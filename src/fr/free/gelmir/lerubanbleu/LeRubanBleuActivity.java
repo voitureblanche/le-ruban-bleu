@@ -3,7 +3,7 @@ package fr.free.gelmir.lerubanbleu;
 import android.app.Activity;
 import android.os.Bundle;
 
-public class leRubanBleu extends Activity
+public class LeRubanBleuActivity extends Activity
 {
     /** Called when the activity is first created. */
     @Override
