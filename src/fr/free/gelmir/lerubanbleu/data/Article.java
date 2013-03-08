@@ -1,4 +1,4 @@
-package fr.free.gelmir.lerubanbleu;
+package fr.free.gelmir.lerubanbleu.data;
 
 import java.util.Date;
 

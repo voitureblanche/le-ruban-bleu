@@ -1,6 +1,7 @@
-package fr.free.gelmir.lerubanbleu;
+package fr.free.gelmir.lerubanbleu.feed;
 
 import android.os.Message;
+import fr.free.gelmir.lerubanbleu.data.Article;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
@@ -21,7 +22,7 @@ public class RssHandler extends DefaultHandler {
     private Article currentArticle;
     private StringBuilder builder;
 
-    public List<Message> getLatestMessages(){
+    public List<Article> getLatestArticles(){
         return this.articles;
     }
 
@@ -52,6 +53,7 @@ public class RssHandler extends DefaultHandler {
     public void endElement(String uri, String localName, String name)
             throws SAXException {
         super.endElement(uri, localName, name);
+        /*
         if (this.currentArticle != null){
             if (localName.equalsIgnoreCase(TITLE)){
                 currentArticle.setTitle(builder.toString());
@@ -74,6 +76,7 @@ public class RssHandler extends DefaultHandler {
             }
             builder.setLength(0);
         }
+        */
     }
 
 }

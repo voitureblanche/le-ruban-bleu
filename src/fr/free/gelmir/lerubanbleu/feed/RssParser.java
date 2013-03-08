@@ -1,4 +1,4 @@
-package fr.free.gelmir.lerubanbleu;
+package fr.free.gelmir.lerubanbleu.feed;
 
 /**
  * Created with IntelliJ IDEA.
