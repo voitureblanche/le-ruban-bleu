@@ -3,21 +3,23 @@ package fr.free.gelmir.lerubanbleu;
 import android.app.Activity;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 
 public class LeRubanBleuActivity extends Activity
 {
-    public static final String PREFS_NAME = "lerubanbleu";
 
-
-    /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
 
+        // Bind Library
+
         // Restore user preferences
-        SharedPreferences sharedPreferences = getSharedPreferences(PREFS_NAME, 0);
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+
+        // Get last current page and display it
 
     }
 
@@ -25,11 +27,12 @@ public class LeRubanBleuActivity extends Activity
     protected void onStop() {
         super.onStop();
 
-        // We need an Editor object to make preference changes.
-        // All objects are from android.context.Context
-        SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
-        SharedPreferences.Editor editor = settings.edit();
-        editor.putBoolean("silentMode", mSilentMode);
+        // Setup an editor on user preferences
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+
+        // Put current page
+        editor.putLong("currentPage", 10);
 
         // Commit the edits!
         editor.commit();

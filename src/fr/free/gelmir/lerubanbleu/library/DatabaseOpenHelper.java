@@ -1,5 +1,6 @@
-package fr.free.gelmir.lerubanbleu.data;
+package fr.free.gelmir.lerubanbleu.library;
 
+import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
@@ -19,7 +20,7 @@ public class DatabaseOpenHelper extends SQLiteOpenHelper
                     KEY_WORD + " TEXT, " +
                     KEY_DEFINITION + " TEXT);";
 
-    DictionaryOpenHelper(Context context) {
+    DatabaseOpenHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
 
@@ -28,4 +29,8 @@ public class DatabaseOpenHelper extends SQLiteOpenHelper
         db.execSQL(DICTIONARY_TABLE_CREATE);
     }
 
+    @Override
+    public void onUpgrade(SQLiteDatabase sqLiteDatabase, int i, int i2) {
+        // TBD
+    }
 }
