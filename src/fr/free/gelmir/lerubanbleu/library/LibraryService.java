@@ -47,13 +47,11 @@ public class LibraryService extends Service
         }
     }
 
-    private class DownloadTask extends AsyncTask<void, void, void>
+    private class DownloadTask extends AsyncTask<Void, Void, Void>
     {
         @Override
-        protected void doInBackground(void... voids) {
-
-
-
+        protected Void doInBackground(Void... voids) {
+            return null;  //To change body of implemented methods use File | Settings | File Templates.
         }
 
         public void AddDownload(String url, String filename) {
@@ -61,7 +59,7 @@ public class LibraryService extends Service
             // Add download to download list
 
             // Allocate downloader
-            Downloader downloader = new Downloader();
+            DownloadService downloader = new DownloadService();
             downloader.start(url, filename, this);
         }
 
