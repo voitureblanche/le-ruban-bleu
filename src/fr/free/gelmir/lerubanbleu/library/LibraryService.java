@@ -1,8 +1,9 @@
 package fr.free.gelmir.lerubanbleu.library;
 
 import android.app.Service;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.IBinder;
 
 /**
@@ -14,11 +15,8 @@ import android.os.IBinder;
  */
 public class LibraryService extends Service
 {
-
     // Action
-    static final String ACTION_GET_ARTICLE = "get article";
-    static final String ACTION_GET_LATEST_ARTICLES = "get latest articles";
-
+    static final String ACTION_DOWNLOAD_FILE = "download file";
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -28,21 +26,31 @@ public class LibraryService extends Service
         // Get latest articles
 
         // Start download task
-        new DownloadTask().execute();
 
         return null;
     }
 
+    private BroadcastReceiver mUiReceiver = new BroadcastReceiver()
+    {
+        @Override
+        public void onReceive(Context context, Intent intent)
+        {
+            // Get article
 
-    public void getLatestArticles() {
-        // Relaunch a feed update
+            // Get latest articles from the UI or from
 
-    }
+        }
+    };
 
-    public void getArticle() {
+    private BroadcastReceiver mDownloadServiceReceiver = new BroadcastReceiver()
+    {
+        @Override
+        public void onReceive(Context context, Intent intent)
+        {
+            // Download completed
 
-    }
+        }
 
-
+    };
 
 }

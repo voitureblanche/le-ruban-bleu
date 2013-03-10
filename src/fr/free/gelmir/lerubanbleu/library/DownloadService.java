@@ -28,16 +28,20 @@ public class DownloadService extends Service
     public IBinder onBind(Intent intent) {
         return null;
     }
+
     @Override
     public void onCreate() {
         super.onCreate();
 
-        // Register the receiver
-        final IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(LibraryService.ACTION_GET_ARTICLE);
-        intentFilter.addAction(LibraryService.ACTION_GET_LATEST_ARTICLES);
+        // Register the library receiver
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(LibraryService.ACTION_DOWNLOAD_FILE);
+        registerReceiver(mLibraryServiceReceiver, intentFilter);
+
+        // Register the download manager receiver
+        intentFilter = new IntentFilter();
         intentFilter.addAction(DownloadManager.ACTION_DOWNLOAD_COMPLETE);
-        registerReceiver(mReceiver, intentFilter);
+        registerReceiver(mDownloadManagerReceiver, intentFilter);
 
     }
 
@@ -45,37 +49,45 @@ public class DownloadService extends Service
     public void onDestroy() {
         super.onDestroy();
 
-        // Unregister the receiver
-        unregisterReceiver(mReceiver);
+        // Unregister the receivers
+        unregisterReceiver(mLibraryServiceReceiver);
+
     }
 
-    private BroadcastReceiver mReceiver = new BroadcastReceiver()
+    private BroadcastReceiver mLibraryServiceReceiver = new BroadcastReceiver()
     {
         @Override
         public void onReceive(Context context, Intent intent)
         {
+            /*
+            // Check URL
 
+            // Request download
+            mDownloadManager = (DownloadManager) context.getSystemService(context.DOWNLOAD_SERVICE);
+            Uri downloadUri = Uri.parse(url);
+            DownloadManager.Request request = new DownloadManager.Request(downloadUri);
+            request.setVisibleInDownloadsUi(false);
+            request.setShowRunningNotification(false);
+            mId = mDownloadManager.enqueue(request);
 
+            return mId;
+            */
+
+        }
+
+    };
+
+    private BroadcastReceiver mDownloadManagerReceiver = new BroadcastReceiver()
+    {
+        @Override
+        public void onReceive(Context context, Intent intent)
+        {
+            // A download has been completed, sending intent to Library
+            Intent intentForLibrary = new Intent();
+            intent.setAction(ACTION_DOWNLOAD_COMPLETED);
+            sendBroadcast(intentForLibrary);
 
         }
     };
-
-
-/*
-    // Check URL
-
-    // Register receiver
-    this.registerReceiver(mDownloadReceiver, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
-
-    // Request download
-    mDownloadManager = (DownloadManager) context.getSystemService(context.DOWNLOAD_SERVICE);
-    Uri downloadUri = Uri.parse(url);
-    DownloadManager.Request request = new DownloadManager.Request(downloadUri);
-    request.setVisibleInDownloadsUi(false);
-    request.setShowRunningNotification(false);
-    mId = mDownloadManager.enqueue(request);
-
-    return mId;
-    */
 
 }
