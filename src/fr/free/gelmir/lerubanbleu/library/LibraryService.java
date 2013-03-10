@@ -15,6 +15,11 @@ import android.os.IBinder;
 public class LibraryService extends Service
 {
 
+    // Action
+    static final String ACTION_GET_ARTICLE = "get article";
+    static final String ACTION_GET_LATEST_ARTICLES = "get latest articles";
+
+
     @Override
     public IBinder onBind(Intent intent) {
 
@@ -39,30 +44,5 @@ public class LibraryService extends Service
     }
 
 
-    private class FeedTask extends AsyncTask<void, void, void>
-    {
-        @Override
-        protected void doInBackground(void... voids) {
-            //To change body of implemented methods use File | Settings | File Templates.
-        }
-    }
-
-    private class DownloadTask extends AsyncTask<Void, Void, Void>
-    {
-        @Override
-        protected Void doInBackground(Void... voids) {
-            return null;  //To change body of implemented methods use File | Settings | File Templates.
-        }
-
-        public void AddDownload(String url, String filename) {
-
-            // Add download to download list
-
-            // Allocate downloader
-            DownloadService downloader = new DownloadService();
-            downloader.start(url, filename, this);
-        }
-
-    }
 
 }
