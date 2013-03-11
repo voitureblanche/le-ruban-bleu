@@ -9,6 +9,7 @@ package fr.free.gelmir.lerubanbleu.library;
  */
 public class Article implements Comparable<Article> {
 
+    private Long mNumber;
     private String mTitle;
     private String mLink;
     private String mDescription;

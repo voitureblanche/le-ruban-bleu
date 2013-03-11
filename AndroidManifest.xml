@@ -13,6 +13,12 @@
         </activity>
         <activity android:name=".AboutActivity"/>
         <activity android:name=".SettingsActivity"/>
+        <activity android:name=".DummyActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
 
     </application>
 </manifest> 

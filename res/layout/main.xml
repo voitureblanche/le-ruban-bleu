@@ -1,20 +1,64 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
+
+<TableLayout
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    >
+    xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <TableRow
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent">
 
-    <Button
+        <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="New Button"
-            android:id="@+id/button" android:layout_gravity="left|center_vertical"/>
-    <Button
+            android:text="Download file 1"
+            android:id="@+id/button1"
+            android:layout_column="0"/>
+
+        <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="New Button"
-            android:id="@+id/button1" android:layout_gravity="left|center_vertical"/>
-</LinearLayout>
+            android:text=""
+            android:id="@+id/textView1"
+            android:layout_column="2"/>
+    </TableRow>
 
+    <TableRow
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent">
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Download file 2"
+            android:id="@+id/button2"
+            android:layout_column="0"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=""
+            android:id="@+id/textView2"
+            android:layout_column="2"/>
+    </TableRow>
+
+    <TableRow
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent">
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Update RSS feed"
+            android:id="@+id/button3"
+            android:layout_column="0"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=""
+            android:id="@+id/textView3"
+            android:layout_column="2"/>
+    </TableRow>
+</TableLayout>

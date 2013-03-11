@@ -19,8 +19,10 @@ import fr.free.gelmir.lerubanbleu.feed.RssSaxParser;
  */
 public class LibraryService extends Service
 {
-    final static String ACTION_GET_ARTICLE = "fr.free.gelmir.LibraryService.getArticle";
-    final static String ACTION_GET_LATEST_ARTICLES = "fr.free.gelmir.LibraryService.getLatestArticles";
+    public final static String ACTION_GET_ARTICLE = "fr.free.gelmir.LibraryService.getArticle";
+    public final static String ACTION_GET_LATEST_ARTICLES = "fr.free.gelmir.LibraryService.getLatestArticles";
+    public final static String ACTION_ARTICLE_COMPLETE = "fr.free.gelmir.LibraryService.articleComplete";
+    public final static String ACTION_LATEST_ARTICLES_COMPLETE = "fr.free.gelmir.LibraryService.latestArticlesComplete";
 
     private DownloadManager mDownloadManager = (DownloadManager) this.getSystemService(this.DOWNLOAD_SERVICE);
     private RssSaxParser    mRssParser = new RssSaxParser();
