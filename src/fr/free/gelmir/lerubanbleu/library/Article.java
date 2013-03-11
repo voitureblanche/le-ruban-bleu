@@ -30,10 +30,23 @@ public class Article implements Comparable<Article> {
         mPubDate = pubDate;
     }
 
+    public void setContent() {
+
+    }
+
+    public void setLocalContent(String location) {
+
+    }
+
+    public void isComplete() {
+
+    }
+
     @Override
     public int compareTo(Article article) {
         return 0;  //To change body of implemented methods use File | Settings | File Templates.
     }
+
 
 
 }
