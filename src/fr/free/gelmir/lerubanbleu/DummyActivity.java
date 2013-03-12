@@ -6,10 +6,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import fr.free.gelmir.lerubanbleu.library.LibraryService;
+
+import java.util.ArrayList;
 
 /**
  * Created with IntelliJ IDEA.
@@ -27,6 +30,10 @@ public class DummyActivity extends Activity
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.main);
+
+        // Start service
+        Intent intent = new Intent(this, LibraryService.class);
+        startService(intent);
 
         // Get widgets
         mButton1 = (Button) findViewById(R.id.button1);
@@ -54,37 +61,64 @@ public class DummyActivity extends Activity
         public void onClick(View view)
         {
             Intent intent;
+            ArrayList<Integer> articleNumbers = new ArrayList<Integer>();
 
             switch (view.getId())
             {
                 case R.id.button1:
-                    intent = new Intent(LibraryService.ACTION_GET_ARTICLE);
-                    intent.putExtra("number", 1);
+                    Log.d("DummyActivity", "Button 1 clicked");
+                    intent = new Intent(LibraryService.ACTION_GET_ARTICLES);
+                    articleNumbers.add(1);
+                    intent.putIntegerArrayListExtra(LibraryService.EXTRA_ARTICLE_NUMBERS_LIST, articleNumbers);
                     sendBroadcast(intent);
+
                     break;
 
                 case R.id.button2:
-                    intent = new Intent(LibraryService.ACTION_GET_ARTICLE);
-                    intent.putExtra("number", 2);
+                    Log.d("DummyActivity", "Button 1 clicked");
+                    intent = new Intent(LibraryService.ACTION_GET_ARTICLES);
+                    articleNumbers.add(2);
+                    intent.putIntegerArrayListExtra(LibraryService.EXTRA_ARTICLE_NUMBERS_LIST, articleNumbers);
                     sendBroadcast(intent);
                     break;
 
                 case R.id.button3:
+                    Log.d("DummyActivity", "Button 3 clicked");
                     intent = new Intent(LibraryService.ACTION_GET_LATEST_ARTICLES);
                     sendBroadcast(intent);
                     break;
             }
         }
-    }
+    };
 
 
     private BroadcastReceiver mLibraryReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent)
         {
-            // Article is available, display it
-            // intent.getBlabla ?
+            Log.d("DummyActivity", "LibraryReceiver event received!");
 
+            // Article is available, display it
+            if (intent.getAction().equals(LibraryService.ACTION_ARTICLE_COMPLETE)) {
+                Log.d("DummyActivity", "ACTION_ARTICLE_COMPLETE event received!");
+
+                int articleNumber;
+                String filename;
+
+                articleNumber = intent.getIntExtra(LibraryService.EXTRA_ARTICLE_NUMBER, 0);
+                filename = intent.getStringExtra(LibraryService.EXTRA_ARTICLE_CONTENT_FILENAME);
+
+                switch (articleNumber)
+                {
+                    case 1:
+                        mTextView1.setText(filename);
+                        break;
+
+                    case 2:
+                        mTextView2.setText(filename);
+                        break;
+                }
+            }
         }
 
     };

@@ -22,7 +22,7 @@ public class DownloadService extends Service
 {
     static final String ACTION_DOWNLOAD_COMPLETED = "download completed";
 
-    private DownloadManager mDownloadManager = (DownloadManager) this.getSystemService(this.DOWNLOAD_SERVICE);;
+    private DownloadManager mDownloadManager;
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -33,9 +33,12 @@ public class DownloadService extends Service
     public void onCreate() {
         super.onCreate();
 
+        mDownloadManager = (DownloadManager) this.getSystemService(this.DOWNLOAD_SERVICE);
+
         // Register the library receiver
         IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(LibraryService.ACTION_DOWNLOAD_FILE);
+        intentFilter.addAction(LibraryService.ACTION_GET_ARTICLES);
+        intentFilter.addAction(LibraryService.ACTION_GET_LATEST_ARTICLES);
         registerReceiver(mLibraryServiceReceiver, intentFilter);
 
         // Register the download manager receiver
@@ -51,6 +54,7 @@ public class DownloadService extends Service
 
         // Unregister the receivers
         unregisterReceiver(mLibraryServiceReceiver);
+        unregisterReceiver(mDownloadManagerReceiver);
 
     }
 

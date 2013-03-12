@@ -1,9 +1,5 @@
 package fr.free.gelmir.lerubanbleu.library;
 
-import android.content.Context;
-import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteOpenHelper;
-
 /**
  * Created with IntelliJ IDEA.
  * User: DE MENDITTE
@@ -11,7 +7,8 @@ import android.database.sqlite.SQLiteOpenHelper;
  * Time: 11:02
  * To change this template use File | Settings | File Templates.
  */
-public class DatabaseOpenHelper extends SQLiteOpenHelper
+/*
+public abstract class DatabaseOpenHelper extends SQLiteOpenHelper
 {
     private static final int DATABASE_VERSION = 2;
     private static final String DICTIONARY_TABLE_NAME = "dictionary";
@@ -34,3 +31,4 @@ public class DatabaseOpenHelper extends SQLiteOpenHelper
         // TBD
     }
 }
+*/
