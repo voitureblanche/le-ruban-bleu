@@ -21,6 +21,7 @@ public class LibraryService extends Service
 {
     public final static String ACTION_GET_ARTICLE = "fr.free.gelmir.LibraryService.getArticle";
     public final static String ACTION_GET_LATEST_ARTICLES = "fr.free.gelmir.LibraryService.getLatestArticles";
+    public final static String ACTION_CANCEL_ALL = "fr.free.gelmir.LibraryService.cancelAll";
     public final static String ACTION_ARTICLE_COMPLETE = "fr.free.gelmir.LibraryService.articleComplete";
     public final static String ACTION_LATEST_ARTICLES_COMPLETE = "fr.free.gelmir.LibraryService.latestArticlesComplete";
 
@@ -77,9 +78,19 @@ public class LibraryService extends Service
         public void onReceive(Context context, Intent intent)
         {
             // Get article
+            if (intent.getAction().equals(ACTION_GET_ARTICLE) ) {
+                intent.getIntArrayExtra();
+
+            }
 
             // Get latest articles
+            else if (intent.getAction().equals(ACTION_GET_LATEST_ARTICLES)) {
 
+            }
+            // Cancel all actions
+            else if (intent.getAction().equals(ACTION_CANCEL_ALL)) {
+
+            }
         }
     };
 
@@ -95,7 +106,7 @@ public class LibraryService extends Service
 
     };
 
-    private long downloadFile(Uri url) {
+    private long downloadFile(String url) {
         Uri downloadUri = Uri.parse(url);
         DownloadManager.Request request = new DownloadManager.Request(downloadUri);
         request.setVisibleInDownloadsUi(false);
