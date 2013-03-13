@@ -6,11 +6,15 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.IBinder;
 import android.util.Log;
+import android.widget.Toast;
+import fr.free.gelmir.lerubanbleu.R;
 import fr.free.gelmir.lerubanbleu.feed.RssSaxParser;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -29,10 +33,12 @@ public class LibraryService extends Service
     public final static String ACTION_ARTICLE_COMPLETE          = "fr.free.gelmir.LibraryService.articleComplete";
     public final static String ACTION_LATEST_ARTICLES_COMPLETE  = "fr.free.gelmir.LibraryService.latestArticlesComplete";
 
-    public final static String EXTRA_ARTICLE_NUMBER             = "fr.free.gelmir.LibraryService.extraArticleNumber";
     public final static String EXTRA_ARTICLE_NUMBERS_LIST       = "fr.free.gelmir.LibraryService.extraArticleNumbersList";
-    public final static String EXTRA_ARTICLE_CONTENT_FILENAME   = "fr.free.gelmir.LibraryService.extraArticleContentFilename";
 
+    // Temporary, useless once we will pass the complete article
+    public final static String EXTRA_ARTICLE_NUMBER             = "fr.free.gelmir.LibraryService.extraArticleNumber";
+    public final static String EXTRA_ARTICLE_CONTENT_FILENAME   = "fr.free.gelmir.LibraryService.extraArticleContentFilename";
+    public final static String EXTRA_ARTICLE_CONTENT_URI        = "fr.free.gelmir.LibraryService.extraArticleContentUri";
 
     private DownloadManager mDownloadManager;
     private RssSaxParser    mRssParser;
@@ -145,32 +151,60 @@ public class LibraryService extends Service
         @Override
         public void onReceive(Context context, Intent intent)
         {
+            if (intent.getAction().equals(DownloadManager.ACTION_DOWNLOAD_COMPLETE)) {
+                Log.d("LibraryService", "ACTION_DOWNLOAD_COMPLETE intent received");
 
-            Log.d("LibraryService", "Download receiver download completed!");
+                String uri;
+                String title;
 
-            // Download completed
-            long downloadId = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, 0);
+                // Query the completed download
+                long downloadId = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, 0);
+                DownloadManager.Query query = new DownloadManager.Query();
+                query.setFilterById(downloadId);
+                Cursor cursor = mDownloadManager.query(query);
+                if (cursor.moveToFirst())
+                {
+                    int columnIndex = cursor.getColumnIndex(DownloadManager.COLUMN_STATUS);
+                    if (DownloadManager.STATUS_SUCCESSFUL == cursor.getInt(columnIndex)) {
+                        uri = cursor.getString(cursor.getColumnIndex(DownloadManager.COLUMN_LOCAL_URI));
+                        title = cursor.getString(cursor.getColumnIndex(DownloadManager.COLUMN_TITLE));
 
-            // Find article number in the hashmap
-            Integer articleNumber = (Integer) mHashMap.get(downloadId);
+                        // Test if the file is present
+                        /*
+                        String path = uri + title;
+                        File file = new File(path);
+                        if (file.exists()) {
+                            Log.d("LibraryService", "File exists");
+                        }
+                        else {
+                            Log.d("LibraryService", "File does not exist!");
+                        }
+                        */
 
-            // Broadcast intent
-            Intent broadcastIntent = new Intent();
-            broadcastIntent.setAction(ACTION_ARTICLE_COMPLETE);
-            broadcastIntent.putExtra(EXTRA_ARTICLE_NUMBER, articleNumber);
-            broadcastIntent.putExtra(EXTRA_ARTICLE_CONTENT_FILENAME, "toto");
-            sendBroadcast(broadcastIntent);
+                        // Find article number in the hashmap
+                        Integer articleNumber = (Integer) mHashMap.get(downloadId);
 
+                        // Broadcast intent
+                        Log.d("LibraryService", "ACTION_ARTICLE_COMPLETE intent sent");
+                        Intent broadcastIntent = new Intent();
+                        broadcastIntent.setAction(ACTION_ARTICLE_COMPLETE);
+                        broadcastIntent.putExtra(EXTRA_ARTICLE_NUMBER, articleNumber);
+                        broadcastIntent.putExtra(EXTRA_ARTICLE_CONTENT_URI, uri);
+                        broadcastIntent.putExtra(EXTRA_ARTICLE_CONTENT_FILENAME, title);
+                        sendBroadcast(broadcastIntent);
+                    }
+                }
+            }
         }
-
     };
 
     private long downloadFile(String url)
     {
+        Log.d("LibraryService", "Requesting download");
         Uri downloadUri = Uri.parse(url);
         DownloadManager.Request request = new DownloadManager.Request(downloadUri);
-        //request.setVisibleInDownloadsUi(false);
-        //request.setShowRunningNotification(false);
+        request.setVisibleInDownloadsUi(false);
+        request.setShowRunningNotification(false);
         return mDownloadManager.enqueue(request);
     }
 

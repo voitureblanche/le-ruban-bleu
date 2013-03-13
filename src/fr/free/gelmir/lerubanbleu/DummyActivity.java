@@ -57,7 +57,7 @@ public class DummyActivity extends Activity
 
 
     private View.OnClickListener onClickListener = new View.OnClickListener() {
-        @Override
+
         public void onClick(View view)
         {
             Intent intent;
@@ -96,26 +96,26 @@ public class DummyActivity extends Activity
         @Override
         public void onReceive(Context context, Intent intent)
         {
-            Log.d("DummyActivity", "LibraryReceiver event received!");
-
             // Article is available, display it
             if (intent.getAction().equals(LibraryService.ACTION_ARTICLE_COMPLETE)) {
-                Log.d("DummyActivity", "ACTION_ARTICLE_COMPLETE event received!");
+                Log.d("DummyActivity", "ACTION_ARTICLE_COMPLETE intent received");
 
                 int articleNumber;
                 String filename;
+                String uri;
 
                 articleNumber = intent.getIntExtra(LibraryService.EXTRA_ARTICLE_NUMBER, 0);
                 filename = intent.getStringExtra(LibraryService.EXTRA_ARTICLE_CONTENT_FILENAME);
+                uri = intent.getStringExtra(LibraryService.EXTRA_ARTICLE_CONTENT_URI);
 
                 switch (articleNumber)
                 {
                     case 1:
-                        mTextView1.setText(filename);
+                        mTextView1.setText(uri + "/" + filename);
                         break;
 
                     case 2:
-                        mTextView2.setText(filename);
+                        mTextView2.setText(uri + "/" + filename);
                         break;
                 }
             }

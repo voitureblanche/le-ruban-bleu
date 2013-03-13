@@ -1,5 +1,8 @@
 package fr.free.gelmir.lerubanbleu.library;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 /**
  * Created with IntelliJ IDEA.
  * User: gerard
@@ -7,7 +10,7 @@ package fr.free.gelmir.lerubanbleu.library;
  * Time: 22:40
  * To change this template use File | Settings | File Templates.
  */
-public class Article implements Comparable<Article> {
+public class Article implements Comparable<Article>, Parcelable {
 
     private Long mNumber;
     private String mTitle;
@@ -43,11 +46,15 @@ public class Article implements Comparable<Article> {
 
     }
 
-    @Override
     public int compareTo(Article article) {
         return 0;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
+    public int describeContents() {
+        return 0;  //To change body of implemented methods use File | Settings | File Templates.
+    }
 
-
+    public void writeToParcel(Parcel parcel, int i) {
+        //To change body of implemented methods use File | Settings | File Templates.
+    }
 }
