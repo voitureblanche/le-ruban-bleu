@@ -50,7 +50,7 @@ public class DummyActivity extends Activity
 
         // Register to Library service intent
         IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(LibraryService.ACTION_ARTICLE_COMPLETE);
+        intentFilter.addAction(LibraryService.ACTION_GET_ARTICLE_COMPLETE);
         registerReceiver(mLibraryReceiver, intentFilter);
 
     }
@@ -67,18 +67,18 @@ public class DummyActivity extends Activity
             {
                 case R.id.button1:
                     Log.d("DummyActivity", "Button 1 clicked");
-                    intent = new Intent(LibraryService.ACTION_GET_ARTICLES);
+                    intent = new Intent(LibraryService.ACTION_GET_ARTICLE);
                     articleNumbers.add(1);
-                    intent.putIntegerArrayListExtra(LibraryService.EXTRA_ARTICLE_NUMBERS_LIST, articleNumbers);
+                    intent.putIntegerArrayListExtra(LibraryService.EXTRA_GET_ARTICLE_NUMBER_LIST, articleNumbers);
                     sendBroadcast(intent);
 
                     break;
 
                 case R.id.button2:
                     Log.d("DummyActivity", "Button 1 clicked");
-                    intent = new Intent(LibraryService.ACTION_GET_ARTICLES);
+                    intent = new Intent(LibraryService.ACTION_GET_ARTICLE);
                     articleNumbers.add(2);
-                    intent.putIntegerArrayListExtra(LibraryService.EXTRA_ARTICLE_NUMBERS_LIST, articleNumbers);
+                    intent.putIntegerArrayListExtra(LibraryService.EXTRA_GET_ARTICLE_NUMBER_LIST, articleNumbers);
                     sendBroadcast(intent);
                     break;
 
@@ -96,28 +96,61 @@ public class DummyActivity extends Activity
         @Override
         public void onReceive(Context context, Intent intent)
         {
-            // Article is available, display it
-            if (intent.getAction().equals(LibraryService.ACTION_ARTICLE_COMPLETE)) {
-                Log.d("DummyActivity", "ACTION_ARTICLE_COMPLETE intent received");
 
-                int articleNumber;
-                String filename;
-                String uri;
+            // Get article
+            //------------
+            if (intent.getAction().equals(LibraryService.ACTION_GET_ARTICLE_COMPLETE))
+            {
+                Log.d("DummyActivity", "ACTION_GET_ARTICLE_COMPLETE intent received");
+                int status = intent.getIntExtra(LibraryService.EXTRA_STATUS, 0);
+                int articleNumber = intent.getIntExtra(LibraryService.EXTRA_ARTICLE_NUMBER, 0);
 
-                articleNumber = intent.getIntExtra(LibraryService.EXTRA_ARTICLE_NUMBER, 0);
-                filename = intent.getStringExtra(LibraryService.EXTRA_ARTICLE_CONTENT_FILENAME);
-                uri = intent.getStringExtra(LibraryService.EXTRA_ARTICLE_CONTENT_URI);
-
-                switch (articleNumber)
+                // Parse status
+                switch (status)
                 {
-                    case 1:
-                        mTextView1.setText(uri + "/" + filename);
+                    case LibraryService.STATUS_SUCCESSFUL:
+                        Log.d("DummyActivity", "STATUS_SUCCESSFUL");
+                        String filename;
+                        String uri;
+                        filename = intent.getStringExtra(LibraryService.EXTRA_ARTICLE_CONTENT_FILENAME);
+                        uri = intent.getStringExtra(LibraryService.EXTRA_ARTICLE_CONTENT_URI);
+                        Log.d("DummyActivity", uri+filename);
+
+                        switch (articleNumber)
+                        {
+                            case 1:
+                                mTextView1.setText(uri + "/" + filename);
+                                break;
+
+                            case 2:
+                                mTextView2.setText(uri + "/" + filename);
+                                break;
+                        }
+
                         break;
 
-                    case 2:
-                        mTextView2.setText(uri + "/" + filename);
+                    case LibraryService.STATUS_FAILED:
+                        Log.d("DummyActivity", "STATUS_FAILED");
+                        switch (articleNumber)
+                        {
+                            case 1:
+                                mTextView1.setText("failed :-(");
+                                break;
+
+                            case 2:
+                                mTextView2.setText("failed :-(");
+                                break;
+                        }
                         break;
                 }
+            }
+
+            // Get latest articles
+            //--------------------
+            else if (intent.getAction().equals(LibraryService.ACTION_GET_LATEST_ARTICLES_COMPLETE))
+            {
+
+
             }
         }
 
