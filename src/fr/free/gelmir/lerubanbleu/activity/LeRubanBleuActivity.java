@@ -1,9 +1,10 @@
-package fr.free.gelmir.lerubanbleu;
+package fr.free.gelmir.lerubanbleu.activity;
 
 import android.app.Activity;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import fr.free.gelmir.lerubanbleu.R;
 
 public class LeRubanBleuActivity extends Activity
 {

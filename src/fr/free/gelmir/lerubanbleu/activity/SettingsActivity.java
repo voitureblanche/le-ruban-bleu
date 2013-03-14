@@ -1,4 +1,4 @@
-package fr.free.gelmir.lerubanbleu;
+package fr.free.gelmir.lerubanbleu.activity;
 
 import android.app.Activity;
 import android.os.Bundle;

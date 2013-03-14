@@ -1,7 +1,7 @@
-package fr.free.gelmir.lerubanbleu.feed;
+package fr.free.gelmir.lerubanbleu.util;
 
 import android.util.Log;
-import fr.free.gelmir.lerubanbleu.library.Article;
+import fr.free.gelmir.lerubanbleu.service.Article;
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;

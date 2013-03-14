@@ -40,7 +40,7 @@
     <!-- The project.properties file is created and updated by the 'android'
          tool, as well as ADT.
 
-         This contains project specific properties such as project target, and library
+         This contains project specific properties such as project target, and service
          dependencies. Lower level build properties are stored in ant.properties
          (or in .classpath for Eclipse projects).
 

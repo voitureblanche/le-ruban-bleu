@@ -1,6 +1,6 @@
-package fr.free.gelmir.lerubanbleu.feed;
+package fr.free.gelmir.lerubanbleu.util;
 
-import fr.free.gelmir.lerubanbleu.library.Article;
+import fr.free.gelmir.lerubanbleu.service.Article;
 
 import java.util.List;
 

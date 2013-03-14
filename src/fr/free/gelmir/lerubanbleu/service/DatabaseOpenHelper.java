@@ -1,4 +1,4 @@
-package fr.free.gelmir.lerubanbleu.library;
+package fr.free.gelmir.lerubanbleu.service;
 
 /**
  * Created with IntelliJ IDEA.

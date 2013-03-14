@@ -1,4 +1,4 @@
-package fr.free.gelmir.lerubanbleu.library;
+package fr.free.gelmir.lerubanbleu.service;
 
 import android.os.Parcel;
 import android.os.Parcelable;

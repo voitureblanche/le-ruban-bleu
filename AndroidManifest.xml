@@ -4,9 +4,9 @@
       android:versionCode="1"
       android:versionName="1.0">
     <application android:label="@string/app_name" android:icon="@drawable/icon">
-        <activity android:name=".LeRubanBleuActivity"/>
-        <activity android:name=".AboutActivity"/>
-        <activity android:name=".SettingsActivity"/>
+        <activity android:name=".activity.LeRubanBleuActivity"/>
+        <activity android:name=".activity.AboutActivity"/>
+        <activity android:name=".activity.SettingsActivity"/>
         <activity android:name=".DummyActivity"
                   android:label="@string/app_name">
             <intent-filter>
@@ -14,7 +14,7 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-        <service android:name=".library.LibraryService" />
+        <service android:name=".service.LibraryService" />
     </application>
 
     <uses-permission android:name="android.permission.INTERNET"></uses-permission>

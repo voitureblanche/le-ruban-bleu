@@ -10,7 +10,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
-import fr.free.gelmir.lerubanbleu.library.LibraryService;
+import fr.free.gelmir.lerubanbleu.service.LibraryService;
 
 import java.util.ArrayList;
 
