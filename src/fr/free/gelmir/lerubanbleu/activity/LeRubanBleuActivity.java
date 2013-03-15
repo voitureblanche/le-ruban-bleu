@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import fr.free.gelmir.lerubanbleu.R;
 
 public class LeRubanBleuActivity extends Activity
 {
