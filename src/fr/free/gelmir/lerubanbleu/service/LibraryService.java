@@ -1,7 +1,6 @@
 package fr.free.gelmir.lerubanbleu.service;
 
 import android.app.DownloadManager;
-import android.app.IntentService;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -10,6 +9,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.util.Log;
 import fr.free.gelmir.lerubanbleu.util.RssSaxParser;
+import fr.free.gelmir.lerubanbleu.util.IntentService;
 
 import java.util.ArrayList;
 import java.util.HashMap;
