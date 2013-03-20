@@ -3,6 +3,8 @@ package fr.free.gelmir.lerubanbleu.provider;
 import android.content.ContentProvider;
 import android.content.ContentValues;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
 
 /**
@@ -14,6 +16,9 @@ import android.net.Uri;
  */
 public class ArticleProvider extends ContentProvider {
 
+    // Open helper
+    ArticleDatabaseOpenHelper mArticleDatabaseOpenHelper;
+
 
     @Override
     public boolean onCreate() {
@@ -21,8 +26,28 @@ public class ArticleProvider extends ContentProvider {
     }
 
     @Override
-    public Cursor query(Uri uri, String[] strings, String s, String[] strings2, String s2) {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    public Cursor query(Uri uri, String[] strings, String s, String[] strings2, String s2)
+    {
+        // Using SQLiteQueryBuilder instead of query() method
+        SQLiteQueryBuilder queryBuilder = new SQLiteQueryBuilder();
+
+        // Check if the caller has requested a column which does not exists
+        //checkColumns(projection);
+
+        // Set the table
+        queryBuilder.setTables(mArticleDatabaseOpenHelper.TABLE_NAME);
+
+        // Build query
+        queryBuilder.appendWhere(mArticleDatabaseOpenHelper.COLUMN_ID + "="  + uri.getLastPathSegment());
+
+
+        SQLiteDatabase db = mArticleDatabase.getWritableDatabase();
+        Cursor cursor = queryBuilder.query(db, projection, selection, selectionArgs, null, null, sortOrder);
+
+        // Make sure that potential listeners are getting notified
+        cursor.setNotificationUri(getContext().getContentResolver(), uri);
+
+        return cursor;
     }
 
     @Override

@@ -3,6 +3,7 @@
       package="fr.free.gelmir.lerubanbleu"
       android:versionCode="1"
       android:versionName="1.0">
+
     <application android:label="@string/app_name" android:icon="@drawable/icon">
         <activity android:name=".activity.LeRubanBleuActivity"/>
         <activity android:name=".activity.AboutActivity"/>
@@ -17,9 +18,13 @@
         <activity android:name=".activity.SelectLanguageActivity"/>
 
         <service android:name=".service.LibraryService" />
+
+        <provider android:name=".provider.ArticleProvider"
+                  android:authorities="fr.free.gelmir.lerubanbleu.provider.ArticleProvider" />
     </application>
 
     <uses-permission android:name="android.permission.INTERNET"></uses-permission>
     <uses-permission android:name="android.permission.DOWNLOAD_WITHOUT_NOTIFICATION"></uses-permission>
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"></uses-permission>
+
 </manifest>

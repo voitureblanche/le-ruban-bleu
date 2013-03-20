@@ -4,14 +4,12 @@ import android.app.DownloadManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.database.Cursor;
 import android.net.Uri;
 import android.util.Log;
-import fr.free.gelmir.lerubanbleu.util.RssSaxParser;
 import fr.free.gelmir.lerubanbleu.util.IntentService;
+import fr.free.gelmir.lerubanbleu.util.RssSaxParser;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
@@ -48,7 +46,7 @@ public class LibraryService extends IntentService
         mHashMap         = new HashMap();
 
 
-        // Database
+        // ArticleDatabase
         //---------
 
         // Open database
@@ -70,36 +68,24 @@ public class LibraryService extends IntentService
         if (intent.getAction().equals(ACTION_GET_ARTICLE))
         {
             Log.d("LibraryService", "ACTION_GET_ARTICLE received");
-            ArrayList<Integer> articleNumbers = intent.getIntegerArrayListExtra(EXTRA_GET_ARTICLE_NUMBER_LIST);
 
-            // Register the receiver for DownloadManager actions
-            IntentFilter intentFilter = new IntentFilter();
-            intentFilter.addAction(DownloadManager.ACTION_DOWNLOAD_COMPLETE);
-            registerReceiver(mDownloadReceiver, intentFilter);
 
-            // Download files
-            for(int i=0; i < articleNumbers.size(); i++) {
-                // Get article in database
+            // Query database
 
-                // Or download content
-                long downloadId;
 
-                switch (articleNumbers.get(i)) {
-                    case 1:
-                        downloadId = downloadFile("http://www.lerubanbleu.com/images/Episode-012.jpg");
-                        mHashMap.put(downloadId, 1);
-                        break;
+            // Form HTTP request
 
-                    case 2:
-                        downloadId = downloadFile("http://www.lerubanbleu.com/images/Episode-013.jpg");
-                        mHashMap.put(downloadId, 2);
-                        break;
 
-                    default:
-                        break;
-                }
+            // Parse HTML to get the image
 
-            }
+
+            // Download image
+
+
+            // Update database
+
+
+            // Return result
 
         }
 

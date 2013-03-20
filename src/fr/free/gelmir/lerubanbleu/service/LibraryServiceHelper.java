@@ -79,7 +79,7 @@ public class LibraryServiceHelper {
             // Recover original action
 
 
-            // Send broadcast
+            // Send broadcast to the activity
 
 
         }
