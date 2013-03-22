@@ -13,7 +13,7 @@ import android.database.sqlite.SQLiteOpenHelper;
  */
 public class ArticleDatabaseOpenHelper extends SQLiteOpenHelper
 {
-    private static final String DATABASE_NAME = "lerubanbleutable.db";
+    private static final String DATABASE_NAME = "lerubanbleu.db";
     private static final int    DATABASE_VERSION = 1;
 
     public ArticleDatabaseOpenHelper(Context context)

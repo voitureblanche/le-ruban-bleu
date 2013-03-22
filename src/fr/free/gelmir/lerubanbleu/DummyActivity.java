@@ -5,7 +5,10 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.database.Cursor;
 import android.os.Bundle;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.Loader;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -21,8 +24,7 @@ import java.util.ArrayList;
  * Time: 00:13
  * To change this template use File | Settings | File Templates.
  */
-public class DummyActivity extends Activity
-{
+public class DummyActivity extends Activity {
     Button mButton1, mButton2, mButton3;
     TextView mTextView1, mTextView2, mTextView3;
     LibraryServiceHelper mLibraryServiceHelper;

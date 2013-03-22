@@ -20,7 +20,8 @@
         <service android:name=".service.LibraryService" />
 
         <provider android:name=".provider.ArticleProvider"
-                  android:authorities="fr.free.gelmir.lerubanbleu.provider.ArticleProvider" />
+                  android:authorities="fr.free.gelmir.lerubanbleu.provider.ArticleProvider"
+                  android:exported="false" />
     </application>
 
     <uses-permission android:name="android.permission.INTERNET"></uses-permission>

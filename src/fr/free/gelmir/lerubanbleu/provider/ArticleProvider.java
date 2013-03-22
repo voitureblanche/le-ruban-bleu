@@ -26,23 +26,35 @@ public class ArticleProvider extends ContentProvider {
     }
 
     @Override
-    public Cursor query(Uri uri, String[] strings, String s, String[] strings2, String s2)
+    public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder)
     {
-        // Using SQLiteQueryBuilder instead of query() method
-        SQLiteQueryBuilder queryBuilder = new SQLiteQueryBuilder();
+        // SQLiteQueryBuilder is a helper class that creates the
+        // proper SQL syntax for us.
+        SQLiteQueryBuilder qBuilder = new SQLiteQueryBuilder();
+
+        // Set the table we're querying.
+        qBuilder.setTables(ArticleDatabase.TABLE_NAME);
 
         // Check if the caller has requested a column which does not exists
-        //checkColumns(projection);
+        // checkColumns(projection);
 
-        // Set the table
-        queryBuilder.setTables(mArticleDatabaseOpenHelper.TABLE_NAME);
+        // If the query ends in a specific record number, we're
+        // being asked for a specific record, so set the
+        // WHERE clause in our query.
+        /*
+        if((URI_MATCHER.match(uri)) == SPECIFIC_MESSAGE){
+            qBuilder.appendWhere("_id=" + uri.getPathLeafId());
+        }
+        */
 
         // Build query
-        queryBuilder.appendWhere(mArticleDatabaseOpenHelper.COLUMN_ID + "="  + uri.getLastPathSegment());
+        // queryBuilder.appendWhere(ArticleDatabase.COLUMN_ID + "="  + uri.getLastPathSegment());
 
+        // Get database
+        SQLiteDatabase db = mArticleDatabaseOpenHelper.getWritableDatabase();
 
-        SQLiteDatabase db = mArticleDatabase.getWritableDatabase();
-        Cursor cursor = queryBuilder.query(db, projection, selection, selectionArgs, null, null, sortOrder);
+        // Make the query
+        Cursor cursor = qBuilder.query(db, projection, selection, selectionArgs, null, null, sortOrder);
 
         // Make sure that potential listeners are getting notified
         cursor.setNotificationUri(getContext().getContentResolver(), uri);

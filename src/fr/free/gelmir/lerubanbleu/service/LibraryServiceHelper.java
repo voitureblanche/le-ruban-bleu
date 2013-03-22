@@ -38,7 +38,7 @@ public class LibraryServiceHelper {
     public final static String EXTRA_STATUS                         = "fr.free.gelmir.service.LibraryService.extraGetArticleStatus";
 
 
-    public LibraryServiceHelper() {
+    public LibraryServiceHelper(Context context) {
 
     }
 

@@ -25,11 +25,13 @@ public class ArticleDatabase {
             + COLUMN_IMAGE + " text not null, "
             + ");";
 
+    // Create table
     public static void onCreate(SQLiteDatabase database)
     {
         database.execSQL(TABLE_CREATE);
     }
 
+    // Upgrade table
     public static void onUpgrade(SQLiteDatabase database, int oldVersion, int newVersion)
     {
         Log.w(ArticleDatabase.class.getName(), "Upgrading database from version " + oldVersion + " to " + newVersion + ", which will destroy all old data");
