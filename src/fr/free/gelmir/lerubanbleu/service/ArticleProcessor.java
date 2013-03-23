@@ -5,7 +5,7 @@ import android.os.Bundle;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
-import fr.free.gelmir.lerubanbleu.provider.ArticleDatabase;
+import fr.free.gelmir.lerubanbleu.provider.ArticleTable;
 import fr.free.gelmir.lerubanbleu.provider.ArticleProvider;
 
 /**
@@ -29,7 +29,7 @@ public class ArticleProcessor implements LoaderManager.LoaderCallbacks<Cursor>
     public void queryArticle(ArticleProcessorCallback articleProcessorCallback) {
 
         // Allocate cursor loader
-        String[] projection = { ArticleDatabase.COLUMN_ID };
+        String[] projection = { ArticleTable.COLUMN_ID };
         CursorLoader cursorLoader = new CursorLoader(this, ArticleProvider.CONTENT_URI, projection, null, null, null);
 
     }

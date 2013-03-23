@@ -46,7 +46,7 @@ public class LibraryService extends IntentService
         mHashMap         = new HashMap();
 
 
-        // ArticleDatabase
+        // ArticleTable
         //---------
 
         // Open database
