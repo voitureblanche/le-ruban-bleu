@@ -1,16 +1,9 @@
 package fr.free.gelmir.lerubanbleu.service;
 
-import android.app.DownloadManager;
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.Intent;
-import android.database.Cursor;
-import android.net.Uri;
+import android.os.ResultReceiver;
 import android.util.Log;
 import fr.free.gelmir.lerubanbleu.util.IntentService;
-import fr.free.gelmir.lerubanbleu.util.RssSaxParser;
-
-import java.util.HashMap;
 
 /**
  * Created with IntelliJ IDEA.
@@ -21,16 +14,17 @@ import java.util.HashMap;
  */
 public class LibraryService extends IntentService
 {
-    // Action
-    public final static String ACTION_GET_ARTICLE                   = "fr.free.gelmir.service.LibraryService.getArticle";
-    public final static String ACTION_GET_LATEST_ARTICLES           = "fr.free.gelmir.service.LibraryService.getLatestArticles";
-    public final static String ACTION_CANCEL_ALL                    = "fr.free.gelmir.service.LibraryService.cancelAll";
+    // Actions
+    public final static String ACTION_GET_ARTICLE           = "fr.free.gelmir.service.LibraryService.actionGetArticle";
+    public final static String ACTION_GET_LATEST_ARTICLES   = "fr.free.gelmir.service.LibraryService.actionGetLatestArticles";
+    public final static String ACTION_CANCEL_ALL            = "fr.free.gelmir.service.LibraryService.actionCancelAll";
 
+    // Extras
+    public final static String EXTRA_ARTICLE_ID      = "fr.free.gelmir.service.LibraryService.extraArticleId";
+    public final static String EXTRA_RESULT_RECEIVER = "fr.free.gelmir.service.LibraryService.extraResultReceiver";
 
     // Members
-    private DownloadManager mDownloadManager;
-    private RssSaxParser    mRssParser;
-    private HashMap         mHashMap;
+    private ArticleProcessor mArticleProcessor;
 
 
     public LibraryService() {
@@ -40,65 +34,31 @@ public class LibraryService extends IntentService
     @Override
     public void onCreate() {
         super.onCreate();
-
-        mDownloadManager = (DownloadManager) this.getSystemService(this.DOWNLOAD_SERVICE);
-        mRssParser       = new RssSaxParser();
-        mHashMap         = new HashMap();
-
-
-        // ArticleTable
-        //---------
-
-        // Open database
-
-        // Library
-        //--------
-
-        // Download management
-        //--------------------
-        mDownloadManager = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
-
+        mArticleProcessor = new ArticleProcessor(this);
     }
 
     @Override
     protected void onHandleIntent(Intent intent)
     {
-        // Get articles
-        //-------------
+        // Get article
+        //------------
         if (intent.getAction().equals(ACTION_GET_ARTICLE))
         {
             Log.d("LibraryService", "ACTION_GET_ARTICLE received");
 
+            // Get intent extras
+            int articleId = intent.getIntExtra(LibraryService.EXTRA_ARTICLE_ID, -1);
+            ResultReceiver resultReceiver = intent.getParcelableExtra(LibraryService.EXTRA_RESULT_RECEIVER);
 
-            // Query database
-
-
-            // Form HTTP request
-
-
-            // Parse HTML to get the image
-
-
-            // Download image
-
-
-            // Update database
-
+            // Get article
+            Article article;
+            article = mArticleProcessor.queryArticle(makeArticleProcessorCallback(), articleId);
 
             // Return result
 
-        }
-
-        // Get latest articles
-        //--------------------
-        else if (intent.getAction().equals(ACTION_GET_LATEST_ARTICLES)) {
-
-            // Relaunch feed update async task
-
-
+            resultReceiver.send(0,);
 
         }
-
 
         // Cancel all actions
         //-------------------
@@ -111,120 +71,20 @@ public class LibraryService extends IntentService
     @Override
     public void onDestroy() {
         super.onDestroy();
-
-        // Unregister the receiver
-        unregisterReceiver(mDownloadReceiver);
     }
 
 
-    // Download
-    //---------
-    private BroadcastReceiver mDownloadReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent)
-        {
-            if (intent.getAction().equals(DownloadManager.ACTION_DOWNLOAD_COMPLETE))
-            {
-                Log.d("LibraryService", "ACTION_DOWNLOAD_COMPLETE intent received");
+    private ArticleProcessorCallback makeArticleProcessorCallback() {
+        ArticleProcessorCallback callback = new ArticleProcessorCallback() {
 
-                String uri;
-                String title;
-                Intent broadcastIntent = new Intent();
+            public void send(Article article) {
 
-                // Get download identifier
-                long downloadId = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, 0);
 
-                // Find article number in the hashmap
-                Integer articleNumber = (Integer) mHashMap.get(downloadId);
 
-                // Query the download manager
-                DownloadManager.Query query = new DownloadManager.Query();
-                query.setFilterById(downloadId);
-                Cursor cursor = mDownloadManager.query(query);
-                if (cursor.moveToFirst())
-                {
-                    int columnIndex = cursor.getColumnIndex(DownloadManager.COLUMN_STATUS);
-                    int status = cursor.getInt(columnIndex);
-                    int columnReason = cursor.getColumnIndex(DownloadManager.COLUMN_REASON);
-                    int reason = cursor.getInt(columnReason);
-
-                    // Parse status
-                    switch(status)
-                    {
-                        case DownloadManager.STATUS_SUCCESSFUL:
-                            Log.d("LibraryService", "STATUS_SUCCESSFUL");
-
-                            // Test file
-                            uri = cursor.getString(cursor.getColumnIndex(DownloadManager.COLUMN_LOCAL_URI));
-                            title = cursor.getString(cursor.getColumnIndex(DownloadManager.COLUMN_TITLE));
-
-                            /*
-                            String path = uri + title;
-                            File file = new File(path);
-                            if (file.exists()) {
-                                Log.d("LibraryService", "File exists");
-                            }
-                            else {
-                                Log.d("LibraryService", "File does not exist!");
-                            }
-                            */
-
-                            // Update intent
-//                            broadcastIntent.putExtra(EXTRA_STATUS, STATUS_SUCCESSFUL);
-//                            broadcastIntent.putExtra(EXTRA_ARTICLE_CONTENT_URI, uri);
-//                            broadcastIntent.putExtra(EXTRA_ARTICLE_CONTENT_FILENAME, title);
-
-                            break;
-
-                        case DownloadManager.STATUS_FAILED:
-                            Log.d("LibraryService", "STATUS_FAILED, reason=" + reason);
-//                            broadcastIntent.putExtra(EXTRA_STATUS, STATUS_FAILED);
-                            break;
-
-                        default:
-                            Log.d("LibraryService", "other status");
-//                            broadcastIntent.putExtra(EXTRA_STATUS, STATUS_FAILED);
-                            break;
-                    }
-
-                    // Broadcast intent
-//                    Log.d("LibraryService", "ACTION_GET_ARTICLE_COMPLETE intent sent");
-//                    broadcastIntent.setAction(ACTION_GET_ARTICLE_COMPLETE);
-//                    broadcastIntent.putExtra(EXTRA_ARTICLE_NUMBER, articleNumber);
-//                    sendBroadcast(broadcastIntent);
-
-                }
             }
-        }
-    };
 
-
-    private long downloadFile(String url)
-    {
-        Log.d("LibraryService", "Requesting download");
-
-        // Without any specified destination, a content would download to content://downloads/my_downloads/
-        Uri downloadUri = Uri.parse(url);
-        DownloadManager.Request request = new DownloadManager.Request(downloadUri);
-        request.setVisibleInDownloadsUi(false);
-        request.setShowRunningNotification(false);
-        return mDownloadManager.enqueue(request);
+        };
+        return callback;
     }
-
-
-    // RSS Parser
-    //-----------
-
-
-
-
-    private void ArticleProcessorCallback() {
-
-
-    }
-
-
-
-
 
 }

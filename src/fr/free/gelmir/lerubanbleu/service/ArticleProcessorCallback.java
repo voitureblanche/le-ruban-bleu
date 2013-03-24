@@ -8,4 +8,7 @@ package fr.free.gelmir.lerubanbleu.service;
  * To change this template use File | Settings | File Templates.
  */
 public interface ArticleProcessorCallback {
+
+    void send(Article article);
+
 }

@@ -6,7 +6,7 @@ import android.os.Bundle;
 import android.os.ResultReceiver;
 import android.util.Log;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * Created with IntelliJ IDEA.
@@ -15,7 +15,7 @@ import java.util.ArrayList;
  * Time: 11:21
  * To change this template use File | Settings | File Templates.
  */
-public class LibraryServiceHelper {
+public final class LibraryServiceHelper implements LibraryServiceHelperResultReceiver.Receiver {
 
     private static Object mLock = new Object();
     private static LibraryServiceHelper mLibraryServiceHelperInstance;
@@ -37,12 +37,14 @@ public class LibraryServiceHelper {
     public final static String EXTRA_GET_ARTICLE_NUMBER_LIST        = "fr.free.gelmir.service.LibraryService.extraGetArticleNumberList";
     public final static String EXTRA_STATUS                         = "fr.free.gelmir.service.LibraryService.extraGetArticleStatus";
 
+    private HashMap mHashMap;
 
-    public LibraryServiceHelper(Context context) {
+    // Constructor
+    protected LibraryServiceHelper(Context context) {
 
     }
 
-    public static LibraryServiceHelper getInstance(Context context)
+    public synchronized static LibraryServiceHelper getInstance(Context context)
     {
         synchronized (mLock) {
             if(mLibraryServiceHelperInstance == null){
@@ -53,15 +55,22 @@ public class LibraryServiceHelper {
         return mLibraryServiceHelperInstance;
     }
 
-    public void getArticle(Context context, ArrayList<Integer> articleNumbers)
+    public int getArticle(Context context, int articleId)
     {
         Log.d("LibraryServiceHelper", "Get article");
 
+        int requestId = 1;
+
+        // Is the method pending?
 
         // Start service
         Intent intent = new Intent(context, LibraryService.class);
         intent.setAction(LibraryService.ACTION_GET_ARTICLE);
+        intent.putExtra(LibraryService.EXTRA_ARTICLE_ID, articleId);
         context.startService(intent);
+
+        // Return request id
+        return requestId;
     }
 
     public void getLatestArticles(Context context)
@@ -86,5 +95,9 @@ public class LibraryServiceHelper {
     };
 
 
-
+    // Library Service Helper Result Receiver
+    @Override
+    protected void onReceiveResult(int resultCode, Bundle resultData) {
+        super.onReceiveResult(resultCode, resultData);
+    }
 }

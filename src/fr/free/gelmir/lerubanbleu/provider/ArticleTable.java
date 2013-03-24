@@ -13,11 +13,12 @@ import android.util.Log;
 public class ArticleTable
 {
     // Table
-    public static final String TABLE_NAME    = "lerubanbleu";
-    public static final String COLUMN_ID     = "_id";
-    public static final String COLUMN_IMAGE  = "image";
-    public static final String COLUMN_STATUS = "status";
-    public static final String COLUMN_RESULT = "result";
+    public static final String TABLE_NAME       = "lerubanbleu";
+    public static final String COLUMN_ID        = "_id";
+    public static final String COLUMN_IMAGE     = "image";
+    public static final String COLUMN_IMAGE_ID  = "image_id";
+    public static final String COLUMN_STATUS    = "status";
+    public static final String COLUMN_RESULT    = "result";
 
     // ArticleTable creation SQL statement
     private static final String SQL_TABLE_CREATE = "create table "

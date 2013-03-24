@@ -61,9 +61,9 @@ public class ArticleProvider extends ContentProvider
         // Match URI
         switch (sUriMatcher.match(uri))
         {
-            // Article id = column id
+            // Article id = image id
             case ARTICLE_ID:
-                queryBuilder.appendWhere(ArticleTable.COLUMN_ID + "=" + uri.getLastPathSegment());
+                queryBuilder.appendWhere(ArticleTable.COLUMN_IMAGE_ID + "=" + uri.getLastPathSegment());
                 break;
 
             // Error
@@ -118,6 +118,9 @@ public class ArticleProvider extends ContentProvider
 
         // Make sure that the fields are all set ?
         if (!values.containsKey(ArticleTable.COLUMN_IMAGE)) {
+        }
+
+        if (!values.containsKey(ArticleTable.COLUMN_IMAGE_ID)) {
         }
 
         if (!values.containsKey(ArticleTable.COLUMN_RESULT)) {

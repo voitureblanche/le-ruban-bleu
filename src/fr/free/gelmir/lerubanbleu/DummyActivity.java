@@ -5,17 +5,12 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.database.Cursor;
 import android.os.Bundle;
-import android.support.v4.app.LoaderManager;
-import android.support.v4.content.Loader;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import fr.free.gelmir.lerubanbleu.service.LibraryServiceHelper;
-
-import java.util.ArrayList;
 
 /**
  * Created with IntelliJ IDEA.
@@ -48,7 +43,7 @@ public class DummyActivity extends Activity {
         mButton3.setOnClickListener(onClickListener);
 
         // LibraryService helper
-        mLibraryServiceHelper = new LibraryServiceHelper();
+        mLibraryServiceHelper = LibraryServiceHelper.getInstance(this);
 
         // Register to Library service intent
         IntentFilter intentFilter = new IntentFilter();
@@ -63,20 +58,18 @@ public class DummyActivity extends Activity {
         public void onClick(View view)
         {
             Intent intent;
-            ArrayList<Integer> articleNumbers = new ArrayList<Integer>();
+            int requestId;
 
             switch (view.getId())
             {
                 case R.id.button1:
                     Log.d("DummyActivity", "Button 1 clicked");
-                    articleNumbers.add(1);
-                    mLibraryServiceHelper.getArticle(view.getContext(), articleNumbers);
+                    requestId = mLibraryServiceHelper.getArticle(view.getContext(), 1);
                     break;
 
                 case R.id.button2:
                     Log.d("DummyActivity", "Button 2 clicked");
-                    articleNumbers.add(2);
-                    mLibraryServiceHelper.getArticle(view.getContext(), articleNumbers);
+                    mLibraryServiceHelper.getArticle(view.getContext(), 2);
                     break;
 
                 case R.id.button3:
@@ -86,6 +79,30 @@ public class DummyActivity extends Activity {
             }
         }
     };
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        // Unregister receiver?
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        // Ask if the request is still pending with the request id
+
+
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        // Unregister the receiver
+        unregisterReceiver(mLibraryServiceHelperReceiver);
+    }
 
 
     private BroadcastReceiver mLibraryServiceHelperReceiver = new BroadcastReceiver() {
@@ -125,7 +142,7 @@ public class DummyActivity extends Activity {
 
                         break;
 
-                    case LibraryService.STATUS_FAILED:
+                    case LibraryServiceHelper.STATUS_FAILED:
                         Log.d("DummyActivity", "STATUS_FAILED");
                         switch (articleNumber)
                         {
@@ -143,7 +160,7 @@ public class DummyActivity extends Activity {
 
             // Get latest articles
             //--------------------
-            else if (intent.getAction().equals(LibraryService.ACTION_GET_LATEST_ARTICLES_COMPLETE))
+            else if (intent.getAction().equals(LibraryServiceHelper.GET_LATEST_ARTICLES_COMPLETE))
             {
 
 
@@ -152,12 +169,5 @@ public class DummyActivity extends Activity {
 
     };
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
 
-        // Unregister the receiver
-        unregisterReceiver(mLibraryServiceHelperReceiver);
-
-    }
 }
