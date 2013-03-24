@@ -52,11 +52,10 @@ public class LibraryService extends IntentService
 
             // Get article
             Article article;
-            article = mArticleProcessor.queryArticle(makeArticleProcessorCallback(), articleId);
+            article = mArticleProcessor.queryArticle(articleId);
 
             // Return result
-
-            resultReceiver.send(0,);
+            // resultReceiver.send(0,);
 
         }
 
@@ -73,18 +72,5 @@ public class LibraryService extends IntentService
         super.onDestroy();
     }
 
-
-    private ArticleProcessorCallback makeArticleProcessorCallback() {
-        ArticleProcessorCallback callback = new ArticleProcessorCallback() {
-
-            public void send(Article article) {
-
-
-
-            }
-
-        };
-        return callback;
-    }
 
 }

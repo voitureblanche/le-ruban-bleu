@@ -32,9 +32,10 @@ public class ArticleProcessor
     }
 
 
-    public void queryArticle(ArticleProcessorCallback articleProcessorCallback, int articleId) {
+    public Article queryArticle(int articleId) {
 
         ContentResolver contentResolver = mContext.getContentResolver();
+        Article article = new Article();
 
         // Query the article
         Uri uri = Uri.withAppendedPath(ArticleProvider.CONTENT_URI, Integer.toString(articleId));
@@ -63,6 +64,9 @@ public class ArticleProcessor
             contentResolver.insert(ArticleProvider.CONTENT_URI, contentValues);
 
         }
+
+        return article;
+
     }
 
 
