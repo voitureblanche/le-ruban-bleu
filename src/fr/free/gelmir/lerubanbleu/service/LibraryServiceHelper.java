@@ -3,6 +3,7 @@ package fr.free.gelmir.lerubanbleu.service;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.ResultReceiver;
 import android.util.Log;
 
@@ -15,12 +16,19 @@ import java.util.HashMap;
  * Time: 11:21
  * To change this template use File | Settings | File Templates.
  */
-public final class LibraryServiceHelper implements LibraryServiceHelperResultReceiver.Receiver {
-
-    private static Object mLock = new Object();
+public final class LibraryServiceHelper
+{
+    // Singleton
+    //----------
+    private static final Object mLock = new Object();
     private static LibraryServiceHelper mLibraryServiceHelperInstance;
 
+    private static LibraryServiceHelperResultReceiver mLibraryHelperResultReceiver;
+    private HashMap mHashMap;
+
+
     // Intent
+    //-------
     public final static String GET_ARTICLE_COMPLETE          = "fr.free.gelmir.service.LibraryServiceHelper.getArticleComplete";
     public final static String GET_LATEST_ARTICLES_COMPLETE  = "fr.free.gelmir.service.LibraryServiceHelper.getLatestArticlesComplete";
 
@@ -34,14 +42,13 @@ public final class LibraryServiceHelper implements LibraryServiceHelperResultRec
     public final static String EXTRA_ARTICLE_CONTENT_URI        = "fr.free.gelmir.service.LibraryService.extraArticleContentUri";
 
     // Extras
-    public final static String EXTRA_GET_ARTICLE_NUMBER_LIST        = "fr.free.gelmir.service.LibraryService.extraGetArticleNumberList";
-    public final static String EXTRA_STATUS                         = "fr.free.gelmir.service.LibraryService.extraGetArticleStatus";
+    public final static String EXTRA_GET_ARTICLE_NUMBER_LIST    = "fr.free.gelmir.service.LibraryService.extraGetArticleNumberList";
+    public final static String EXTRA_STATUS                     = "fr.free.gelmir.service.LibraryService.extraGetArticleStatus";
 
-    private HashMap mHashMap;
 
     // Constructor
     protected LibraryServiceHelper(Context context) {
-
+        mLibraryHelperResultReceiver = new LibraryServiceHelperResultReceiver(null);
     }
 
     public synchronized static LibraryServiceHelper getInstance(Context context)
@@ -55,6 +62,8 @@ public final class LibraryServiceHelper implements LibraryServiceHelperResultRec
         return mLibraryServiceHelperInstance;
     }
 
+    // Get article
+    //------------
     public int getArticle(Context context, int articleId)
     {
         Log.d("LibraryServiceHelper", "Get article");
@@ -67,12 +76,15 @@ public final class LibraryServiceHelper implements LibraryServiceHelperResultRec
         Intent intent = new Intent(context, LibraryService.class);
         intent.setAction(LibraryService.ACTION_GET_ARTICLE);
         intent.putExtra(LibraryService.EXTRA_ARTICLE_ID, articleId);
+        intent.putExtra(LibraryService.EXTRA_RESULT_RECEIVER, mLibraryHelperResultReceiver);
         context.startService(intent);
 
-        // Return request id
+        // Store and return request id
         return requestId;
     }
 
+    // Get latest articles
+    //--------------------
     public void getLatestArticles(Context context)
     {
         Intent intent = new Intent(context, LibraryService.class);
@@ -81,23 +93,18 @@ public final class LibraryServiceHelper implements LibraryServiceHelperResultRec
     }
 
 
-    private ResultReceiver resultReceiver = new ResultReceiver(null) {
-        @Override
-        protected void onReceiveResult(int result, Bundle bundle) {
-
-            // Recover original action
-
-
-            // Send broadcast to the activity
-
-
+    // Result receiver
+    //----------------
+    class LibraryServiceHelperResultReceiver extends ResultReceiver
+    {
+        public LibraryServiceHelperResultReceiver(Handler handler) {
+            super(handler);
         }
-    };
 
-
-    // Library Service Helper Result Receiver
-    @Override
-    protected void onReceiveResult(int resultCode, Bundle resultData) {
-        super.onReceiveResult(resultCode, resultData);
+        @Override
+        protected void onReceiveResult(int resultCode, Bundle resultData) {
+            super.onReceiveResult(resultCode, resultData);
+        }
     }
+
 }

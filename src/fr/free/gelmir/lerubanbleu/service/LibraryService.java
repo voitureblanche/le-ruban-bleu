@@ -1,6 +1,7 @@
 package fr.free.gelmir.lerubanbleu.service;
 
 import android.content.Intent;
+import android.os.Bundle;
 import android.os.ResultReceiver;
 import android.util.Log;
 import fr.free.gelmir.lerubanbleu.util.IntentService;
@@ -20,6 +21,7 @@ public class LibraryService extends IntentService
     public final static String ACTION_CANCEL_ALL            = "fr.free.gelmir.service.LibraryService.actionCancelAll";
 
     // Extras
+    public final static String EXTRA_ARTICLE         = "fr.free.gelmir.service.LibraryService.extraArticle";
     public final static String EXTRA_ARTICLE_ID      = "fr.free.gelmir.service.LibraryService.extraArticleId";
     public final static String EXTRA_RESULT_RECEIVER = "fr.free.gelmir.service.LibraryService.extraResultReceiver";
 
@@ -55,7 +57,9 @@ public class LibraryService extends IntentService
             article = mArticleProcessor.queryArticle(articleId);
 
             // Return result
-            // resultReceiver.send(0,);
+            Bundle bundle = new Bundle();
+            bundle.putParcelable(EXTRA_ARTICLE, article);
+            resultReceiver.send(0, bundle);
 
         }
 
