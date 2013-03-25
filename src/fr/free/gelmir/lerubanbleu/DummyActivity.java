@@ -11,6 +11,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import fr.free.gelmir.lerubanbleu.service.LibraryServiceHelper;
+import fr.free.gelmir.lerubanbleu.util.DetachableResultReceiver;
 
 /**
  * Created with IntelliJ IDEA.
@@ -19,7 +20,7 @@ import fr.free.gelmir.lerubanbleu.service.LibraryServiceHelper;
  * Time: 00:13
  * To change this template use File | Settings | File Templates.
  */
-public class DummyActivity extends Activity {
+public class DummyActivity extends Activity implements DetachableResultReceiver.Receiver {
     Button mButton1, mButton2, mButton3;
     TextView mTextView1, mTextView2, mTextView3;
     LibraryServiceHelper mLibraryServiceHelper;
@@ -170,4 +171,7 @@ public class DummyActivity extends Activity {
     };
 
 
+    // Result receiver
+    public void onReceiveResult(int resultCode, Bundle resultData) {
+    }
 }
