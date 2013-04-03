@@ -15,7 +15,7 @@ import android.text.TextUtils;
  * Time: 11:57
  * To change this template use File | Settings | File Templates.
  */
-public class ArticleProvider extends ContentProvider
+public class EpisodeProvider extends ContentProvider
 {
     // URI authority, paths
     private static final String AUTHORITY = "fr.free.gelmir.lerubanbleu.provider.articleprovider";
@@ -29,22 +29,22 @@ public class ArticleProvider extends ContentProvider
     public static final String CONTENT_ITEM_TYPE = ContentResolver.CURSOR_ITEM_BASE_TYPE + "/vnd.lerubanbleu.article";
 
     // URI Matcher
-    private static final int ARTICLES = 1;
-    private static final int ARTICLE_ID = 2;
+    private static final int EPISODES = 1;
+    private static final int EPISODE_ID = 2;
     private static final UriMatcher sUriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
     static {
-        sUriMatcher.addURI(AUTHORITY, BASE_PATH,        ARTICLES);
-        sUriMatcher.addURI(AUTHORITY, BASE_PATH + "/#", ARTICLE_ID);
+        sUriMatcher.addURI(AUTHORITY, BASE_PATH, EPISODES);
+        sUriMatcher.addURI(AUTHORITY, BASE_PATH + "/#", EPISODE_ID);
     }
 
     // Database open helper
-    ArticleDatabaseOpenHelper mArticleDatabaseOpenHelper;
+    EpisodeDatabaseOpenHelper mEpisodeDatabaseOpenHelper;
 
 
 
     @Override
     public boolean onCreate() {
-        mArticleDatabaseOpenHelper = new ArticleDatabaseOpenHelper(getContext());
+        mEpisodeDatabaseOpenHelper = new EpisodeDatabaseOpenHelper(getContext());
         return true;
     }
 
@@ -56,14 +56,14 @@ public class ArticleProvider extends ContentProvider
         SQLiteQueryBuilder queryBuilder = new SQLiteQueryBuilder();
 
         // Set the table we're querying
-        queryBuilder.setTables(ArticleTable.TABLE_NAME);
+        queryBuilder.setTables(EpisodeTable.TABLE_NAME);
 
         // Match URI
         switch (sUriMatcher.match(uri))
         {
-            // Article id = image id
-            case ARTICLE_ID:
-                queryBuilder.appendWhere(ArticleTable.COLUMN_IMAGE_ID + "=" + uri.getLastPathSegment());
+            // Episode id = image id
+            case EPISODE_ID:
+                queryBuilder.appendWhere(EpisodeTable.COLUMN_EPISODE_ID + "=" + uri.getLastPathSegment());
                 break;
 
             // Error
@@ -72,7 +72,7 @@ public class ArticleProvider extends ContentProvider
         }
 
         // Get database
-        SQLiteDatabase database = mArticleDatabaseOpenHelper.getWritableDatabase();
+        SQLiteDatabase database = mEpisodeDatabaseOpenHelper.getWritableDatabase();
 
         // Make the query
         Cursor cursor = queryBuilder.query(database, projection, selection, selectionArgs, null, null, sortOrder);
@@ -90,10 +90,10 @@ public class ArticleProvider extends ContentProvider
         // Match URI
         switch (sUriMatcher.match(uri))
         {
-            case ARTICLES:
-                return ArticleProvider.CONTENT_TYPE;
-            case ARTICLE_ID:
-                return ArticleProvider.CONTENT_ITEM_TYPE;
+            case EPISODES:
+                return EpisodeProvider.CONTENT_TYPE;
+            case EPISODE_ID:
+                return EpisodeProvider.CONTENT_ITEM_TYPE;
             default:
                 throw new IllegalArgumentException("Unknown URI " + uri);
         }
@@ -104,7 +104,7 @@ public class ArticleProvider extends ContentProvider
     public Uri insert(Uri uri, ContentValues contentValues)
     {
         // Match URI
-        if (sUriMatcher.match(uri) != ARTICLE_ID) {
+        if (sUriMatcher.match(uri) != EPISODE_ID) {
             throw new IllegalArgumentException("Unknown URI " + uri);
         }
 
@@ -117,25 +117,25 @@ public class ArticleProvider extends ContentProvider
         }
 
         // Make sure that the fields are all set ?
-        if (!values.containsKey(ArticleTable.COLUMN_IMAGE)) {
+        if (!values.containsKey(EpisodeTable.COLUMN_IMAGE)) {
         }
 
-        if (!values.containsKey(ArticleTable.COLUMN_IMAGE_ID)) {
+        if (!values.containsKey(EpisodeTable.COLUMN_EPISODE_ID)) {
         }
 
-        if (!values.containsKey(ArticleTable.COLUMN_RESULT)) {
+        if (!values.containsKey(EpisodeTable.COLUMN_RESULT)) {
         }
 
-        if (!values.containsKey(ArticleTable.COLUMN_STATUS)) {
+        if (!values.containsKey(EpisodeTable.COLUMN_STATUS)) {
         }
 
         // Insert into database
-        SQLiteDatabase database = mArticleDatabaseOpenHelper.getWritableDatabase();
-        long rowId = database.insert(ArticleTable.TABLE_NAME, ArticleTable.COLUMN_RESULT, values);
+        SQLiteDatabase database = mEpisodeDatabaseOpenHelper.getWritableDatabase();
+        long rowId = database.insert(EpisodeTable.TABLE_NAME, EpisodeTable.COLUMN_RESULT, values);
 
         // Notify and return
         if (rowId > 0) {
-            Uri noteUri = ContentUris.withAppendedId(ArticleProvider.CONTENT_URI, rowId);
+            Uri noteUri = ContentUris.withAppendedId(EpisodeProvider.CONTENT_URI, rowId);
             getContext().getContentResolver().notifyChange(noteUri, null);
             return noteUri;
         }
@@ -146,18 +146,18 @@ public class ArticleProvider extends ContentProvider
     @Override
     public int delete(Uri uri, String where, String[] whereArgs)
     {
-        SQLiteDatabase database = mArticleDatabaseOpenHelper.getWritableDatabase();
+        SQLiteDatabase database = mEpisodeDatabaseOpenHelper.getWritableDatabase();
         int count = 0;
 
         // Match URI
         switch(sUriMatcher.match(uri)) {
-            case ARTICLES:
-                count = database.delete(ArticleTable.TABLE_NAME, where, whereArgs);
+            case EPISODES:
+                count = database.delete(EpisodeTable.TABLE_NAME, where, whereArgs);
                 break;
 
-            case ARTICLE_ID:
+            case EPISODE_ID:
                 String rowId = uri.getLastPathSegment();
-                count = database.delete(ArticleTable.TABLE_NAME, ArticleTable.COLUMN_ID + " = " + rowId + (!TextUtils.isEmpty(where) ? " AND (" + where + ")" : ""), whereArgs);
+                count = database.delete(EpisodeTable.TABLE_NAME, EpisodeTable.COLUMN_ID + " = " + rowId + (!TextUtils.isEmpty(where) ? " AND (" + where + ")" : ""), whereArgs);
                 break;
 
             default:
@@ -173,18 +173,18 @@ public class ArticleProvider extends ContentProvider
     @Override
     public int update(Uri uri, ContentValues contentValues, String where, String[] whereArgs)
     {
-        SQLiteDatabase database = mArticleDatabaseOpenHelper.getWritableDatabase();
+        SQLiteDatabase database = mEpisodeDatabaseOpenHelper.getWritableDatabase();
         int count = 0;
 
         // Match URI
         switch (sUriMatcher.match(uri)) {
-            case ARTICLES:
-                count = database.update(ArticleTable.TABLE_NAME, contentValues, where, whereArgs);
+            case EPISODES:
+                count = database.update(EpisodeTable.TABLE_NAME, contentValues, where, whereArgs);
                 break;
 
-            case ARTICLE_ID:
+            case EPISODE_ID:
                 String rowId = uri.getLastPathSegment();
-                count = database.update(ArticleTable.TABLE_NAME, contentValues, ArticleTable.COLUMN_ID + "=" + rowId + (!TextUtils.isEmpty(where) ? " AND (" + where + ')' : ""), whereArgs);
+                count = database.update(EpisodeTable.TABLE_NAME, contentValues, EpisodeTable.COLUMN_ID + "=" + rowId + (!TextUtils.isEmpty(where) ? " AND (" + where + ')' : ""), whereArgs);
                 break;
 
             default:

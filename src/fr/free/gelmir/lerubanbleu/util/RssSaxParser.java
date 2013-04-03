@@ -1,6 +1,6 @@
 package fr.free.gelmir.lerubanbleu.util;
 
-import fr.free.gelmir.lerubanbleu.service.Article;
+import fr.free.gelmir.lerubanbleu.service.Episode;
 
 import java.util.List;
 
@@ -14,13 +14,13 @@ import java.util.List;
 public class RssSaxParser
 {
 
-    public List<Article> getLatestArticles() {
+    public List<Episode> getLatestArticles() {
 
-        // allocate an handler and get latest articles
+        // allocate an handler and get latest episodes
         RssSaxHandler rssSaxHandler = new RssSaxHandler();
-        List<Article> articles = rssSaxHandler.getLatestArticles("http://www.lerubanbleu.com/rss.xml");
+        List<Episode> episodes = rssSaxHandler.getLatestArticles("http://www.lerubanbleu.com/rss.xml");
 
-        return articles;
+        return episodes;
     }
 
 }

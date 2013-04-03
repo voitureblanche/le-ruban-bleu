@@ -10,8 +10,10 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import fr.free.gelmir.lerubanbleu.service.Episode;
 import fr.free.gelmir.lerubanbleu.service.LibraryServiceHelper;
-import fr.free.gelmir.lerubanbleu.util.DetachableResultReceiver;
+
+import java.net.URI;
 
 /**
  * Created with IntelliJ IDEA.
@@ -20,7 +22,7 @@ import fr.free.gelmir.lerubanbleu.util.DetachableResultReceiver;
  * Time: 00:13
  * To change this template use File | Settings | File Templates.
  */
-public class DummyActivity extends Activity implements DetachableResultReceiver.Receiver {
+public class DummyActivity extends Activity {
     Button mButton1, mButton2, mButton3;
     TextView mTextView1, mTextView2, mTextView3;
     LibraryServiceHelper mLibraryServiceHelper;
@@ -48,7 +50,7 @@ public class DummyActivity extends Activity implements DetachableResultReceiver.
 
         // Register to Library service intent
         IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(LibraryServiceHelper.GET_ARTICLE_COMPLETE);
+        intentFilter.addAction(LibraryServiceHelper.GET_EPISODE_COMPLETE);
         registerReceiver(mLibraryServiceHelperReceiver, intentFilter);
 
     }
@@ -58,24 +60,22 @@ public class DummyActivity extends Activity implements DetachableResultReceiver.
 
         public void onClick(View view)
         {
-            Intent intent;
-            int requestId;
 
             switch (view.getId())
             {
                 case R.id.button1:
                     Log.d("DummyActivity", "Button 1 clicked");
-                    requestId = mLibraryServiceHelper.getArticle(view.getContext(), 1);
+                    mLibraryServiceHelper.getEpisode(view.getContext(), 1);
                     break;
 
                 case R.id.button2:
                     Log.d("DummyActivity", "Button 2 clicked");
-                    mLibraryServiceHelper.getArticle(view.getContext(), 2);
+                    mLibraryServiceHelper.getEpisode(view.getContext(), 2);
                     break;
 
                 case R.id.button3:
                     Log.d("DummyActivity", "Button 3 clicked");
-                    mLibraryServiceHelper.getLatestArticles(view.getContext());
+                    mLibraryServiceHelper.getLatestEpisodes(view.getContext());
                     break;
             }
         }
@@ -113,39 +113,36 @@ public class DummyActivity extends Activity implements DetachableResultReceiver.
 
             // Get article
             //------------
-            if (intent.getAction().equals(LibraryServiceHelper.GET_ARTICLE_COMPLETE))
+            if (intent.getAction().equals(LibraryServiceHelper.GET_EPISODE_COMPLETE))
             {
                 Log.d("DummyActivity", "ACTION_GET_ARTICLE_COMPLETE intent received");
                 int status = intent.getIntExtra(LibraryServiceHelper.EXTRA_STATUS, 0);
-                int articleNumber = intent.getIntExtra(LibraryServiceHelper.EXTRA_ARTICLE_NUMBER, 0);
 
                 // Parse status
                 switch (status)
                 {
                     case LibraryServiceHelper.STATUS_SUCCESSFUL:
                         Log.d("DummyActivity", "STATUS_SUCCESSFUL");
-                        String filename;
-                        String uri;
-                        filename = intent.getStringExtra(LibraryServiceHelper.EXTRA_ARTICLE_CONTENT_FILENAME);
-                        uri = intent.getStringExtra(LibraryServiceHelper.EXTRA_ARTICLE_CONTENT_URI);
-                        Log.d("DummyActivity", uri+filename);
+                        Episode episode = intent.getParcelableExtra(LibraryServiceHelper.EXTRA_EPISODE);
+                        URI episodeImageUri = episode.getImageUri();
 
-                        switch (articleNumber)
+                        switch (episode.getEpisodeId())
                         {
                             case 1:
-                                mTextView1.setText(uri + "/" + filename);
+                                mTextView1.setText(episodeImageUri.toString());
                                 break;
 
                             case 2:
-                                mTextView2.setText(uri + "/" + filename);
+                                mTextView2.setText(episodeImageUri.toString());
                                 break;
                         }
+                        // Display image
 
                         break;
 
                     case LibraryServiceHelper.STATUS_FAILED:
                         Log.d("DummyActivity", "STATUS_FAILED");
-                        switch (articleNumber)
+                        /* switch ()
                         {
                             case 1:
                                 mTextView1.setText("failed :-(");
@@ -154,7 +151,7 @@ public class DummyActivity extends Activity implements DetachableResultReceiver.
                             case 2:
                                 mTextView2.setText("failed :-(");
                                 break;
-                        }
+                        } */
                         break;
                 }
             }
@@ -170,8 +167,4 @@ public class DummyActivity extends Activity implements DetachableResultReceiver.
 
     };
 
-
-    // Result receiver
-    public void onReceiveResult(int resultCode, Bundle resultData) {
-    }
 }

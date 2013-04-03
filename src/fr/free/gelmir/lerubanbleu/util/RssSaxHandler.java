@@ -1,7 +1,7 @@
 package fr.free.gelmir.lerubanbleu.util;
 
 import android.util.Log;
-import fr.free.gelmir.lerubanbleu.service.Article;
+import fr.free.gelmir.lerubanbleu.service.Episode;
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -25,14 +25,14 @@ import java.util.List;
  */
 public class RssSaxHandler extends DefaultHandler
 {
-    private List<Article> mArticles;
-    private Article mCurrentArticle;
+    private List<Episode> mEpisodes;
+    private Episode mCurrentEpisode;
     private StringBuilder mStringBuilder;
 
     @Override
     public void startDocument() throws SAXException {
         super.startDocument();
-        mArticles = new ArrayList<Article>();
+        mEpisodes = new ArrayList<Episode>();
         mStringBuilder = new StringBuilder();
     }
 
@@ -40,28 +40,28 @@ public class RssSaxHandler extends DefaultHandler
     public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
         super.startElement(uri, localName, qName, attributes);
         if (localName.equalsIgnoreCase("item")) {
-            mCurrentArticle = new Article();
+            mCurrentEpisode = new Episode();
         }
     }
 
     @Override
     public void endElement(String uri, String localName, String name) throws SAXException {
         super.endElement(uri, localName, name);
-        if (this.mCurrentArticle != null) {
+        if (this.mCurrentEpisode != null) {
             if (localName.equalsIgnoreCase("title")) {
-                mCurrentArticle.setTitle(mStringBuilder.toString());
+                mCurrentEpisode.setTitle(mStringBuilder.toString());
             }
             else if (localName.equalsIgnoreCase("link")) {
-                mCurrentArticle.setLink(mStringBuilder.toString());
+                mCurrentEpisode.setLink(mStringBuilder.toString());
             }
             else if (localName.equalsIgnoreCase("description")) {
-                mCurrentArticle.setDescription(mStringBuilder.toString());
+                mCurrentEpisode.setDescription(mStringBuilder.toString());
             }
             else if (localName.equalsIgnoreCase("puDate")) {
-                mCurrentArticle.setPubDate(mStringBuilder.toString());
+                mCurrentEpisode.setPubDate(mStringBuilder.toString());
             }
             else if (localName.equalsIgnoreCase("item")) {
-                mArticles.add(mCurrentArticle);
+                mEpisodes.add(mCurrentEpisode);
             }
             mStringBuilder.setLength(0);
         }
@@ -74,7 +74,7 @@ public class RssSaxHandler extends DefaultHandler
     }
 
 
-    public List<Article> getLatestArticles(String feedUrl) {
+    public List<Episode> getLatestArticles(String feedUrl) {
         URL url = null;
 
         try {
@@ -95,7 +95,7 @@ public class RssSaxHandler extends DefaultHandler
             Log.e("RSS Handler Parser Config", e.toString());
         }
 
-        return mArticles;
+        return mEpisodes;
 
     }
 }

@@ -16,17 +16,20 @@ import fr.free.gelmir.lerubanbleu.util.IntentService;
 public class LibraryService extends IntentService
 {
     // Actions
-    public final static String ACTION_GET_ARTICLE           = "fr.free.gelmir.service.LibraryService.actionGetArticle";
-    public final static String ACTION_GET_LATEST_ARTICLES   = "fr.free.gelmir.service.LibraryService.actionGetLatestArticles";
-    public final static String ACTION_CANCEL_ALL            = "fr.free.gelmir.service.LibraryService.actionCancelAll";
+    public final static String ACTION_GET_EPISODE = "fr.free.gelmir.service.LibraryService.actionGetEpisode";
+    public final static String ACTION_GET_LATEST_EPISODES = "fr.free.gelmir.service.LibraryService.actionGetLatestEpisodes";
+    public final static String ACTION_CANCEL_ALL = "fr.free.gelmir.service.LibraryService.actionCancelAll";
 
     // Extras
-    public final static String EXTRA_ARTICLE         = "fr.free.gelmir.service.LibraryService.extraArticle";
-    public final static String EXTRA_ARTICLE_ID      = "fr.free.gelmir.service.LibraryService.extraArticleId";
+    public final static String EXTRA_EPISODE = "fr.free.gelmir.service.LibraryService.extraEpisode";
+    public final static String EXTRA_EPISODE_ID = "fr.free.gelmir.service.LibraryService.extraEpisodeId";
     public final static String EXTRA_RESULT_RECEIVER = "fr.free.gelmir.service.LibraryService.extraResultReceiver";
+    public final static String EXTRA_ORIGINAL_INTENT = "fr.free.gelmir.service.LibraryService.extraOriginalIntent";
 
     // Members
-    private ArticleProcessor mArticleProcessor;
+    private EpisodeProcessor mEpisodeProcessor;
+    private ResultReceiver mResultReceiver;
+    private Intent mIntent;
 
 
     public LibraryService() {
@@ -36,30 +39,30 @@ public class LibraryService extends IntentService
     @Override
     public void onCreate() {
         super.onCreate();
-        mArticleProcessor = new ArticleProcessor(this);
+        mEpisodeProcessor = new EpisodeProcessor(this);
     }
 
     @Override
     protected void onHandleIntent(Intent intent)
     {
-        // Get article
+        // Save intent
+        mIntent = intent;
+
+        // Get request data from intent
+        mResultReceiver = intent.getParcelableExtra(EXTRA_RESULT_RECEIVER);
+
+        // Get episode
         //------------
-        if (intent.getAction().equals(ACTION_GET_ARTICLE))
+        if (intent.getAction().equals(ACTION_GET_EPISODE))
         {
-            Log.d("LibraryService", "ACTION_GET_ARTICLE received");
+            Log.d("LibraryService", "ACTION_GET_EPISODE received");
 
             // Get intent extras
-            int articleId = intent.getIntExtra(LibraryService.EXTRA_ARTICLE_ID, -1);
-            ResultReceiver resultReceiver = intent.getParcelableExtra(LibraryService.EXTRA_RESULT_RECEIVER);
+            int episodeId = intent.getIntExtra(EXTRA_EPISODE_ID, -1);
 
-            // Get article
-            Article article;
-            article = mArticleProcessor.queryArticle(articleId);
-
-            // Return result
-            Bundle bundle = new Bundle();
-            bundle.putParcelable(EXTRA_ARTICLE, article);
-            resultReceiver.send(0, bundle);
+            // Get episode
+            EpisodeProcessorCallback callback = makeEpisodeProcessorCallback();
+            mEpisodeProcessor.queryEpisode(episodeId, callback);
 
         }
 
@@ -76,5 +79,21 @@ public class LibraryService extends IntentService
         super.onDestroy();
     }
 
+
+    private EpisodeProcessorCallback makeEpisodeProcessorCallback() {
+        EpisodeProcessorCallback callback = new EpisodeProcessorCallback() {
+            @Override
+            public void send(int resultCode, Episode episode) {
+
+            // Send to result receiver
+            Bundle bundle = new Bundle();
+            bundle.putParcelable(EXTRA_ORIGINAL_INTENT, mIntent);
+            bundle.putParcelable(EXTRA_EPISODE, episode);
+            mResultReceiver.send(resultCode, bundle);
+
+            }
+        };
+        return callback;
+    }
 
 }

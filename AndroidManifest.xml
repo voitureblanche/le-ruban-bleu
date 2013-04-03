@@ -19,7 +19,7 @@
 
         <service android:name=".service.LibraryService" />
 
-        <provider android:name=".provider.ArticleProvider"
+        <provider android:name=".provider.EpisodeProvider"
                   android:authorities="fr.free.gelmir.lerubanbleu.provider.articleprovider"
                   android:exported="false" />
     </application>
