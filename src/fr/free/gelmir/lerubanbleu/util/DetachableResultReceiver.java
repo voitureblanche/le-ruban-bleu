@@ -2,6 +2,7 @@ package fr.free.gelmir.lerubanbleu.util;
 
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.ResultReceiver;
 import android.util.Log;
 
 /**
@@ -11,7 +12,7 @@ import android.util.Log;
  * Time: 15:33
  * To change this template use File | Settings | File Templates.
  */
-public class DetachableResultReceiver {
+public class DetachableResultReceiver extends ResultReceiver {
     private static final String TAG = "DetachableResultReceiver";
 
     private Receiver mReceiver;

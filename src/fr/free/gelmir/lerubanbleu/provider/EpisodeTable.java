@@ -15,8 +15,8 @@ public class EpisodeTable
     // Table
     public static final String TABLE_NAME           = "lerubanbleu";
     public static final String COLUMN_ID            = "_id";
-    public static final String COLUMN_EPISODE_ID    = "episode_id";
-    public static final String COLUMN_IMAGE         = "image";
+    public static final String COLUMN_EPISODE_NB    = "episode_nb";
+    public static final String COLUMN_IMAGE_URI     = "image_uri";
     public static final String COLUMN_STATUS        = "status";
     public static final String COLUMN_RESULT        = "result";
 
@@ -25,10 +25,10 @@ public class EpisodeTable
             + TABLE_NAME
             + "("
             + COLUMN_ID + " integer primary key autoincrement, "
-            + COLUMN_EPISODE_ID + " integer not null, "
-            + COLUMN_IMAGE + " text not null, "
+            + COLUMN_EPISODE_NB + " integer not null, "
+            + COLUMN_IMAGE_URI + " text not null, "
             + COLUMN_STATUS + " text, "
-            + COLUMN_RESULT + " text, "
+            + COLUMN_RESULT + " text "
             + ");";
 
     // Create table

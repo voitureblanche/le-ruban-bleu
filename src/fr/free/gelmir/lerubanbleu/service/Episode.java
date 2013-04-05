@@ -1,9 +1,8 @@
 package fr.free.gelmir.lerubanbleu.service;
 
+import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
-
-import java.net.URI;
 
 /**
  * Created with IntelliJ IDEA.
@@ -14,21 +13,27 @@ import java.net.URI;
  */
 public class Episode implements Comparable<Episode>, Parcelable {
 
-    private int mEpisodeId;
-    private URI mImageUri;
+    private int mEpisodeNumber;
+    private Uri mImageUri;
 
-    public Episode(int episodeId, URI imageURI) {
-        mEpisodeId = episodeId;
-        mImageUri = imageURI;
+    public Episode() {
     }
 
-    public URI getImageUri() {
+    public Uri getImageUri() {
         return mImageUri;
-    };
+    }
 
-    public int getEpisodeId() {
-        return mEpisodeId;
-    };
+    public void setImageUri(Uri imageUri) {
+        mImageUri = imageUri;
+    }
+
+    public int getEpisodeNb() {
+        return mEpisodeNumber;
+    }
+
+    public void setEpisodeNb(int episodeNb) {
+        mEpisodeNumber = episodeNb;
+    }
 
     public int compareTo(Episode episode) {
         return 0;  //To change body of implemented methods use File | Settings | File Templates.

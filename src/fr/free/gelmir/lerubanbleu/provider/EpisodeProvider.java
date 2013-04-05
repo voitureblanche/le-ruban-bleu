@@ -63,7 +63,7 @@ public class EpisodeProvider extends ContentProvider
         {
             // Episode id = image id
             case EPISODE_ID:
-                queryBuilder.appendWhere(EpisodeTable.COLUMN_EPISODE_ID + "=" + uri.getLastPathSegment());
+                queryBuilder.appendWhere(EpisodeTable.COLUMN_EPISODE_NB + "=" + uri.getLastPathSegment());
                 break;
 
             // Error
@@ -117,10 +117,10 @@ public class EpisodeProvider extends ContentProvider
         }
 
         // Make sure that the fields are all set ?
-        if (!values.containsKey(EpisodeTable.COLUMN_IMAGE)) {
+        if (!values.containsKey(EpisodeTable.COLUMN_IMAGE_URI)) {
         }
 
-        if (!values.containsKey(EpisodeTable.COLUMN_EPISODE_ID)) {
+        if (!values.containsKey(EpisodeTable.COLUMN_EPISODE_NB)) {
         }
 
         if (!values.containsKey(EpisodeTable.COLUMN_RESULT)) {
