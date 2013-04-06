@@ -62,7 +62,7 @@ public class LibraryService extends IntentService
 
             // Get episode
             EpisodeProcessorCallback callback = makeEpisodeProcessorCallback();
-            mEpisodeProcessor.queryEpisode(episodeId, callback);
+            mEpisodeProcessor.queryEpisode(episodeId, callback, this);
 
         }
 

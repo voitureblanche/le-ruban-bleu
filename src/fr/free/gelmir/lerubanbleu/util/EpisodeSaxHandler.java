@@ -1,5 +1,6 @@
 package fr.free.gelmir.lerubanbleu.util;
 
+import android.content.Context;
 import android.net.Uri;
 import android.util.Base64;
 import android.util.Log;
@@ -27,9 +28,11 @@ import java.io.InputStream;
  */
 public class EpisodeSaxHandler extends DefaultHandler
 {
+    private Context mContext;
     private StringBuilder mStringBuilder;
     private Episode mEpisode;
     private String mImageName = null;
+
 
     @Override
     public void startDocument() throws SAXException {
@@ -67,7 +70,7 @@ public class EpisodeSaxHandler extends DefaultHandler
             byte[] image = Base64.decode(imageBase64, Base64.DEFAULT);
 
             // Create file
-            File file = new File(mImageName);
+            File file = new File(mContext.getFilesDir().toString() + "/" + mImageName);
             Log.d("EpisodeSaxHandler", "image " + mImageName + " found!");
 
             // write file
@@ -82,6 +85,8 @@ public class EpisodeSaxHandler extends DefaultHandler
 
             // save file URI
             mEpisode.setImageUri(Uri.fromFile(file));
+            Log.d("EpisodeSaxHandler", "image URI " + Uri.fromFile(file).toString());
+
         }
 
         mStringBuilder.setLength(0);
@@ -94,9 +99,11 @@ public class EpisodeSaxHandler extends DefaultHandler
     }
 
 
-    public Episode getEpisode(InputStream is)
+    public Episode getEpisode(InputStream is, Context context)
     {
         try {
+            mContext = context;
+
             SAXParserFactory spf = SAXParserFactory.newInstance();
             SAXParser sp = spf.newSAXParser();
             XMLReader xr = sp.getXMLReader();

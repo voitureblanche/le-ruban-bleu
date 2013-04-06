@@ -27,15 +27,15 @@ public final class LibraryServiceHelper
 
 
     // Intent
-    public final static String GET_EPISODE_COMPLETE = "fr.free.gelmir.service.LibraryServiceHelper.getArticleComplete";
-    public final static String GET_LATEST_ARTICLES_COMPLETE  = "fr.free.gelmir.service.LibraryServiceHelper.getLatestArticlesComplete";
+    public final static String GET_EPISODE_COMPLETE         = "fr.free.gelmir.service.LibraryServiceHelper.getEpisodeComplete";
+    public final static String GET_LATEST_EPISODES_COMPLETE = "fr.free.gelmir.service.LibraryServiceHelper.getLatestEpisodesComplete";
 
     // Status
     public final static int STATUS_FAILED     = 1;
     public final static int STATUS_SUCCESSFUL = 2;
 
     // Extras
-    public final static String EXTRA_EPISODE = "fr.free.gelmir.service.LibraryService.extraArticle";
+    public final static String EXTRA_EPISODE    = "fr.free.gelmir.service.LibraryService.extraEpisode";
     public final static String EXTRA_STATUS     = "fr.free.gelmir.service.LibraryService.extraStatus";
 
 
@@ -82,7 +82,7 @@ public final class LibraryServiceHelper
     {
         // Get original intent and retrieve the episode id
         Intent intent = resultData.getParcelable(LibraryService.EXTRA_ORIGINAL_INTENT);
-        int articleId = intent.getIntExtra(LibraryService.EXTRA_EPISODE_ID, -1);
+        int episodeId = intent.getIntExtra(LibraryService.EXTRA_EPISODE_ID, -1);
 
         // Get episode
         Episode episode = resultData.getParcelable(LibraryService.EXTRA_EPISODE);
@@ -90,7 +90,7 @@ public final class LibraryServiceHelper
         // Broadcast result
         Intent broadcastIntent = new Intent(GET_EPISODE_COMPLETE);
         broadcastIntent.putExtra(EXTRA_EPISODE, episode);
-        broadcastIntent.putExtra(EXTRA_STATUS, resultCode);
+        broadcastIntent.putExtra(EXTRA_STATUS, STATUS_SUCCESSFUL);
         mApplicationContext.sendBroadcast(broadcastIntent);
     }
 

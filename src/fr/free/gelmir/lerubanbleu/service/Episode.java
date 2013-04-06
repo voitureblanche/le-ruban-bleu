@@ -11,12 +11,20 @@ import android.os.Parcelable;
  * Time: 22:40
  * To change this template use File | Settings | File Templates.
  */
-public class Episode implements Comparable<Episode>, Parcelable {
+public class Episode implements Parcelable {
 
     private int mEpisodeNumber;
     private Uri mImageUri;
 
+    // Basic constructor for non-parcel object creation
     public Episode() {
+
+    }
+
+    // Constructor used when reconstructing object from a parcel
+    public Episode(Parcel parcel) {
+        mEpisodeNumber = parcel.readInt();
+        mImageUri = Uri.parse(parcel.readString());
     }
 
     public Uri getImageUri() {
@@ -35,15 +43,26 @@ public class Episode implements Comparable<Episode>, Parcelable {
         mEpisodeNumber = episodeNb;
     }
 
-    public int compareTo(Episode episode) {
-        return 0;  //To change body of implemented methods use File | Settings | File Templates.
-    }
+    public static final Parcelable.Creator<Episode> CREATOR = new Parcelable.Creator<Episode>()
+    {
+        public Episode createFromParcel(Parcel parcel) {
+            return new Episode(parcel);
+        }
 
+        public Episode[] newArray(int size) {
+            return new Episode[size];
+        }
+
+    };
+
+    @Override
     public int describeContents() {
-        return 0;  //To change body of implemented methods use File | Settings | File Templates.
+        return 0;
     }
 
-    public void writeToParcel(Parcel parcel, int i) {
-        //To change body of implemented methods use File | Settings | File Templates.
+    @Override
+    public void writeToParcel(Parcel parcel, int flags) {
+        parcel.writeInt(mEpisodeNumber);
+        parcel.writeString(mImageUri.toString());
     }
 }

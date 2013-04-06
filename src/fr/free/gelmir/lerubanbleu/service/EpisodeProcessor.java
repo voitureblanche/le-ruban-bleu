@@ -6,19 +6,17 @@ import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
-import android.util.Log;
 import fr.free.gelmir.lerubanbleu.provider.EpisodeProvider;
 import fr.free.gelmir.lerubanbleu.provider.EpisodeTable;
 import fr.free.gelmir.lerubanbleu.util.EpisodeSaxParser;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.util.zip.GZIPInputStream;
 
 /**
  * Created with IntelliJ IDEA.
@@ -38,7 +36,7 @@ public class EpisodeProcessor
     }
 
 
-    public void queryEpisode(int episodeNb, EpisodeProcessorCallback callback)
+    public void queryEpisode(int episodeNb, EpisodeProcessorCallback callback, Context context)
     {
         int result = 0;
 
@@ -84,14 +82,10 @@ public class EpisodeProcessor
 
                 // Handle result
                 else {
-                    // Get XML
-                    //String xml;
-                    //xml = getXml(inputStream);
-                    //Log.d("EpisodeProcessor", xml);
-
                     // Parse XML
+                    GZIPInputStream gzis = new GZIPInputStream(inputStream);
                     EpisodeSaxParser parser = new EpisodeSaxParser();
-                    mEpisode = parser.getEpisode(inputStream);
+                    mEpisode = parser.getEpisode(gzis, context);
 
                     // Update database
                     //ContentValues contentValues = new ContentValues();
@@ -113,45 +107,6 @@ public class EpisodeProcessor
         callback.send(result, mEpisode);
 
     }
-
-
-    private String getXml(InputStream is)
-    {
-        String xml = null;
-        BufferedReader br = null;
-        StringBuilder sb = null;
-        try {
-            //GZIPInputStream gzis = new GZIPInputStream(is);
-            //br = new BufferedReader(new InputStreamReader(gzis));
-            br = new BufferedReader(new InputStreamReader(is));
-            sb = new StringBuilder();
-            char[] buffer = new char[1000];
-            int charsRead;
-
-            // Get data from stream
-            while ((charsRead = br.read(buffer)) != -1) {
-                sb.append(buffer, 0, charsRead);
-            }
-            br.close();
-
-            // Get XML
-            xml = sb.toString();
-            Log.d("EpisodeProcessor", Integer.toString(xml.length()));
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            if (br != null) {
-                try {
-                    br.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-        return xml;
-    }
-
 
     private boolean isNetworkAvailable() {
         boolean available = false;

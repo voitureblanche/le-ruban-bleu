@@ -103,7 +103,7 @@ public class DummyActivity extends Activity {
                 {
                     case LibraryServiceHelper.STATUS_SUCCESSFUL:
                         Log.d("DummyActivity", "STATUS_SUCCESSFUL");
-                        Episode episode = intent.getParcelableExtra(LibraryServiceHelper.EXTRA_EPISODE);
+                        Episode episode = intent.getExtras().getParcelable(LibraryServiceHelper.EXTRA_EPISODE);
                         Uri episodeImageUri = episode.getImageUri();
 
                         // Display image
@@ -128,7 +128,7 @@ public class DummyActivity extends Activity {
 
             // Get latest articles
             //--------------------
-            else if (intent.getAction().equals(LibraryServiceHelper.GET_LATEST_ARTICLES_COMPLETE))
+            else if (intent.getAction().equals(LibraryServiceHelper.GET_LATEST_EPISODES_COMPLETE))
             {
 
 

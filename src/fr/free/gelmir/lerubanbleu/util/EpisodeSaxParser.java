@@ -1,5 +1,6 @@
 package fr.free.gelmir.lerubanbleu.util;
 
+import android.content.Context;
 import fr.free.gelmir.lerubanbleu.service.Episode;
 
 import java.io.InputStream;
@@ -13,11 +14,11 @@ import java.io.InputStream;
  */
 public class EpisodeSaxParser
 {
-    public Episode getEpisode(InputStream is) {
+    public Episode getEpisode(InputStream is, Context context) {
 
         // Allocate an handler and get the episode
         EpisodeSaxHandler episodeSaxHandler = new EpisodeSaxHandler();
-        return episodeSaxHandler.getEpisode(is);
+        return episodeSaxHandler.getEpisode(is, context);
 
     }
 }
