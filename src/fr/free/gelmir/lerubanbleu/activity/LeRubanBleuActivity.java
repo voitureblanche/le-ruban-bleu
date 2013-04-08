@@ -15,7 +15,9 @@ public class LeRubanBleuActivity extends Activity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
 
-        // Bind Library
+        // Check network
+
+        // Get latest episodes
 
         // Restore user preferences
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);

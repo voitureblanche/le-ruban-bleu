@@ -28,6 +28,7 @@ public final class LibraryServiceHelper
 
     // Intent
     public final static String GET_EPISODE_COMPLETE         = "fr.free.gelmir.service.LibraryServiceHelper.getEpisodeComplete";
+    public final static String GET_TOTAL_NUMBER_COMPLETE    = "fr.free.gelmir.service.LibraryServiceHelper.getTotalNumberComplete";
     public final static String GET_LATEST_EPISODES_COMPLETE = "fr.free.gelmir.service.LibraryServiceHelper.getLatestEpisodesComplete";
 
     // Status
@@ -101,6 +102,22 @@ public final class LibraryServiceHelper
         context.startService(intent);
     }
 
+    public void getTotalNumber(Context context)
+    {
+        // Allocate result receiver
+        ResultReceiver resultReceiver = new ResultReceiver(null){
+            @Override
+            protected void onReceiveResult(int resultCode, Bundle resultData) {
+                handleGetEpisodeResponse(resultCode, resultData);
+            }
+        };
+
+        // Start service
+        Intent intent = new Intent(context, LibraryService.class);
+        intent.setAction(LibraryService.ACTION_GET_);
+        intent.putExtra(LibraryService.EXTRA_RESULT_RECEIVER, resultReceiver);
+        context.startService(intent);
+    }
 
 
 

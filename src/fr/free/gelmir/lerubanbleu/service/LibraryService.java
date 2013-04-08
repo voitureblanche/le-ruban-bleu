@@ -17,6 +17,7 @@ public class LibraryService extends IntentService
 {
     // Actions
     public final static String ACTION_GET_EPISODE = "fr.free.gelmir.service.LibraryService.actionGetEpisode";
+    public final static String ACTION_GET_TOTAL_NUMBER = "fr.free.gelmir.service.LibraryService.actionGetTotalNumber";
     public final static String ACTION_GET_LATEST_EPISODES = "fr.free.gelmir.service.LibraryService.actionGetLatestEpisodes";
     public final static String ACTION_CANCEL_ALL = "fr.free.gelmir.service.LibraryService.actionCancelAll";
 
@@ -63,6 +64,12 @@ public class LibraryService extends IntentService
             // Get episode
             EpisodeProcessorCallback callback = makeEpisodeProcessorCallback();
             mEpisodeProcessor.queryEpisode(episodeId, callback, this);
+
+        }
+
+        // Get total number
+        //-------------------
+        else if (intent.getAction().equals(ACTION_GET_TOTAL_NUMBER)) {
 
         }
 

@@ -102,7 +102,6 @@ public class EpisodeProcessor
 
         }
 
-
         // Callback
         callback.send(result, mEpisode);
 
