@@ -26,13 +26,12 @@ import java.io.InputStream;
  * Time: 21:58
  * To change this template use File | Settings | File Templates.
  */
-public class EpisodeSaxHandler extends DefaultHandler
+public class XmlSaxHandler extends DefaultHandler
 {
     private Context mContext;
     private StringBuilder mStringBuilder;
     private Episode mEpisode;
     private String mImageName = null;
-
 
     @Override
     public void startDocument() throws SAXException {
@@ -49,7 +48,7 @@ public class EpisodeSaxHandler extends DefaultHandler
             try {
                 int number = Integer.parseInt(attributes.getValue("number"));
                 mEpisode.setEpisodeNb(number);
-                Log.d("EpisodeSaxHandler", "episode number " + attributes.getValue("number") + " found!");
+                Log.d("XmlSaxHandler", "episode number " + attributes.getValue("number") + " found!");
             } catch(Exception e) {
                 throw new SAXException(e); // attribute content is not an integer
             }
@@ -71,7 +70,7 @@ public class EpisodeSaxHandler extends DefaultHandler
 
             // Create file
             File file = new File(mContext.getFilesDir().toString() + "/" + mImageName);
-            Log.d("EpisodeSaxHandler", "image " + mImageName + " found!");
+            Log.d("XmlSaxHandler", "image " + mImageName + " found!");
 
             // write file
             try {
@@ -85,7 +84,7 @@ public class EpisodeSaxHandler extends DefaultHandler
 
             // save file URI
             mEpisode.setImageUri(Uri.fromFile(file));
-            Log.d("EpisodeSaxHandler", "image URI " + Uri.fromFile(file).toString());
+            Log.d("XmlSaxHandler", "image URI " + Uri.fromFile(file).toString());
 
         }
 
@@ -122,6 +121,29 @@ public class EpisodeSaxHandler extends DefaultHandler
         return mEpisode;
     }
 
+
+    public int getTotalNumber(InputStream is, Context context)
+    {
+        try {
+            mContext = context;
+
+            SAXParserFactory spf = SAXParserFactory.newInstance();
+            SAXParser sp = spf.newSAXParser();
+            XMLReader xr = sp.getXMLReader();
+
+            xr.setContentHandler(this);
+            xr.parse(new InputSource(is));
+
+        } catch (IOException e) {
+            Log.e("RSS Handler IO", e.getMessage() + " >> " + e.toString());
+        } catch (SAXException e) {
+            Log.e("RSS Handler SAX", e.toString());
+        } catch (ParserConfigurationException e) {
+            Log.e("RSS Handler Parser Config", e.toString());
+        }
+
+        return 0;
+    }
 
 }
 

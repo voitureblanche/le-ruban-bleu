@@ -114,7 +114,7 @@ public final class LibraryServiceHelper
 
         // Start service
         Intent intent = new Intent(context, LibraryService.class);
-        intent.setAction(LibraryService.ACTION_GET_);
+        intent.setAction(LibraryService.ACTION_GET_TOTAL_NUMBER);
         intent.putExtra(LibraryService.EXTRA_RESULT_RECEIVER, resultReceiver);
         context.startService(intent);
     }

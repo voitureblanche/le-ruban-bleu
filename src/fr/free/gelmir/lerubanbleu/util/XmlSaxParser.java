@@ -12,13 +12,21 @@ import java.io.InputStream;
  * Time: 23:43
  * To change this template use File | Settings | File Templates.
  */
-public class EpisodeSaxParser
+public class XmlSaxParser
 {
     public Episode getEpisode(InputStream is, Context context) {
 
         // Allocate an handler and get the episode
-        EpisodeSaxHandler episodeSaxHandler = new EpisodeSaxHandler();
-        return episodeSaxHandler.getEpisode(is, context);
+        XmlSaxHandler xmlSaxHandler = new XmlSaxHandler();
+        return xmlSaxHandler.getEpisode(is, context);
+
+    }
+
+    public int getTotalNumber(InputStream is, Context context) {
+
+        // Allocate an handler and get total number of episodes
+        XmlSaxHandler xmlSaxHandler = new XmlSaxHandler();
+        return xmlSaxHandler.getTotalNumber(is, context);
 
     }
 }

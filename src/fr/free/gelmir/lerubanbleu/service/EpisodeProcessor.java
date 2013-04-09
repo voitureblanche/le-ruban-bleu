@@ -8,7 +8,7 @@ import android.net.NetworkInfo;
 import android.net.Uri;
 import fr.free.gelmir.lerubanbleu.provider.EpisodeProvider;
 import fr.free.gelmir.lerubanbleu.provider.EpisodeTable;
-import fr.free.gelmir.lerubanbleu.util.EpisodeSaxParser;
+import fr.free.gelmir.lerubanbleu.util.XmlSaxParser;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -84,7 +84,7 @@ public class EpisodeProcessor
                 else {
                     // Parse XML
                     GZIPInputStream gzis = new GZIPInputStream(inputStream);
-                    EpisodeSaxParser parser = new EpisodeSaxParser();
+                    XmlSaxParser parser = new XmlSaxParser();
                     mEpisode = parser.getEpisode(gzis, context);
 
                     // Update database
