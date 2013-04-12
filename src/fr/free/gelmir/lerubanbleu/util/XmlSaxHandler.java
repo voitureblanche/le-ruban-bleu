@@ -32,60 +32,101 @@ public class XmlSaxHandler extends DefaultHandler
     private StringBuilder mStringBuilder;
     private Episode mEpisode;
     private String mImageName = null;
+    private int mTotalNb = -1;
+    private enum Action { ACTION_GET_EPISODE, ACTION_GET_TOTAL_NUMBER };
+    private Action mAction;
+
+
 
     @Override
     public void startDocument() throws SAXException {
         super.startDocument();
-        mEpisode = new Episode();
+
+        switch (mAction) {
+            case ACTION_GET_EPISODE:
+                mEpisode = new Episode();
+                break;
+        }
+
         mStringBuilder = new StringBuilder();
+
     }
+
+
 
     @Override
     public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
         super.startElement(uri, localName, qName, attributes);
-        if (localName.equalsIgnoreCase("episode"))
-        {
-            try {
-                int number = Integer.parseInt(attributes.getValue("number"));
-                mEpisode.setEpisodeNb(number);
-                Log.d("XmlSaxHandler", "episode number " + attributes.getValue("number") + " found!");
-            } catch(Exception e) {
-                throw new SAXException(e); // attribute content is not an integer
-            }
-        }
-        else if (localName.equalsIgnoreCase("image"))
-        {
-            mImageName = attributes.getValue("name");
+
+        switch (mAction) {
+
+            case ACTION_GET_EPISODE:
+                if (localName.equalsIgnoreCase("episode"))
+                {
+                    try {
+                        int number = Integer.parseInt(attributes.getValue("number"));
+                        mEpisode.setEpisodeNb(number);
+                        Log.d("XmlSaxHandler", "episode number " + Integer.toString(number) + " found!");
+                    } catch(Exception e) {
+                        throw new SAXException(e); // attribute content is not an integer
+                    }
+                }
+                else if (localName.equalsIgnoreCase("image"))
+                {
+                    mImageName = attributes.getValue("name");
+                }
+                break;
+
+
+            case ACTION_GET_TOTAL_NUMBER:
+                if (localName.equalsIgnoreCase("episodes"))
+                {
+                    try {
+                        mTotalNb = Integer.parseInt(attributes.getValue("totalNumber"));
+                        Log.d("XmlSaxHandler", "total number of " + Integer.toString(mTotalNb) + " episodes found!");
+                    } catch(Exception e) {
+                        throw new SAXException(e); // attribute content is not an integer
+                    }
+                }
+                break;
         }
     }
+
+
 
     @Override
     public void endElement(String uri, String localName, String name) throws SAXException {
         super.endElement(uri, localName, name);
-        if (localName.equalsIgnoreCase("image"))
-        {
-            // base64 decode
-            String imageBase64 = mStringBuilder.toString();
-            byte[] image = Base64.decode(imageBase64, Base64.DEFAULT);
 
-            // Create file
-            File file = new File(mContext.getFilesDir().toString() + "/" + mImageName);
-            Log.d("XmlSaxHandler", "image " + mImageName + " found!");
+        switch (mAction) {
 
-            // write file
-            try {
-                FileOutputStream fos = new FileOutputStream(file);
-                fos.write(image);
-                fos.flush();
-                fos.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            case ACTION_GET_EPISODE:
+                if (localName.equalsIgnoreCase("image"))
+                {
+                    // base64 decode
+                    String imageBase64 = mStringBuilder.toString();
+                    byte[] image = Base64.decode(imageBase64, Base64.DEFAULT);
 
-            // save file URI
-            mEpisode.setImageUri(Uri.fromFile(file));
-            Log.d("XmlSaxHandler", "image URI " + Uri.fromFile(file).toString());
+                    // Create file
+                    File file = new File(mContext.getFilesDir().toString() + "/" + mImageName);
+                    Log.d("XmlSaxHandler", "image " + mImageName + " found!");
 
+                    // write file
+                    try {
+                        FileOutputStream fos = new FileOutputStream(file);
+                        fos.write(image);
+                        fos.flush();
+                        fos.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
+                    // save file URI
+                    mEpisode.setImageUri(Uri.fromFile(file));
+                    Log.d("XmlSaxHandler", "image URI " + Uri.fromFile(file).toString());
+
+                }
+                break;
         }
 
         mStringBuilder.setLength(0);
@@ -102,6 +143,7 @@ public class XmlSaxHandler extends DefaultHandler
     {
         try {
             mContext = context;
+            mAction = Action.ACTION_GET_EPISODE;
 
             SAXParserFactory spf = SAXParserFactory.newInstance();
             SAXParser sp = spf.newSAXParser();
@@ -126,6 +168,7 @@ public class XmlSaxHandler extends DefaultHandler
     {
         try {
             mContext = context;
+            mAction = Action.ACTION_GET_TOTAL_NUMBER;
 
             SAXParserFactory spf = SAXParserFactory.newInstance();
             SAXParser sp = spf.newSAXParser();
@@ -142,7 +185,7 @@ public class XmlSaxHandler extends DefaultHandler
             Log.e("RSS Handler Parser Config", e.toString());
         }
 
-        return 0;
+        return mTotalNb;
     }
 
 }

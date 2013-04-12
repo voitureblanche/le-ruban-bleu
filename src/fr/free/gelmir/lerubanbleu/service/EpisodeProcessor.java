@@ -86,11 +86,6 @@ public class EpisodeProcessor
                     GZIPInputStream gzis = new GZIPInputStream(inputStream);
                     XmlSaxParser parser = new XmlSaxParser();
                     mEpisode = parser.getEpisode(gzis, context);
-
-                    // Update database
-                    //ContentValues contentValues = new ContentValues();
-                    //contentValues.put();
-                    //contentResolver.insert(EpisodeProvider.CONTENT_URI, contentValues);
                 }
             } catch (IOException e) {
                 e.printStackTrace();
