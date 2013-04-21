@@ -20,6 +20,29 @@ public class EpisodeTable
     public static final String COLUMN_STATUS        = "status";
     public static final String COLUMN_RESULT        = "result";
 
+    // Reason
+    public final static int ERROR_UNKNOWN = 1000;
+    public final static int ERROR_FILE_ERROR = 1001;
+    public final static int ERROR_UNHANDLED_HTTP_CODE = 1002;
+    public final static int ERROR_HTTP_DATA_ERROR = 1004;
+    public final static int ERROR_TOO_MANY_REDIRECTS = 1005;
+    public final static int ERROR_INSUFFICIENT_SPACE = 1006;
+    public final static int ERROR_DEVICE_NOT_FOUND = 1007;
+    public final static int ERROR_CANNOT_RESUME = 1008;
+    public final static int ERROR_FILE_ALREADY_EXISTS = 1009;
+    public final static int ERROR_BLOCKED = 1010;
+    public final static int PAUSED_WAITING_TO_RETRY = 1;
+    public final static int PAUSED_WAITING_FOR_NETWORK = 2;
+    public final static int PAUSED_QUEUED_FOR_WIFI = 3;
+    public final static int PAUSED_UNKNOWN = 4;
+
+    // Status
+    public final static int STATUS_PENDING = 1 << 0;
+    public final static int STATUS_RUNNING = 1 << 1;
+    public final static int STATUS_PAUSED = 1 << 2;
+    public final static int STATUS_SUCCESSFUL = 1 << 3;
+    public final static int STATUS_FAILED = 1 << 4;
+
     // EpisodeTable creation SQL statement
     private static final String SQL_TABLE_CREATE = "create table "
             + TABLE_NAME

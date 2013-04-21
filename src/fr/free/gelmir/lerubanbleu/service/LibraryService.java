@@ -22,8 +22,8 @@ public class LibraryService extends IntentService
     public final static String ACTION_CANCEL_ALL = "fr.free.gelmir.service.LibraryService.actionCancelAll";
 
     // Extras
-    public final static String EXTRA_EPISODE = "fr.free.gelmir.service.LibraryService.extraEpisode";
-    public final static String EXTRA_EPISODE_ID = "fr.free.gelmir.service.LibraryService.extraEpisodeId";
+    public final static String EXTRA_EPISODE_POJO = "fr.free.gelmir.service.LibraryService.extraEpisodePojo";
+    public final static String EXTRA_EPISODE_NB = "fr.free.gelmir.service.LibraryService.extraEpisodeNb";
     public final static String EXTRA_RESULT_RECEIVER = "fr.free.gelmir.service.LibraryService.extraResultReceiver";
     public final static String EXTRA_ORIGINAL_INTENT = "fr.free.gelmir.service.LibraryService.extraOriginalIntent";
 
@@ -32,6 +32,11 @@ public class LibraryService extends IntentService
     private ResultReceiver mResultReceiver;
     private Intent mIntent;
 
+    // Result
+    public enum Result {
+        OK,
+        KO
+    }
 
     public LibraryService() {
         super("LibraryService");
@@ -59,7 +64,7 @@ public class LibraryService extends IntentService
             Log.d("LibraryService", "ACTION_GET_EPISODE received");
 
             // Get intent extras
-            int episodeId = intent.getIntExtra(EXTRA_EPISODE_ID, -1);
+            int episodeId = intent.getIntExtra(EXTRA_EPISODE_NB, -1);
 
             // Get episode
             EpisodeProcessorCallback callback = makeEpisodeProcessorCallback();
@@ -90,13 +95,26 @@ public class LibraryService extends IntentService
     private EpisodeProcessorCallback makeEpisodeProcessorCallback() {
         EpisodeProcessorCallback callback = new EpisodeProcessorCallback() {
             @Override
-            public void send(int resultCode, Episode episode) {
+            public void send(Result result, Episode episode) {
 
-            // Send to result receiver
-            Bundle bundle = new Bundle();
-            bundle.putParcelable(EXTRA_ORIGINAL_INTENT, mIntent);
-            bundle.putParcelable(EXTRA_EPISODE, episode);
-            mResultReceiver.send(resultCode, bundle);
+                int resultCode = 0;
+
+                // Handle result
+                switch (result) {
+                    case OK:
+                        resultCode = 0;
+                        break;
+
+                    case KO:
+                        resultCode = -1;
+                        break;
+                }
+
+                // Send to result receiver
+                Bundle bundle = new Bundle();
+                bundle.putParcelable(EXTRA_ORIGINAL_INTENT, mIntent);
+                bundle.putParcelable(EXTRA_EPISODE_POJO, episode);
+                mResultReceiver.send(resultCode, bundle);
 
             }
         };

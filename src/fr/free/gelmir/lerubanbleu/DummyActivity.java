@@ -96,32 +96,25 @@ public class DummyActivity extends Activity {
             if (intent.getAction().equals(LibraryServiceHelper.GET_EPISODE_COMPLETE))
             {
                 Log.d("DummyActivity", "ACTION_GET_ARTICLE_COMPLETE intent received");
-                int status = intent.getIntExtra(LibraryServiceHelper.EXTRA_STATUS, 0);
+                int status = intent.getIntExtra(LibraryServiceHelper.EXTRA_STATUS, -1);
 
                 // Parse status
                 switch (status)
                 {
-                    case LibraryServiceHelper.STATUS_SUCCESSFUL:
-                        Log.d("DummyActivity", "STATUS_SUCCESSFUL");
-                        Episode episode = intent.getExtras().getParcelable(LibraryServiceHelper.EXTRA_EPISODE);
+                    case LibraryServiceHelper.STATUS_OK:
+                        Log.d("DummyActivity", "STATUS_OK");
+                        Episode episode = intent.getExtras().getParcelable(LibraryServiceHelper.EXTRA_EPISODE_POJO);
                         Uri episodeImageUri = episode.getImageUri();
 
                         // Display image
                         mImageView.setImageURI(episodeImageUri);
                         break;
 
-                    case LibraryServiceHelper.STATUS_FAILED:
-                        Log.d("DummyActivity", "STATUS_FAILED");
-                        /* switch ()
-                        {
-                            case 1:
-                                mTextView1.setText("failed :-(");
-                                break;
+                    case LibraryServiceHelper.STATUS_KO:
+                        Log.d("DummyActivity", "STATUS_KO");
 
-                            case 2:
-                                mTextView2.setText("failed :-(");
-                                break;
-                        } */
+                        // TODO Display error image
+
                         break;
                 }
             }

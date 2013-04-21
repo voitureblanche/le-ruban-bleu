@@ -32,11 +32,11 @@ public final class LibraryServiceHelper
     public final static String GET_LATEST_EPISODES_COMPLETE = "fr.free.gelmir.service.LibraryServiceHelper.getLatestEpisodesComplete";
 
     // Status
-    public final static int STATUS_FAILED     = 1;
-    public final static int STATUS_SUCCESSFUL = 2;
+    public final static int STATUS_OK = 1;
+    public final static int STATUS_KO = 2;
 
     // Extras
-    public final static String EXTRA_EPISODE    = "fr.free.gelmir.service.LibraryService.extraEpisode";
+    public final static String EXTRA_EPISODE_POJO = "fr.free.gelmir.service.LibraryService.extraEpisode";
     public final static String EXTRA_STATUS     = "fr.free.gelmir.service.LibraryService.extraStatus";
 
 
@@ -57,7 +57,7 @@ public final class LibraryServiceHelper
         return mLibraryServiceHelperInstance;
     }
 
-    public void getEpisode(Context context, int episodeId)
+    public void getEpisode(Context context, int episodeNb)
     {
         Log.d("LibraryServiceHelper", "Get episode");
 
@@ -74,7 +74,7 @@ public final class LibraryServiceHelper
         // Start service
         Intent intent = new Intent(context, LibraryService.class);
         intent.setAction(LibraryService.ACTION_GET_EPISODE);
-        intent.putExtra(LibraryService.EXTRA_EPISODE_ID, episodeId);
+        intent.putExtra(LibraryService.EXTRA_EPISODE_NB, episodeNb);
         intent.putExtra(LibraryService.EXTRA_RESULT_RECEIVER, resultReceiver);
         context.startService(intent);
     }
@@ -83,15 +83,23 @@ public final class LibraryServiceHelper
     {
         // Get original intent and retrieve the episode id
         Intent intent = resultData.getParcelable(LibraryService.EXTRA_ORIGINAL_INTENT);
-        int episodeId = intent.getIntExtra(LibraryService.EXTRA_EPISODE_ID, -1);
+        int episodeId = intent.getIntExtra(LibraryService.EXTRA_EPISODE_NB, -1);
 
         // Get episode
-        Episode episode = resultData.getParcelable(LibraryService.EXTRA_EPISODE);
+        Episode episode = resultData.getParcelable(LibraryService.EXTRA_EPISODE_POJO);
 
         // Broadcast result
         Intent broadcastIntent = new Intent(GET_EPISODE_COMPLETE);
-        broadcastIntent.putExtra(EXTRA_EPISODE, episode);
-        broadcastIntent.putExtra(EXTRA_STATUS, STATUS_SUCCESSFUL);
+        broadcastIntent.putExtra(EXTRA_EPISODE_POJO, episode);
+        switch (resultCode) {
+            case 0:
+                broadcastIntent.putExtra(EXTRA_STATUS, STATUS_OK);
+                break;
+
+            case -1:
+                broadcastIntent.putExtra(EXTRA_STATUS, STATUS_KO);
+                break;
+        }
         mApplicationContext.sendBroadcast(broadcastIntent);
     }
 

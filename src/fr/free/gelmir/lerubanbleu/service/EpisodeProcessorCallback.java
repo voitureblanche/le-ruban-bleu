@@ -9,6 +9,11 @@ package fr.free.gelmir.lerubanbleu.service;
  */
 public interface EpisodeProcessorCallback {
 
-    void send(int resultCode, Episode episode);
+    public enum Result {
+        OK,
+        KO
+    }
+
+    void send(Result result, Episode episode);
 
 }
