@@ -1,11 +1,13 @@
 package fr.free.gelmir.lerubanbleu.service;
 
 import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
+import android.util.Log;
 import fr.free.gelmir.lerubanbleu.provider.EpisodeProvider;
 import fr.free.gelmir.lerubanbleu.provider.EpisodeTable;
 import fr.free.gelmir.lerubanbleu.util.XmlSaxParser;
@@ -45,9 +47,12 @@ public class EpisodeProcessor
     {
         EpisodeProcessorCallback.Result result = EpisodeProcessorCallback.Result.OK;
 
-        // Query the episode
+        // Database variables
         ContentResolver contentResolver = mContext.getContentResolver();
         Uri episodeUri = Uri.withAppendedPath(EpisodeProvider.CONTENT_URI, Integer.toString(episodeNb));
+        Log.d("EpisodeProcessor", episodeUri.toString());
+
+        // Query the episode
         Cursor cursor = contentResolver.query(episodeUri, null, null, null, null);
 
         // Fetch data from database
@@ -59,10 +64,11 @@ public class EpisodeProcessor
                 // The episode has already been downloaded successfully
                 case EpisodeTable.STATUS_SUCCESSFUL:
 
+                    // Fill episode POJO
                     mEpisode = new Episode();
                     mEpisode.setEpisodeNb(episodeNb);
-                    Uri uri = Uri.parse(cursor.getString(cursor.getColumnIndex(EpisodeTable.COLUMN_IMAGE_URI)));
-                    mEpisode.setImageUri(uri);
+                    mEpisode.setImageUri(Uri.parse(cursor.getString(cursor.getColumnIndex(EpisodeTable.COLUMN_IMAGE_URI))));
+
                     break;
 
                 // The episode could not be downloaded
@@ -72,26 +78,14 @@ public class EpisodeProcessor
                     // Test network availability
                     if (isNetworkAvailable())
                     {
-                        // TODO update database with PENDING status
-                        Uri uri = Uri.withAppendedPath(EpisodeProvider., )
-
-                        // Download
-                        result = download(episodeNb, context);
-
-                        // TODO Update database with download result and reason
-                        if (result == EpisodeProcessorCallback.Result.OK) {
-
-                        }
-                        else {
-
-
-                        }
+                        result = download(episodeNb, context, contentResolver, episodeUri);
                     }
                     else {
+                        // TODO Update database with FAILED status and "no network" reason
+
+
                         mEpisode = null;
                         result = EpisodeProcessorCallback.Result.KO;
-
-                        // TODO Update database with FAILED status and "no network" reason
                     }
                     break;
 
@@ -107,17 +101,11 @@ public class EpisodeProcessor
         // The episode has never been downloaded yet
         else {
 
-            // Update database
-            //int columnIndex = cursor.getColumnIndex(EpisodeTable.COLUMN_STATUS);
-            //int status = cursor.getInt(columnIndex);
-            //int columnReason = cursor.getColumnIndex(EpisodeTable.COLUMN_RESULT);
-            //int reason = cursor.getInt(columnReason);
+            // Insert episode in the table
+            contentResolver.insert(episodeUri, new ContentValues());
 
             // Download episode
-            result = download(episodeNb, context);
-
-
-
+            result = download(episodeNb, context, contentResolver, episodeUri);
         }
 
         // Callback
@@ -151,13 +139,22 @@ public class EpisodeProcessor
         }
     }
 
-    private EpisodeProcessorCallback.Result download(int episodeNb, Context context)
+    private EpisodeProcessorCallback.Result download(int episodeNb, Context context, ContentResolver contentResolver, Uri episodeUri)
     {
+
         EpisodeProcessorCallback.Result result = EpisodeProcessorCallback.Result.OK;
+        HttpURLConnection connection = null;
+        ContentValues contentValues = new ContentValues();
+
 
         // HTTP request
-        HttpURLConnection connection = null;
         try {
+
+            // Update episode with PENDING status
+            contentValues.clear();
+            contentValues.put(EpisodeTable.COLUMN_STATUS, EpisodeTable.STATUS_PENDING);
+            contentResolver.update(episodeUri, contentValues);
+
             // Create URL
             URL url = urlCreate("http://gelmir.free.fr/lerubanbleu/get.php5?episode=" + URLEncoder.encode(Integer.toString(episodeNb), "UTF-8"));
 
@@ -169,6 +166,12 @@ public class EpisodeProcessor
             // Error!
             if (httpStatus / 100 != 2) {
                 result = EpisodeProcessorCallback.Result.KO;
+
+                // Update database
+                contentValues.clear();
+                contentValues.put(EpisodeTable.COLUMN_STATUS, EpisodeTable.STATUS_FAILED);
+                contentValues.put(EpisodeTable.COLUMN_RESULT, httpStatus);
+                contentResolver.update(episodeUri, contentValues);
             }
 
             // Handle result
@@ -178,7 +181,15 @@ public class EpisodeProcessor
                 XmlSaxParser parser = new XmlSaxParser();
                 mEpisode = parser.getEpisode(gzis, context);
                 result = EpisodeProcessorCallback.Result.OK;
+
+                // Update database
+                contentValues.clear();
+                contentValues.put(EpisodeTable.COLUMN_IMAGE_URI, mEpisode.getImageUri().toString());
+                contentValues.put(EpisodeTable.COLUMN_STATUS, EpisodeTable.STATUS_SUCCESSFUL);
+                contentResolver.update(episodeUri, contentValues);
+
             }
+
         } catch (IOException e) {
             e.printStackTrace();
         } finally {

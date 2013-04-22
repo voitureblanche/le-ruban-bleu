@@ -30,11 +30,11 @@ public class EpisodeProvider extends ContentProvider
 
     // URI Matcher
     private static final int EPISODES = 1;
-    private static final int EPISODE_ID = 2;
+    private static final int EPISODE_NB = 2;
     private static final UriMatcher sUriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
     static {
         sUriMatcher.addURI(AUTHORITY, BASE_PATH, EPISODES);
-        sUriMatcher.addURI(AUTHORITY, BASE_PATH + "/#", EPISODE_ID);
+        sUriMatcher.addURI(AUTHORITY, BASE_PATH + "/#", EPISODE_NB);
     }
 
     // Database open helper
@@ -62,7 +62,7 @@ public class EpisodeProvider extends ContentProvider
         switch (sUriMatcher.match(uri))
         {
             // Episode id = image id
-            case EPISODE_ID:
+            case EPISODE_NB:
                 queryBuilder.appendWhere(EpisodeTable.COLUMN_EPISODE_NB + "=" + uri.getLastPathSegment());
                 break;
 
@@ -92,7 +92,7 @@ public class EpisodeProvider extends ContentProvider
         {
             case EPISODES:
                 return EpisodeProvider.CONTENT_TYPE;
-            case EPISODE_ID:
+            case EPISODE_NB:
                 return EpisodeProvider.CONTENT_ITEM_TYPE;
             default:
                 throw new IllegalArgumentException("Unknown URI " + uri);
@@ -104,7 +104,7 @@ public class EpisodeProvider extends ContentProvider
     public Uri insert(Uri uri, ContentValues contentValues)
     {
         // Match URI
-        if (sUriMatcher.match(uri) != EPISODE_ID) {
+        if (sUriMatcher.match(uri) != EPISODE_NB) {
             throw new IllegalArgumentException("Unknown URI " + uri);
         }
 
@@ -155,7 +155,7 @@ public class EpisodeProvider extends ContentProvider
                 count = database.delete(EpisodeTable.TABLE_NAME, where, whereArgs);
                 break;
 
-            case EPISODE_ID:
+            case EPISODE_NB:
                 String rowId = uri.getLastPathSegment();
                 count = database.delete(EpisodeTable.TABLE_NAME, EpisodeTable.COLUMN_ID + " = " + rowId + (!TextUtils.isEmpty(where) ? " AND (" + where + ")" : ""), whereArgs);
                 break;
@@ -182,7 +182,7 @@ public class EpisodeProvider extends ContentProvider
                 count = database.update(EpisodeTable.TABLE_NAME, contentValues, where, whereArgs);
                 break;
 
-            case EPISODE_ID:
+            case EPISODE_NB:
                 String rowId = uri.getLastPathSegment();
                 count = database.update(EpisodeTable.TABLE_NAME, contentValues, EpisodeTable.COLUMN_ID + "=" + rowId + (!TextUtils.isEmpty(where) ? " AND (" + where + ')' : ""), whereArgs);
                 break;
