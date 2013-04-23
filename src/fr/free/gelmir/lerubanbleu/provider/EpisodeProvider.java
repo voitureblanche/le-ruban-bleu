@@ -7,6 +7,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
 import android.text.TextUtils;
+import android.util.Log;
 
 /**
  * Created with IntelliJ IDEA.
@@ -116,22 +117,26 @@ public class EpisodeProvider extends ContentProvider
             values = new ContentValues();
         }
 
-        // Make sure that the fields are all set ?
+        // Make sure that the fields are all set?
         if (!values.containsKey(EpisodeTable.COLUMN_IMAGE_URI)) {
+            Log.d("EpisodeProvider", "Missing IMAGE_URI!");
         }
 
         if (!values.containsKey(EpisodeTable.COLUMN_EPISODE_NB)) {
+            Log.d("EpisodeProvider", "Missing EPISODE_NB!");
         }
 
-        if (!values.containsKey(EpisodeTable.COLUMN_RESULT)) {
+        if (!values.containsKey(EpisodeTable.COLUMN_REASON)) {
+            Log.d("EpisodeProvider", "Missing REASON!");
         }
 
         if (!values.containsKey(EpisodeTable.COLUMN_STATUS)) {
+            Log.d("EpisodeProvider", "Missing STATUS!");
         }
 
         // Insert into database
         SQLiteDatabase database = mEpisodeDatabaseOpenHelper.getWritableDatabase();
-        long rowId = database.insert(EpisodeTable.TABLE_NAME, EpisodeTable.COLUMN_RESULT, values);
+        long rowId = database.insert(EpisodeTable.TABLE_NAME, EpisodeTable.COLUMN_REASON, values); // Second argument is an ugly hack from Android!
 
         // Notify and return
         if (rowId > 0) {

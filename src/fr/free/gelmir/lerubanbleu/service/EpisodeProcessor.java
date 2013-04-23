@@ -46,6 +46,7 @@ public class EpisodeProcessor
     public void queryEpisode(int episodeNb, EpisodeProcessorCallback callback, Context context)
     {
         EpisodeProcessorCallback.Result result = EpisodeProcessorCallback.Result.OK;
+        Cursor cursor;
 
         // Database variables
         ContentResolver contentResolver = mContext.getContentResolver();
@@ -53,16 +54,19 @@ public class EpisodeProcessor
         Log.d("EpisodeProcessor", episodeUri.toString());
 
         // Query the episode
-        Cursor cursor = contentResolver.query(episodeUri, null, null, null, null);
+        cursor = contentResolver.query(episodeUri, null, null, null, null);
 
         // Fetch data from database
         if (cursor.moveToFirst()) {
+
             // Read status
             int status = cursor.getInt(cursor.getColumnIndex(EpisodeTable.COLUMN_STATUS));
             switch (status)
             {
                 // The episode has already been downloaded successfully
                 case EpisodeTable.STATUS_SUCCESSFUL:
+
+                    Log.d("EpisodeProcessor", "Episode successfully found in the database!");
 
                     // Fill episode POJO
                     mEpisode = new Episode();
@@ -74,16 +78,25 @@ public class EpisodeProcessor
                 // The episode could not be downloaded
                 case EpisodeTable.STATUS_FAILED:
 
-                    // Relaunch download
+                    Log.d("EpisodeProcessor", "Episode with FAILED status found in the database!");
+
                     // Test network availability
                     if (isNetworkAvailable())
                     {
-                        result = download(episodeNb, context, contentResolver, episodeUri);
+                        // Relaunch download
+                        result = download(cursor, context);
                     }
                     else {
-                        // TODO Update database with FAILED status and "no network" reason
 
+                        // Update database with FAILED status and NO_NETWORK reason
+                        ContentValues contentValues = new ContentValues();
+                        contentValues.put(EpisodeTable.COLUMN_REASON, EpisodeTable.ERROR_NO_NETWORK);
+                        contentValues.put(EpisodeTable.COLUMN_STATUS, EpisodeTable.STATUS_FAILED);
+                        int id = cursor.getInt(cursor.getColumnIndex(EpisodeTable.COLUMN_ID));
+                        String[] whereArgs = { Integer.toString(id) };
+                        contentResolver.update(episodeUri, contentValues, EpisodeTable.COLUMN_ID, whereArgs);
 
+                        // Returned parameters
                         mEpisode = null;
                         result = EpisodeProcessorCallback.Result.KO;
                     }
@@ -91,6 +104,8 @@ public class EpisodeProcessor
 
                 // Should never happen
                 default:
+
+                    // Returned parameters
                     mEpisode = null;
                     result = EpisodeProcessorCallback.Result.KO;
                     break;
@@ -98,14 +113,20 @@ public class EpisodeProcessor
 
         }
 
-        // The episode has never been downloaded yet
+        // The episode has not been found in the table
         else {
+            Log.d("EpisodeProcessor", "No episode found in the database!");
 
             // Insert episode in the table
-            contentResolver.insert(episodeUri, new ContentValues());
+            ContentValues contentValues = new ContentValues();
+            contentValues.put(EpisodeTable.COLUMN_EPISODE_NB, episodeNb);
+            contentResolver.insert(episodeUri, contentValues);
+
+            // Get cursor
+            cursor = contentResolver.query(episodeUri, null, null, null, null);
 
             // Download episode
-            result = download(episodeNb, context, contentResolver, episodeUri);
+            result = download(cursor, context);
         }
 
         // Callback
@@ -139,21 +160,26 @@ public class EpisodeProcessor
         }
     }
 
-    private EpisodeProcessorCallback.Result download(int episodeNb, Context context, ContentResolver contentResolver, Uri episodeUri)
+    private EpisodeProcessorCallback.Result download(Cursor cursor, Context context)
     {
+        // Database variables
+        int id = cursor.getInt(cursor.getColumnIndex(EpisodeTable.COLUMN_ID));
+        String[] whereArgs = { Integer.toString(id) };
+        int episodeNb = cursor.getInt(cursor.getColumnIndex(EpisodeTable.COLUMN_EPISODE_NB));
+        ContentResolver contentResolver = context.getContentResolver();
+        Uri episodeUri = Uri.withAppendedPath(EpisodeProvider.CONTENT_URI, Integer.toString(episodeNb));
 
         EpisodeProcessorCallback.Result result = EpisodeProcessorCallback.Result.OK;
         HttpURLConnection connection = null;
         ContentValues contentValues = new ContentValues();
 
-
         // HTTP request
         try {
 
-            // Update episode with PENDING status
+            // Update database with RUNNING status
             contentValues.clear();
-            contentValues.put(EpisodeTable.COLUMN_STATUS, EpisodeTable.STATUS_PENDING);
-            contentResolver.update(episodeUri, contentValues);
+            contentValues.put(EpisodeTable.COLUMN_STATUS, EpisodeTable.STATUS_RUNNING);
+            contentResolver.update(episodeUri, contentValues, EpisodeTable.COLUMN_ID, whereArgs);
 
             // Create URL
             URL url = urlCreate("http://gelmir.free.fr/lerubanbleu/get.php5?episode=" + URLEncoder.encode(Integer.toString(episodeNb), "UTF-8"));
@@ -165,17 +191,21 @@ public class EpisodeProcessor
 
             // Error!
             if (httpStatus / 100 != 2) {
-                result = EpisodeProcessorCallback.Result.KO;
+                Log.d("EpisodeProcessor", "Download failed!");
 
                 // Update database
                 contentValues.clear();
                 contentValues.put(EpisodeTable.COLUMN_STATUS, EpisodeTable.STATUS_FAILED);
-                contentValues.put(EpisodeTable.COLUMN_RESULT, httpStatus);
-                contentResolver.update(episodeUri, contentValues);
+                contentValues.put(EpisodeTable.COLUMN_REASON, httpStatus);
+                contentResolver.update(episodeUri, contentValues, EpisodeTable.COLUMN_ID, whereArgs);
+
+                result = EpisodeProcessorCallback.Result.KO;
             }
 
             // Handle result
             else {
+                Log.d("EpisodeProcessor", "Download successful!");
+
                 // Parse XML
                 GZIPInputStream gzis = new GZIPInputStream(inputStream);
                 XmlSaxParser parser = new XmlSaxParser();
@@ -186,8 +216,8 @@ public class EpisodeProcessor
                 contentValues.clear();
                 contentValues.put(EpisodeTable.COLUMN_IMAGE_URI, mEpisode.getImageUri().toString());
                 contentValues.put(EpisodeTable.COLUMN_STATUS, EpisodeTable.STATUS_SUCCESSFUL);
-                contentResolver.update(episodeUri, contentValues);
-
+                contentValues.put(EpisodeTable.COLUMN_REASON, httpStatus);
+                contentResolver.update(episodeUri, contentValues, EpisodeTable.COLUMN_ID, whereArgs);
             }
 
         } catch (IOException e) {

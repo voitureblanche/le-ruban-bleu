@@ -17,8 +17,8 @@ public class EpisodeTable
     public static final String COLUMN_ID            = "_id";
     public static final String COLUMN_EPISODE_NB    = "episode_nb";
     public static final String COLUMN_IMAGE_URI     = "image_uri";
+    public static final String COLUMN_REASON        = "result";
     public static final String COLUMN_STATUS        = "status";
-    public static final String COLUMN_RESULT        = "result";
 
     // Reason
     public final static int ERROR_UNKNOWN = 1000;
@@ -31,17 +31,12 @@ public class EpisodeTable
     public final static int ERROR_CANNOT_RESUME = 1008;
     public final static int ERROR_FILE_ALREADY_EXISTS = 1009;
     public final static int ERROR_BLOCKED = 1010;
-    public final static int PAUSED_WAITING_TO_RETRY = 1;
-    public final static int PAUSED_WAITING_FOR_NETWORK = 2;
-    public final static int PAUSED_QUEUED_FOR_WIFI = 3;
-    public final static int PAUSED_UNKNOWN = 4;
+    public final static int ERROR_NO_NETWORK = 1;
 
     // Status
-    public final static int STATUS_PENDING = 1 << 0;
-    public final static int STATUS_RUNNING = 1 << 1;
-    public final static int STATUS_PAUSED = 1 << 2;
-    public final static int STATUS_SUCCESSFUL = 1 << 3;
-    public final static int STATUS_FAILED = 1 << 4;
+    public final static int STATUS_RUNNING = 1 << 0;
+    public final static int STATUS_SUCCESSFUL = 1 << 1;
+    public final static int STATUS_FAILED = 1 << 2;
 
     // EpisodeTable creation SQL statement
     private static final String SQL_TABLE_CREATE = "create table "
@@ -49,9 +44,9 @@ public class EpisodeTable
             + "("
             + COLUMN_ID + " integer primary key autoincrement, "
             + COLUMN_EPISODE_NB + " integer not null, "
-            + COLUMN_IMAGE_URI + " text not null, "
-            + COLUMN_STATUS + " text, "
-            + COLUMN_RESULT + " text "
+            + COLUMN_IMAGE_URI + " text, "
+            + COLUMN_REASON + " integer, "
+            + COLUMN_STATUS + " integer "
             + ");";
 
     // Create table
