@@ -39,14 +39,14 @@ public class EpisodeTable
     public final static int STATUS_FAILED = 1 << 2;
 
     // EpisodeTable creation SQL statement
-    private static final String SQL_TABLE_CREATE = "create table "
+    private static final String SQL_TABLE_CREATE = "CREATE TABLE "
             + TABLE_NAME
             + "("
-            + COLUMN_ID + " integer primary key autoincrement, "
-            + COLUMN_EPISODE_NB + " integer not null, "
-            + COLUMN_IMAGE_URI + " text, "
-            + COLUMN_REASON + " integer, "
-            + COLUMN_STATUS + " integer "
+            + COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
+            + COLUMN_EPISODE_NB + " INTEGER NOT NULL, "
+            + COLUMN_IMAGE_URI + " TEXT, "
+            + COLUMN_REASON + " INTEGER, "
+            + COLUMN_STATUS + " INTEGER "
             + ");";
 
     // Create table

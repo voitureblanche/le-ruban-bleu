@@ -162,6 +162,8 @@ public class EpisodeProcessor
 
     private EpisodeProcessorCallback.Result download(Cursor cursor, Context context)
     {
+        cursor.moveToFirst();
+
         // Database variables
         int id = cursor.getInt(cursor.getColumnIndex(EpisodeTable.COLUMN_ID));
         String[] whereArgs = { Integer.toString(id) };
