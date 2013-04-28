@@ -188,8 +188,8 @@ public class EpisodeProvider extends ContentProvider
                 break;
 
             case EPISODE_NB:
-                String rowId = uri.getLastPathSegment();
-                count = database.update(EpisodeTable.TABLE_NAME, contentValues, EpisodeTable.COLUMN_ID + "=" + rowId + (!TextUtils.isEmpty(where) ? " AND (" + where + ')' : ""), whereArgs);
+                // String rowId = uri.getLastPathSegment();
+                count = database.update(EpisodeTable.TABLE_NAME, contentValues, where, whereArgs);
                 break;
 
             default:

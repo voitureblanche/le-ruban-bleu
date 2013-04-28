@@ -92,9 +92,10 @@ public class EpisodeProcessor
                         ContentValues contentValues = new ContentValues();
                         contentValues.put(EpisodeTable.COLUMN_REASON, EpisodeTable.ERROR_NO_NETWORK);
                         contentValues.put(EpisodeTable.COLUMN_STATUS, EpisodeTable.STATUS_FAILED);
+                        String where = EpisodeTable.COLUMN_ID + " = ? ";
                         int id = cursor.getInt(cursor.getColumnIndex(EpisodeTable.COLUMN_ID));
                         String[] whereArgs = { Integer.toString(id) };
-                        contentResolver.update(episodeUri, contentValues, EpisodeTable.COLUMN_ID, whereArgs);
+                        contentResolver.update(episodeUri, contentValues, where, whereArgs);
 
                         // Returned parameters
                         mEpisode = null;
@@ -165,6 +166,7 @@ public class EpisodeProcessor
         cursor.moveToFirst();
 
         // Database variables
+        String where = EpisodeTable.COLUMN_ID + " = ? ";
         int id = cursor.getInt(cursor.getColumnIndex(EpisodeTable.COLUMN_ID));
         String[] whereArgs = { Integer.toString(id) };
         int episodeNb = cursor.getInt(cursor.getColumnIndex(EpisodeTable.COLUMN_EPISODE_NB));
@@ -181,7 +183,7 @@ public class EpisodeProcessor
             // Update database with RUNNING status
             contentValues.clear();
             contentValues.put(EpisodeTable.COLUMN_STATUS, EpisodeTable.STATUS_RUNNING);
-            contentResolver.update(episodeUri, contentValues, EpisodeTable.COLUMN_ID, whereArgs);
+            contentResolver.update(episodeUri, contentValues, where, whereArgs);
 
             // Create URL
             URL url = urlCreate("http://gelmir.free.fr/lerubanbleu/get.php5?episode=" + URLEncoder.encode(Integer.toString(episodeNb), "UTF-8"));
@@ -199,7 +201,7 @@ public class EpisodeProcessor
                 contentValues.clear();
                 contentValues.put(EpisodeTable.COLUMN_STATUS, EpisodeTable.STATUS_FAILED);
                 contentValues.put(EpisodeTable.COLUMN_REASON, httpStatus);
-                contentResolver.update(episodeUri, contentValues, EpisodeTable.COLUMN_ID, whereArgs);
+                contentResolver.update(episodeUri, contentValues, where, whereArgs);
 
                 result = EpisodeProcessorCallback.Result.KO;
             }
@@ -219,7 +221,7 @@ public class EpisodeProcessor
                 contentValues.put(EpisodeTable.COLUMN_IMAGE_URI, mEpisode.getImageUri().toString());
                 contentValues.put(EpisodeTable.COLUMN_STATUS, EpisodeTable.STATUS_SUCCESSFUL);
                 contentValues.put(EpisodeTable.COLUMN_REASON, httpStatus);
-                contentResolver.update(episodeUri, contentValues, EpisodeTable.COLUMN_ID, whereArgs);
+                contentResolver.update(episodeUri, contentValues, where, whereArgs);
             }
 
         } catch (IOException e) {
