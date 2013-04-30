@@ -173,7 +173,7 @@ public class EpisodeProcessor
         ContentResolver contentResolver = context.getContentResolver();
         Uri episodeUri = Uri.withAppendedPath(EpisodeProvider.CONTENT_URI, Integer.toString(episodeNb));
 
-        EpisodeProcessorCallback.Result result = EpisodeProcessorCallback.Result.OK;
+        EpisodeProcessorCallback.Result result = EpisodeProcessorCallback.Result.KO;
         HttpURLConnection connection = null;
         ContentValues contentValues = new ContentValues();
 
@@ -192,6 +192,7 @@ public class EpisodeProcessor
             connection = (HttpURLConnection) url.openConnection();  // this does no network IO
             InputStream inputStream = connection.getInputStream();  // this opens a connection, then sends GET & headers
             int httpStatus = connection.getResponseCode();
+            Log.d("EpisodeProcessor", "http status = " + Integer.toString(httpStatus));
 
             // Error!
             if (httpStatus / 100 != 2) {
@@ -225,6 +226,16 @@ public class EpisodeProcessor
             }
 
         } catch (IOException e) {
+            Log.d("EpisodeProcessor", "exception!");
+
+            // Update database
+            contentValues.clear();
+            contentValues.put(EpisodeTable.COLUMN_STATUS, EpisodeTable.STATUS_FAILED);
+            contentValues.put(EpisodeTable.COLUMN_REASON, EpisodeTable.ERROR_UNKNOWN);
+            contentResolver.update(episodeUri, contentValues, where, whereArgs);
+
+            result = EpisodeProcessorCallback.Result.KO;
+
             e.printStackTrace();
         } finally {
             if (connection != null) {
