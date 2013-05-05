@@ -4,7 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.ResultReceiver;
 import android.util.Log;
-import fr.free.gelmir.lerubanbleu.util.IntentService;
+import fr.free.gelmir.lerubanbleu.util.CustomIntentService;
 
 /**
  * Created with IntelliJ IDEA.
@@ -13,12 +13,10 @@ import fr.free.gelmir.lerubanbleu.util.IntentService;
  * Time: 21:45
  * To change this template use File | Settings | File Templates.
  */
-public class LibraryService extends IntentService
+public class LibraryService extends CustomIntentService
 {
     // Actions
     public final static String ACTION_GET_EPISODE = "fr.free.gelmir.service.LibraryService.actionGetEpisode";
-    public final static String ACTION_GET_TOTAL_NUMBER = "fr.free.gelmir.service.LibraryService.actionGetTotalNumber";
-    public final static String ACTION_GET_LATEST_EPISODES = "fr.free.gelmir.service.LibraryService.actionGetLatestEpisodes";
     public final static String ACTION_CANCEL_ALL = "fr.free.gelmir.service.LibraryService.actionCancelAll";
 
     // Extras
@@ -69,13 +67,6 @@ public class LibraryService extends IntentService
             // Get episode
             EpisodeProcessorCallback callback = makeEpisodeProcessorCallback();
             mEpisodeProcessor.queryEpisode(episodeId, callback, this);
-
-        }
-
-        // Get total number
-        //-------------------
-        else if (intent.getAction().equals(ACTION_GET_TOTAL_NUMBER)) {
-
         }
 
         // Cancel all actions

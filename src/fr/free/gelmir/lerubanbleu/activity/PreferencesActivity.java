@@ -10,7 +10,7 @@ import android.os.Bundle;
  * Time: 12:38
  * To change this template use File | Settings | File Templates.
  */
-public class SettingsActivity extends Activity {
+public class PreferencesActivity extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
     }

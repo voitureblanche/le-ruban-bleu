@@ -28,16 +28,14 @@ public final class LibraryServiceHelper
 
     // Intent
     public final static String GET_EPISODE_COMPLETE         = "fr.free.gelmir.service.LibraryServiceHelper.getEpisodeComplete";
-    public final static String GET_TOTAL_NUMBER_COMPLETE    = "fr.free.gelmir.service.LibraryServiceHelper.getTotalNumberComplete";
-    public final static String GET_LATEST_EPISODES_COMPLETE = "fr.free.gelmir.service.LibraryServiceHelper.getLatestEpisodesComplete";
 
     // Status
     public final static int STATUS_OK = 1;
     public final static int STATUS_KO = 2;
 
     // Extras
-    public final static String EXTRA_EPISODE_POJO = "fr.free.gelmir.service.LibraryService.extraEpisode";
-    public final static String EXTRA_STATUS     = "fr.free.gelmir.service.LibraryService.extraStatus";
+    public final static String EXTRA_EPISODE_POJO = "fr.free.gelmir.service.LibraryService.extraEpisodePojo";
+    public final static String EXTRA_STATUS       = "fr.free.gelmir.service.LibraryService.extraStatus";
 
 
     // Constructor
@@ -57,6 +55,7 @@ public final class LibraryServiceHelper
         return mLibraryServiceHelperInstance;
     }
 
+    // Get an episode
     public void getEpisode(Context context, int episodeNb)
     {
         Log.d("LibraryServiceHelper", "Get episode");
@@ -67,7 +66,7 @@ public final class LibraryServiceHelper
         ResultReceiver resultReceiver = new ResultReceiver(null){
             @Override
             protected void onReceiveResult(int resultCode, Bundle resultData) {
-                handleGetEpisodeResponse(resultCode, resultData);
+                handleResponse(resultCode, resultData);
             }
         };
 
@@ -79,54 +78,38 @@ public final class LibraryServiceHelper
         context.startService(intent);
     }
 
-    private void handleGetEpisodeResponse(int resultCode, Bundle resultData)
+    // Cancel all actions
+    public void cancelAllActions() {
+
+    }
+
+    // Handle the response
+    private void handleResponse(int resultCode, Bundle resultData)
     {
         // Get original intent and retrieve the episode id
         Intent intent = resultData.getParcelable(LibraryService.EXTRA_ORIGINAL_INTENT);
-        int episodeId = intent.getIntExtra(LibraryService.EXTRA_EPISODE_NB, -1);
+        String action = intent.getAction();
 
-        // Get episode
-        Episode episode = resultData.getParcelable(LibraryService.EXTRA_EPISODE_POJO);
+        if (action == LibraryService.ACTION_GET_EPISODE) {
+            int episodeId = intent.getIntExtra(LibraryService.EXTRA_EPISODE_NB, -1);
 
-        // Broadcast result
-        Intent broadcastIntent = new Intent(GET_EPISODE_COMPLETE);
-        broadcastIntent.putExtra(EXTRA_EPISODE_POJO, episode);
-        switch (resultCode) {
-            case 0:
-                broadcastIntent.putExtra(EXTRA_STATUS, STATUS_OK);
-                break;
+            // Get episode
+            Episode episode = resultData.getParcelable(LibraryService.EXTRA_EPISODE_POJO);
 
-            case -1:
-                broadcastIntent.putExtra(EXTRA_STATUS, STATUS_KO);
-                break;
-        }
-        mApplicationContext.sendBroadcast(broadcastIntent);
-    }
+            // Broadcast result
+            Intent broadcastIntent = new Intent(GET_EPISODE_COMPLETE);
+            broadcastIntent.putExtra(EXTRA_EPISODE_POJO, episode);
+            switch (resultCode) {
+                case 0:
+                    broadcastIntent.putExtra(EXTRA_STATUS, STATUS_OK);
+                    break;
 
-    public void getLatestEpisodes(Context context)
-    {
-        Intent intent = new Intent(context, LibraryService.class);
-        intent.setAction(LibraryService.ACTION_GET_LATEST_EPISODES);
-        context.startService(intent);
-    }
-
-    public void getTotalNumber(Context context)
-    {
-        // Allocate result receiver
-        ResultReceiver resultReceiver = new ResultReceiver(null){
-            @Override
-            protected void onReceiveResult(int resultCode, Bundle resultData) {
-                handleGetEpisodeResponse(resultCode, resultData);
+                case -1:
+                    broadcastIntent.putExtra(EXTRA_STATUS, STATUS_KO);
+                    break;
             }
-        };
-
-        // Start service
-        Intent intent = new Intent(context, LibraryService.class);
-        intent.setAction(LibraryService.ACTION_GET_TOTAL_NUMBER);
-        intent.putExtra(LibraryService.EXTRA_RESULT_RECEIVER, resultReceiver);
-        context.startService(intent);
+            mApplicationContext.sendBroadcast(broadcastIntent);
+        }
     }
-
-
 
 }

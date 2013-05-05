@@ -22,11 +22,11 @@ public class XmlSaxParser
 
     }
 
-    public int getTotalNumber(InputStream is, Context context) {
+    public int getTotalNumber(InputStream is) {
 
         // Allocate an handler and get total number of episodes
         XmlSaxHandler xmlSaxHandler = new XmlSaxHandler();
-        return xmlSaxHandler.getTotalNumber(is, context);
+        return xmlSaxHandler.getTotalNumber(is);
 
     }
 }

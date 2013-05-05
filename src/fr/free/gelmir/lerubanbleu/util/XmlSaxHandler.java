@@ -164,10 +164,9 @@ public class XmlSaxHandler extends DefaultHandler
     }
 
 
-    public int getTotalNumber(InputStream is, Context context)
+    public int getTotalNumber(InputStream is)
     {
         try {
-            mContext = context;
             mAction = Action.ACTION_GET_TOTAL_NUMBER;
 
             SAXParserFactory spf = SAXParserFactory.newInstance();

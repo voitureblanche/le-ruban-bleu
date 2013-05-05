@@ -144,7 +144,7 @@ public class EpisodeProcessor
         /** Getting active network interface  to get the network's status */
         NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
 
-        if (networkInfo !=null && networkInfo.isAvailable()) {
+        if (networkInfo != null && networkInfo.isAvailable()) {
             available = true;
         }
 
