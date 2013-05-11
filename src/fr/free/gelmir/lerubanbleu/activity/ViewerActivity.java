@@ -8,11 +8,15 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.util.Log;
 import android.view.Window;
 import android.view.WindowManager;
+import fr.free.gelmir.lerubanbleu.LeRubanBleuApplication;
 import fr.free.gelmir.lerubanbleu.R;
+import fr.free.gelmir.lerubanbleu.fragment.EpisodeFragment;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class ViewerActivity extends FragmentActivity
 {
@@ -25,28 +29,23 @@ public class ViewerActivity extends FragmentActivity
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        setContentView(R.layout.main);
+        setContentView(R.layout.ac_viewer);
+
+        // Get last current page and display it
+        LeRubanBleuApplication application = LeRubanBleuApplication.getInstance();
+        int lastEpisode = application.getUserLatestEpisode();
+        int totalNbEpisodes = application.getTotalNbEpisodes();
+        Log.d("ViewerActivity", "latest episode " + Integer.toString(lastEpisode));
+        Log.d("ViewerActivity", "total number of episodes " + Integer.toString(totalNbEpisodes));
 
         // FragmentPagerAdapter
-        MyFragmentPagerAdapter fragmentPagerAdapter = new MyFragmentPagerAdapter(getSupportFragmentManager());
-
-        // Restore latest episode or start with first one
-        // EpisodeFragment episodeFragment1 = EpisodeFragment.newInstance(1, this);
-        // fragmentPagerAdapter.addFragment(episodeFragment1);
+        EpisodeFragmentPagerAdapter fragmentPagerAdapter = new EpisodeFragmentPagerAdapter(getSupportFragmentManager(), lastEpisode, totalNbEpisodes);
 
         // Viewpager
         mViewPager = (ViewPager) findViewById(R.id.viewpager);
+        mViewPager.setOffscreenPageLimit(2);
         mViewPager.setAdapter(fragmentPagerAdapter);
-        mViewPager.setCurrentItem(0);
-
-        // FragmentManager
-        FragmentManager fragmentManager = getSupportFragmentManager();
-
-        // Restore user preferences
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-
-        // Get last current page and display it
-
+        mViewPager.setCurrentItem(lastEpisode);
     }
 
 
@@ -65,15 +64,9 @@ public class ViewerActivity extends FragmentActivity
     protected void onStop() {
         super.onStop();
 
-        // Setup an editor on user preferences
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-
-        // Put current page
-        editor.putLong("currentPage", 10);
-
-        // Commit the edits!
-        editor.commit();
+        // Save episode
+        LeRubanBleuApplication application = LeRubanBleuApplication.getInstance();
+        application.setUserLatestEpisode(mViewPager.getCurrentItem());
 
     }
 
@@ -85,29 +78,54 @@ public class ViewerActivity extends FragmentActivity
     /**
      * Custom fragment pager adapter to populate fragments inside of a ViewPager
      */
-    private class MyFragmentPagerAdapter extends FragmentPagerAdapter
+    private class EpisodeFragmentPagerAdapter extends FragmentPagerAdapter
     {
-        private final ArrayList<Fragment> fragments = new ArrayList<Fragment>();
+        private HashMap<Integer, EpisodeFragment> mHashMap = new HashMap<Integer, EpisodeFragment>();
+        private int mTotalNbEpisodes;
 
-        public MyFragmentPagerAdapter(FragmentManager fragmentManager) {
+        public EpisodeFragmentPagerAdapter(FragmentManager fragmentManager, int initialEpisode, int totalNbEpisodes) {
             super(fragmentManager);
+            mTotalNbEpisodes = totalNbEpisodes;
+            allocateFragments(initialEpisode);
         }
 
         @Override
-        public Fragment getItem(int i) {
-            return fragments.get(i);
+        public EpisodeFragment getItem(int i) {
+            allocateFragments(i);
+            return mHashMap.get(i);
         }
 
         @Override
         public int getCount() {
-            return fragments.size();
+            return mHashMap.size();
         }
 
-        public void addFragment(Fragment fragment) {
-            fragments.add(fragment);
-            notifyDataSetChanged();
+        // Allocate fragments
+        private void allocateFragments(int episodeNb)
+        {
+            // Allocate episode number fragment
+            if (mHashMap.get(episodeNb) == null) {
+                mHashMap.put(episodeNb, EpisodeFragment.newInstance(episodeNb));
+            }
+
+            // Allocate preceding fragments
+            for (int i=episodeNb-3; i<episodeNb; i++) {
+                if (i >= 0) {
+                    if (mHashMap.get(i) == null) {
+                        mHashMap.put(i, EpisodeFragment.newInstance(i));
+                    }
+                }
+            }
+
+            // Allocate following fragments
+            for (int i=episodeNb+1; i<episodeNb+4; i++) {
+                if (i <= mTotalNbEpisodes) {
+                    if (mHashMap.get(i) == null) {
+                        mHashMap.put(i, EpisodeFragment.newInstance(i));
+                    }
+                }
+            }
         }
     }
-
 
 }

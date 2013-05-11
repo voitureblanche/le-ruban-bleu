@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <EditTextPreference
+        android:key="@string/prefs_total_nb_episodes_key"
+        android:defaultValue="@string/prefs_total_nb_episodes_default"/>
+
+    <EditTextPreference
+        android:key="@string/prefs_user_language_key"
+        android:defaultValue="@string/prefs_user_language_default"/>
+
+    <EditTextPreference
+        android:key="@string/prefs_user_latest_episode_key"
+        android:defaultValue="@string/prefs_user_latest_episode_default"/>
+
+</PreferenceScreen>
+

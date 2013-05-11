@@ -34,8 +34,8 @@ public final class LibraryServiceHelper
     public final static int STATUS_KO = 2;
 
     // Extras
-    public final static String EXTRA_EPISODE_POJO = "fr.free.gelmir.service.LibraryService.extraEpisodePojo";
-    public final static String EXTRA_STATUS       = "fr.free.gelmir.service.LibraryService.extraStatus";
+    public final static String EXTRA_EPISODE_POJO = "fr.free.gelmir.service.LibraryServiceHelper.extraEpisodePojo";
+    public final static String EXTRA_STATUS       = "fr.free.gelmir.service.LibraryServiceHelper.extraStatus";
 
 
     // Constructor

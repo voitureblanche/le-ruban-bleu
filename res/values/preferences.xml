@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="prefs_total_nb_episodes_key">totalNbEpisodes</string>
+    <string name="prefs_total_nb_episodes_default">0</string>
+
+    <string name="prefs_user_latest_episode_key">userLatestEpisode</string>
+    <string name="prefs_user_latest_episode_default">0</string>
+
+    <string name="prefs_user_language_key">userLanguage</string>
+    <string name="prefs_user_language_default">fr_FR</string>
+</resources>

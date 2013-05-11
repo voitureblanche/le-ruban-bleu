@@ -92,11 +92,11 @@ public class LibraryService extends CustomIntentService
 
                 // Handle result
                 switch (result) {
-                    case OK:
+                    case EPISODE_PROCESSOR_OK:
                         resultCode = 0;
                         break;
 
-                    case KO:
+                    case EPISODE_PROCESSOR_KO:
                         resultCode = -1;
                         break;
                 }

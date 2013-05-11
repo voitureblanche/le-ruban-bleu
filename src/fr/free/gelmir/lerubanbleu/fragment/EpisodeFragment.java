@@ -11,6 +11,9 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.TextView;
+import fr.free.gelmir.lerubanbleu.R;
 import fr.free.gelmir.lerubanbleu.service.Episode;
 import fr.free.gelmir.lerubanbleu.service.LibraryServiceHelper;
 
@@ -23,28 +26,27 @@ import fr.free.gelmir.lerubanbleu.service.LibraryServiceHelper;
  */
 public class EpisodeFragment extends Fragment {
 
-    private static final String EPISODE_NUMBER = "fr.free.gelmir.expandingviewpager.episodeNumber";
+    private static final String EPISODE_NUMBER = "fr.free.gelmir.fragment.episodeFragment.episodeNumber";
 
-
-    Context mContext;
     LibraryServiceHelper mLibraryServiceHelper;
 
-
     public EpisodeFragment() {
-
     }
 
     public static final EpisodeFragment newInstance(int episodeNb)
     {
-        Log.d("EpisodeFragment", "new fragment " + Integer.toString(episodeNb) + " instantiated");
+        Log.d("EpisodeFragment", "fragment " + Integer.toString(episodeNb) + " instantiated");
         EpisodeFragment fragment = new EpisodeFragment();
         Bundle bundle = new Bundle(1);
         bundle.putInt(EPISODE_NUMBER, episodeNb);
         fragment.setArguments(bundle);
-
         return fragment;
     }
 
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);    //To change body of overridden methods use File | Settings | File Templates.
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -62,36 +64,48 @@ public class EpisodeFragment extends Fragment {
         getActivity().registerReceiver(mLibraryServiceHelperReceiver, intentFilter);
 
         // Get episode
-        mLibraryServiceHelper.getEpisode(mContext, episodeNb);
+        //mLibraryServiceHelper.getEpisode(mContext, episodeNb);
 
-        return null;
+        // Inflate view
+        View view = inflater.inflate(R.layout.fr_episode, container, false);
+        TextView textView = (TextView) view.findViewById(R.id.episodeNb);
+        textView.setText(Integer.toString(episodeNb));
+        ImageView imageView = (ImageView) view.findViewById(R.id.watch);
+        imageView.setImageResource(R.drawable.watch);
+
+        return view;
     }
 
 
     @Override
     public void onPause() {
-        super.onPause();    //To change body of overridden methods use File | Settings | File Templates.
+        super.onPause();
+        Bundle bundle = this.getArguments();
+        int episodeNb = bundle.getInt(EPISODE_NUMBER);
+        Log.d("EpisodeFragment", "fragment " + Integer.toString(episodeNb) + " paused");
 
-        // Unregister the receiver?
+        // Unregister the receiver
+        getActivity().unregisterReceiver(mLibraryServiceHelperReceiver);
     }
 
 
     @Override
     public void onResume() {
-        super.onResume();    //To change body of overridden methods use File | Settings | File Templates.
+        super.onResume();
+        Bundle bundle = this.getArguments();
+        int episodeNb = bundle.getInt(EPISODE_NUMBER);
+        Log.d("EpisodeFragment", "fragment " + Integer.toString(episodeNb) + " resumed");
 
-        // Relaunch episode get
-
+        // Relaunch episode get?
     }
 
 
     @Override
     public void onDestroy() {
-        super.onDestroy();    //To change body of overridden methods use File | Settings | File Templates.
-
-        // Unregister the receiver
-        mContext.unregisterReceiver(mLibraryServiceHelperReceiver);
-
+        super.onDestroy();
+        Bundle bundle = this.getArguments();
+        int episodeNb = bundle.getInt(EPISODE_NUMBER);
+        Log.d("EpisodeFragment", "fragment " + Integer.toString(episodeNb) + " destroyed");
     }
 
 
@@ -100,9 +114,6 @@ public class EpisodeFragment extends Fragment {
         @Override
         public void onReceive(Context context, Intent intent)
         {
-
-            // Get total number of episodes
-            //-----------------------------
             if (intent.getAction().equals(LibraryServiceHelper.GET_EPISODE_COMPLETE))
             {
                 Log.d("EpisodeFragment", "GET_EPISODE_COMPLETE intent received");
@@ -118,6 +129,9 @@ public class EpisodeFragment extends Fragment {
 
                         // TODO: display image
 
+                        //
+                        TextView textView = (TextView) getView().findViewById(R.id.episodeNb);
+                        textView.setText("OK!");
 
                         break;
 

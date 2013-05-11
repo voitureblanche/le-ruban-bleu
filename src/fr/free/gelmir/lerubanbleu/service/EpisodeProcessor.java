@@ -45,7 +45,7 @@ public class EpisodeProcessor
 
     public void queryEpisode(int episodeNb, EpisodeProcessorCallback callback, Context context)
     {
-        EpisodeProcessorCallback.Result result = EpisodeProcessorCallback.Result.OK;
+        EpisodeProcessorCallback.Result result = EpisodeProcessorCallback.Result.EPISODE_PROCESSOR_OK;
         Cursor cursor;
 
         // Database variables
@@ -99,7 +99,7 @@ public class EpisodeProcessor
 
                         // Returned parameters
                         mEpisode = null;
-                        result = EpisodeProcessorCallback.Result.KO;
+                        result = EpisodeProcessorCallback.Result.EPISODE_PROCESSOR_KO;
                     }
                     break;
 
@@ -108,7 +108,7 @@ public class EpisodeProcessor
 
                     // Returned parameters
                     mEpisode = null;
-                    result = EpisodeProcessorCallback.Result.KO;
+                    result = EpisodeProcessorCallback.Result.EPISODE_PROCESSOR_KO;
                     break;
             }
 
@@ -173,7 +173,7 @@ public class EpisodeProcessor
         ContentResolver contentResolver = context.getContentResolver();
         Uri episodeUri = Uri.withAppendedPath(EpisodeProvider.CONTENT_URI, Integer.toString(episodeNb));
 
-        EpisodeProcessorCallback.Result result = EpisodeProcessorCallback.Result.KO;
+        EpisodeProcessorCallback.Result result = EpisodeProcessorCallback.Result.EPISODE_PROCESSOR_KO;
         HttpURLConnection connection = null;
         ContentValues contentValues = new ContentValues();
 
@@ -204,7 +204,7 @@ public class EpisodeProcessor
                 contentValues.put(EpisodeTable.COLUMN_REASON, httpStatus);
                 contentResolver.update(episodeUri, contentValues, where, whereArgs);
 
-                result = EpisodeProcessorCallback.Result.KO;
+                result = EpisodeProcessorCallback.Result.EPISODE_PROCESSOR_KO;
             }
 
             // Handle result
@@ -215,7 +215,7 @@ public class EpisodeProcessor
                 GZIPInputStream gzis = new GZIPInputStream(inputStream);
                 XmlSaxParser parser = new XmlSaxParser();
                 mEpisode = parser.getEpisode(gzis, context);
-                result = EpisodeProcessorCallback.Result.OK;
+                result = EpisodeProcessorCallback.Result.EPISODE_PROCESSOR_OK;
 
                 // Update database
                 contentValues.clear();
@@ -234,7 +234,7 @@ public class EpisodeProcessor
             contentValues.put(EpisodeTable.COLUMN_REASON, EpisodeTable.ERROR_UNKNOWN);
             contentResolver.update(episodeUri, contentValues, where, whereArgs);
 
-            result = EpisodeProcessorCallback.Result.KO;
+            result = EpisodeProcessorCallback.Result.EPISODE_PROCESSOR_KO;
 
             e.printStackTrace();
         } finally {

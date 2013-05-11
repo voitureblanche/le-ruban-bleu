@@ -11,6 +11,7 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Window;
 import android.view.WindowManager;
+import fr.free.gelmir.lerubanbleu.LeRubanBleuApplication;
 import fr.free.gelmir.lerubanbleu.R;
 import fr.free.gelmir.lerubanbleu.util.XmlSaxParser;
 
@@ -40,7 +41,7 @@ public class SplashActivity extends Activity {
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        setContentView(R.layout.splash);
+        setContentView(R.layout.ac_splash);
 
         startWaitThread();
     }
@@ -95,10 +96,8 @@ public class SplashActivity extends Activity {
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event)
     {
-        if (keyCode == KeyEvent.KEYCODE_BACK)
-        {
-            if (mFetchDataTask != null)
-            {
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            if (mFetchDataTask != null) {
                 mFetchDataTask.cancel(true);
                 mFetchDataTask = null;
             }
@@ -112,8 +111,7 @@ public class SplashActivity extends Activity {
     {
         /** The system calls this to perform work in a worker thread and
          * delivers it the parameters given to AsyncTask.execute() */
-        protected Integer doInBackground(Void... params)
-        {
+        protected Integer doInBackground(Void... params) {
             URL url;
             HttpURLConnection connection = null;
             int totalNumber = 0;
@@ -137,8 +135,7 @@ public class SplashActivity extends Activity {
                 }
 
                 // Handle result
-                else
-                {
+                else {
                     // Parse XML
                     GZIPInputStream gzis = new GZIPInputStream(inputStream);
                     XmlSaxParser parser = new XmlSaxParser();
@@ -154,19 +151,17 @@ public class SplashActivity extends Activity {
             }
 
             return totalNumber;
-
         }
 
         /** The system calls this to perform work in the UI thread and delivers
          * the result from doInBackground() */
-        protected void onPostExecute(Integer totalNumber)
-        {
-            /*
-            if (totalNumber != 0) {
-                // TODO: update preferences
+        protected void onPostExecute(Integer totalNumber) {
 
+            // Save total number of episodes in the application preferences
+            if (totalNumber != -1) {
+                LeRubanBleuApplication application = LeRubanBleuApplication.getInstance();
+                application.setTotalNbEpisodes(totalNumber);
             }
-            */
 
             // Launch main activity
             finish();
