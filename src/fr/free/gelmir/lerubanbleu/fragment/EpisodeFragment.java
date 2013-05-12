@@ -97,6 +97,11 @@ public class EpisodeFragment extends Fragment {
         Log.d("EpisodeFragment", "fragment " + Integer.toString(episodeNb) + " resumed");
 
         // Relaunch episode get?
+
+        // Register to Library service intent
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(LibraryServiceHelper.GET_EPISODE_COMPLETE);
+        getActivity().registerReceiver(mLibraryServiceHelperReceiver, intentFilter);
     }
 
 

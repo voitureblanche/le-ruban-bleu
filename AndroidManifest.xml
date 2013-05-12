@@ -8,9 +8,12 @@
                  android:icon="@drawable/icon"
                  android:name="fr.free.gelmir.lerubanbleu.LeRubanBleuApplication">
 
-        <activity android:name=".activity.ViewerActivity"/>
-        <activity android:name=".activity.AboutActivity"/>
-        <activity android:name=".activity.PreferencesActivity"/>
+        <activity android:name=".activity.ViewerActivity"
+                  android:screenOrientation="landscape"/>
+        <activity android:name=".activity.AboutActivity"
+                  android:screenOrientation="landscape"/>
+        <activity android:name=".activity.PreferencesActivity"
+                  android:screenOrientation="landscape"/>
         <activity android:name=".activity.SplashActivity"
                   android:label="@string/app_name"
                   android:screenOrientation="landscape">

@@ -1,9 +1,6 @@
 package fr.free.gelmir.lerubanbleu.activity;
 
-import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
-import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
@@ -15,7 +12,6 @@ import fr.free.gelmir.lerubanbleu.LeRubanBleuApplication;
 import fr.free.gelmir.lerubanbleu.R;
 import fr.free.gelmir.lerubanbleu.fragment.EpisodeFragment;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 
 public class ViewerActivity extends FragmentActivity
@@ -43,8 +39,9 @@ public class ViewerActivity extends FragmentActivity
 
         // Viewpager
         mViewPager = (ViewPager) findViewById(R.id.viewpager);
-        mViewPager.setOffscreenPageLimit(2);
+        //mViewPager.setOffscreenPageLimit(2);
         mViewPager.setAdapter(fragmentPagerAdapter);
+        Log.d("ViewerActivity", "setCurrentItem " + Integer.toString(lastEpisode));
         mViewPager.setCurrentItem(lastEpisode);
     }
 
@@ -91,13 +88,14 @@ public class ViewerActivity extends FragmentActivity
 
         @Override
         public EpisodeFragment getItem(int i) {
+            Log.d("EpisodeFragmentPAgerAdapter", "getItem " + Integer.toString(i));
             allocateFragments(i);
             return mHashMap.get(i);
         }
 
         @Override
         public int getCount() {
-            return mHashMap.size();
+            return mTotalNbEpisodes;
         }
 
         // Allocate fragments
