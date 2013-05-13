@@ -58,14 +58,6 @@ public class EpisodeFragment extends Fragment {
         // LibraryService helper
         mLibraryServiceHelper = LibraryServiceHelper.getInstance(getActivity());
 
-        // Register to Library service intent
-        IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(LibraryServiceHelper.GET_EPISODE_COMPLETE);
-        getActivity().registerReceiver(mLibraryServiceHelperReceiver, intentFilter);
-
-        // Get episode
-        //mLibraryServiceHelper.getEpisode(mContext, episodeNb);
-
         // Inflate view
         View view = inflater.inflate(R.layout.fr_episode, container, false);
         TextView textView = (TextView) view.findViewById(R.id.episodeNb);
@@ -96,12 +88,13 @@ public class EpisodeFragment extends Fragment {
         int episodeNb = bundle.getInt(EPISODE_NUMBER);
         Log.d("EpisodeFragment", "fragment " + Integer.toString(episodeNb) + " resumed");
 
-        // Relaunch episode get?
-
         // Register to Library service intent
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(LibraryServiceHelper.GET_EPISODE_COMPLETE);
         getActivity().registerReceiver(mLibraryServiceHelperReceiver, intentFilter);
+
+        // Get episode
+        mLibraryServiceHelper.getEpisode(getActivity(), episodeNb);
     }
 
 
@@ -136,7 +129,7 @@ public class EpisodeFragment extends Fragment {
 
                         //
                         TextView textView = (TextView) getView().findViewById(R.id.episodeNb);
-                        textView.setText("OK!");
+                        textView.setText(episodeImageUri.toString());
 
                         break;
 

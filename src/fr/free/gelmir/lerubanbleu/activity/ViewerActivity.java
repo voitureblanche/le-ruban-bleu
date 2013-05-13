@@ -39,6 +39,7 @@ public class ViewerActivity extends FragmentActivity
 
         // Viewpager
         mViewPager = (ViewPager) findViewById(R.id.viewpager);
+        // TODO useful?
         //mViewPager.setOffscreenPageLimit(2);
         mViewPager.setAdapter(fragmentPagerAdapter);
         Log.d("ViewerActivity", "setCurrentItem " + Integer.toString(lastEpisode));

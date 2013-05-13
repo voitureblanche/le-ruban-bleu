@@ -58,7 +58,7 @@ public final class LibraryServiceHelper
     // Get an episode
     public void getEpisode(Context context, int episodeNb)
     {
-        Log.d("LibraryServiceHelper", "Get episode");
+        Log.d("LibraryServiceHelper", "Get episode " + Integer.toString(episodeNb));
 
         // Is the method pending?
 

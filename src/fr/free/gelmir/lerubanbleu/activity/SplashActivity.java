@@ -11,6 +11,8 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.TextView;
+import android.widget.Toast;
 import fr.free.gelmir.lerubanbleu.LeRubanBleuApplication;
 import fr.free.gelmir.lerubanbleu.R;
 import fr.free.gelmir.lerubanbleu.util.XmlSaxParser;
@@ -83,12 +85,27 @@ public class SplashActivity extends Activity {
             mFetchDataTask.execute((Void[]) null);
         }
 
-        // Launch main activity
+        // The network is not available
         else {
             Log.d("SplashActivity", "no network available!");
-            finish();
-            Intent intent = new Intent(SplashActivity.this, ViewerActivity.class);
-            SplashActivity.this.startActivity(intent);
+
+            // Retrieve total number of episodes
+            LeRubanBleuApplication application = LeRubanBleuApplication.getInstance();
+            int totalNbEpisodes = application.getTotalNbEpisodes();
+
+            // First start: display an error
+            if (totalNbEpisodes == 0) {
+                Toast.makeText(this, "Grmbl !?", Toast.LENGTH_LONG).show();
+
+                // TODO: add a refresh button
+            }
+
+            // Launch the gallery
+            else {
+                finish();
+                Intent intent = new Intent(SplashActivity.this, ViewerActivity.class);
+                SplashActivity.this.startActivity(intent);
+            }
         }
     }
 
@@ -114,7 +131,7 @@ public class SplashActivity extends Activity {
         protected Integer doInBackground(Void... params) {
             URL url;
             HttpURLConnection connection = null;
-            int totalNumber = 0;
+            int errorCode = 0;
 
             try {
                 url = new URL("http://gelmir.free.fr/lerubanbleu/get.php5?totalnumber");
@@ -131,7 +148,7 @@ public class SplashActivity extends Activity {
 
                 // Error!
                 if (httpStatus / 100 != 2) {
-                    totalNumber = -1;
+                    errorCode = 0;
                 }
 
                 // Handle result
@@ -139,8 +156,8 @@ public class SplashActivity extends Activity {
                     // Parse XML
                     GZIPInputStream gzis = new GZIPInputStream(inputStream);
                     XmlSaxParser parser = new XmlSaxParser();
-                    totalNumber = parser.getTotalNumber(gzis);
-                    Log.d("GetTotalNumberTask", "total number of episodes = " + Integer.toString(totalNumber));
+                    errorCode = parser.getTotalNumber(gzis);
+                    Log.d("GetTotalNumberTask", "total number of episodes = " + Integer.toString(errorCode));
                 }
             } catch (IOException e) {
                 e.printStackTrace();
@@ -150,23 +167,37 @@ public class SplashActivity extends Activity {
                 }
             }
 
-            return totalNumber;
+            return errorCode;
         }
 
         /** The system calls this to perform work in the UI thread and delivers
          * the result from doInBackground() */
-        protected void onPostExecute(Integer totalNumber) {
+        protected void onPostExecute(Integer errorCode) {
 
             // Save total number of episodes in the application preferences
-            if (totalNumber != -1) {
+            if (errorCode != 0) {
                 LeRubanBleuApplication application = LeRubanBleuApplication.getInstance();
-                application.setTotalNbEpisodes(totalNumber);
+                application.setTotalNbEpisodes(errorCode);
             }
 
             // Launch main activity
-            finish();
-            Intent intent = new Intent(SplashActivity.this, ViewerActivity.class);
-            SplashActivity.this.startActivity(intent);
+            // Retrieve total number of episodes
+            LeRubanBleuApplication application = LeRubanBleuApplication.getInstance();
+            int totalNbEpisodes = application.getTotalNbEpisodes();
+
+            // First start: display an error
+            if (totalNbEpisodes == 0) {
+                Toast.makeText(getApplicationContext(), "Grmbl !?", Toast.LENGTH_LONG).show();
+
+                // TODO: add a refresh button
+            }
+
+            // Launch the gallery
+            else {
+                finish();
+                Intent intent = new Intent(SplashActivity.this, ViewerActivity.class);
+                SplashActivity.this.startActivity(intent);
+            }
         }
     }
 
