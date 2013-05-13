@@ -129,7 +129,7 @@ public class EpisodeFragment extends Fragment {
 
                         //
                         TextView textView = (TextView) getView().findViewById(R.id.episodeNb);
-                        textView.setText(episodeImageUri.toString());
+                        textView.setText(episodeImageUri.getLastPathSegment());
 
                         break;
 

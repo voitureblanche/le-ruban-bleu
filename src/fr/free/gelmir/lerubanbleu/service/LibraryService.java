@@ -57,8 +57,7 @@ public class LibraryService extends CustomIntentService
 
         // Get episode
         //------------
-        if (intent.getAction().equals(ACTION_GET_EPISODE))
-        {
+        if (intent.getAction().equals(ACTION_GET_EPISODE)) {
             Log.d("LibraryService", "ACTION_GET_EPISODE received");
 
             // Get intent extras
@@ -87,6 +86,8 @@ public class LibraryService extends CustomIntentService
         EpisodeProcessorCallback callback = new EpisodeProcessorCallback() {
             @Override
             public void send(Result result, Episode episode) {
+
+                Log.d("EpisodeProcessorCallback", "Callback called!");
 
                 int resultCode = 0;
 

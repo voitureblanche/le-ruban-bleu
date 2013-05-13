@@ -66,6 +66,7 @@ public final class LibraryServiceHelper
         ResultReceiver resultReceiver = new ResultReceiver(null){
             @Override
             protected void onReceiveResult(int resultCode, Bundle resultData) {
+                Log.d("ResultReceiver", "onReceiveResult");
                 handleResponse(resultCode, resultData);
             }
         };
@@ -86,17 +87,17 @@ public final class LibraryServiceHelper
     // Handle the response
     private void handleResponse(int resultCode, Bundle resultData)
     {
-        // Get original intent and retrieve the episode id
+        // Get original intent and action
         Intent intent = resultData.getParcelable(LibraryService.EXTRA_ORIGINAL_INTENT);
         String action = intent.getAction();
 
-        if (action == LibraryService.ACTION_GET_EPISODE) {
-            int episodeId = intent.getIntExtra(LibraryService.EXTRA_EPISODE_NB, -1);
+        if (action.equals(LibraryService.ACTION_GET_EPISODE)) {
 
-            // Get episode
+            // Get intent extra
+            int episodeId = intent.getIntExtra(LibraryService.EXTRA_EPISODE_NB, -1);
             Episode episode = resultData.getParcelable(LibraryService.EXTRA_EPISODE_POJO);
 
-            // Broadcast result
+            // Broadcast intent
             Intent broadcastIntent = new Intent(GET_EPISODE_COMPLETE);
             broadcastIntent.putExtra(EXTRA_EPISODE_POJO, episode);
             switch (resultCode) {
@@ -111,5 +112,4 @@ public final class LibraryServiceHelper
             mApplicationContext.sendBroadcast(broadcastIntent);
         }
     }
-
 }
