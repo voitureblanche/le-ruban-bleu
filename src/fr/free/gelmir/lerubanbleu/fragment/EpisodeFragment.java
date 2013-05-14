@@ -91,6 +91,9 @@ public class EpisodeFragment extends Fragment {
         // Register to Library service intent
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(LibraryServiceHelper.GET_EPISODE_COMPLETE);
+        intentFilter.addDataScheme("lerubanbleu");
+        intentFilter.addDataAuthority("fr.free.gelmir.lerubanbleu", null);
+        intentFilter.addDataPath("/" + Integer.toString(episodeNb), 0);
         getActivity().registerReceiver(mLibraryServiceHelperReceiver, intentFilter);
 
         // Get episode

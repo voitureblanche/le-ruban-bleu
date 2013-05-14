@@ -2,6 +2,7 @@ package fr.free.gelmir.lerubanbleu.service;
 
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.ResultReceiver;
 import android.util.Log;
@@ -94,11 +95,12 @@ public final class LibraryServiceHelper
         if (action.equals(LibraryService.ACTION_GET_EPISODE)) {
 
             // Get intent extra
-            int episodeId = intent.getIntExtra(LibraryService.EXTRA_EPISODE_NB, -1);
+            int episodeNb = intent.getIntExtra(LibraryService.EXTRA_EPISODE_NB, -1);
             Episode episode = resultData.getParcelable(LibraryService.EXTRA_EPISODE_POJO);
 
             // Broadcast intent
             Intent broadcastIntent = new Intent(GET_EPISODE_COMPLETE);
+            broadcastIntent.setData(Uri.parse("lerubanbleu://fr.free.gelmir.lerubanbleu/" + Integer.toString(episodeNb)));
             broadcastIntent.putExtra(EXTRA_EPISODE_POJO, episode);
             switch (resultCode) {
                 case 0:
