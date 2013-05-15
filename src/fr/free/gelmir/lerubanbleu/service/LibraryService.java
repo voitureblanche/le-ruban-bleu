@@ -84,7 +84,6 @@ public class LibraryService extends CustomIntentService
 
     private EpisodeProcessorCallback makeEpisodeProcessorCallback() {
         EpisodeProcessorCallback callback = new EpisodeProcessorCallback() {
-            @Override
             public void send(Result result, Episode episode) {
 
                 Log.d("EpisodeProcessorCallback", "Callback called!");

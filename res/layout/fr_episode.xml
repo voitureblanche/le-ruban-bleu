@@ -10,7 +10,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/episodeNb"
+        android:id="@+id/episodeNbTextView"
         android:layout_centerHorizontal="true"
         android:layout_centerVertical="true"
         android:textStyle="bold"
@@ -21,9 +21,18 @@
     <ImageView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/watch"
+        android:id="@+id/episodeImageView"
         android:layout_centerHorizontal="true"
-        android:layout_below="@+id/episodeNb" />
+        android:layout_centerVertical="true"
+        android:layout_below="@+id/episodeNbTextView"
+        android:visibility="invisible"/>
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/watchImageView"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@+id/episodeNbTextView" />
 
 
 </RelativeLayout>
