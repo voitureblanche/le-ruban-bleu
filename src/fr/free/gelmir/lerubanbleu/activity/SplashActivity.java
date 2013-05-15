@@ -11,7 +11,6 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.TextView;
 import android.widget.Toast;
 import fr.free.gelmir.lerubanbleu.LeRubanBleuApplication;
 import fr.free.gelmir.lerubanbleu.R;
@@ -45,11 +44,20 @@ public class SplashActivity extends Activity {
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.ac_splash);
 
+        // Init async task
+        mFetchDataTask = new GetTotalNumberTask();
+
+        // Start wait thread
         startWaitThread();
+
+        // TODO launch tread
+        // Runnable r = new WaitThread();
+        // new Thread(r).start();
+
     }
 
 
-    //
+    // Start wait thread
     private void startWaitThread()
     {
         mWaitThread = new Thread(new Runnable() {
@@ -58,7 +66,7 @@ public class SplashActivity extends Activity {
                     Thread.sleep(3000);
                     runOnUiThread(new Runnable() {
                         public void run() {
-                           fetchData();
+                            fetchData();
                         }
                     });
                 }
@@ -81,7 +89,6 @@ public class SplashActivity extends Activity {
         // Get number of episodes
         if (networkInfo != null && networkInfo.isAvailable()) {
             Log.d("SplashActivity", "fetching data!");
-            mFetchDataTask = new GetTotalNumberTask();
             mFetchDataTask.execute((Void[]) null);
         }
 
@@ -192,11 +199,42 @@ public class SplashActivity extends Activity {
                 // TODO: add a refresh button
             }
 
-            // Launch the gallery
+            // Launch the viewer
             else {
                 finish();
                 Intent intent = new Intent(SplashActivity.this, ViewerActivity.class);
                 SplashActivity.this.startActivity(intent);
+            }
+        }
+    }
+
+
+    // Runnable that will 1) sleep 2) launch a function 3) ensure the async task does not last for a too long time
+    // Runnable can be interrupted by the user
+    private class WaitThread implements Runnable {
+
+        AsyncTask mAsyncTask;
+
+        // Constructor
+        public WaitThread(AsyncTask asyncTask) {
+            mAsyncTask = asyncTask;
+
+        }
+
+        @Override
+        public void run() {
+            try {
+                Thread.sleep(3000);
+                runOnUiThread(new Runnable() {
+                    public void run() {
+                        fetchData();
+                    }
+                });
+                mAsyncTask.get();
+            }
+            catch (InterruptedException e) {
+                Log.d(, "Launch cancelled");
+                finish();
             }
         }
     }
