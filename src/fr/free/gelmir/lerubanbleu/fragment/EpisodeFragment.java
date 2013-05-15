@@ -27,13 +27,10 @@ import fr.free.gelmir.lerubanbleu.service.LibraryServiceHelper;
  */
 public class EpisodeFragment extends Fragment {
 
+    // Static
     private static final String EPISODE_NUMBER = "fr.free.gelmir.fragment.episodeFragment.episodeNumber";
     private static final String IMAGE_URI_STRING = "fr.free.gelmir.fragment.episodeFragment.imageUriString";
-
-    LibraryServiceHelper mLibraryServiceHelper = null;
-
-    public EpisodeFragment() {
-    }
+    private static final String REGISTERED_RECEIVER = "fr.free.gelmir.fragment.episodeFragment.registeredReceiver";
 
     public static final EpisodeFragment newInstance(int episodeNb)
     {
@@ -42,8 +39,13 @@ public class EpisodeFragment extends Fragment {
         Bundle bundle = new Bundle(2);
         bundle.putInt(EPISODE_NUMBER, episodeNb);
         bundle.putString(IMAGE_URI_STRING, "");
+        bundle.putBoolean(REGISTERED_RECEIVER, false);
         fragment.setArguments(bundle);
         return fragment;
+    }
+
+    // Constructor
+    public EpisodeFragment() {
     }
 
     @Override
@@ -74,11 +76,13 @@ public class EpisodeFragment extends Fragment {
         super.onPause();
         Bundle bundle = this.getArguments();
         int episodeNb = bundle.getInt(EPISODE_NUMBER);
+        boolean registeredReceiver = bundle.getBoolean(REGISTERED_RECEIVER);
         Log.d("EpisodeFragment", "fragment " + Integer.toString(episodeNb) + " paused");
 
         // Unregister the receiver
-        if(mLibraryServiceHelper != null) {
+        if (registeredReceiver) {
             getActivity().unregisterReceiver(mLibraryServiceHelperReceiver);
+            bundle.putBoolean(REGISTERED_RECEIVER, false);
         }
     }
 
@@ -168,23 +172,23 @@ public class EpisodeFragment extends Fragment {
 
     private void getEpisode(int episodeNb)
     {
-        // LibraryService helper
-        mLibraryServiceHelper = LibraryServiceHelper.getInstance(getActivity());
-
         // Register to Library service intent
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(LibraryServiceHelper.GET_EPISODE_COMPLETE);
         intentFilter.addDataScheme("lerubanbleu");
         intentFilter.addDataAuthority("fr.free.gelmir.lerubanbleu", null);
         intentFilter.addDataPath("/" + Integer.toString(episodeNb), 0);
+        Bundle bundle = this.getArguments();
+        bundle.putBoolean(REGISTERED_RECEIVER, true);
         getActivity().registerReceiver(mLibraryServiceHelperReceiver, intentFilter);
 
         // Get episode
-        mLibraryServiceHelper.getEpisode(getActivity(), episodeNb);
+        LibraryServiceHelper libraryServiceHelper = LibraryServiceHelper.getInstance(getActivity());
+        libraryServiceHelper.getEpisode(getActivity(), episodeNb);
     }
 
-    private void displayEpisode(Uri imageUri) {
-
+    private void displayEpisode(Uri imageUri)
+    {
         Log.d("displayEpisode", "displaying episode " + imageUri.toString());
         TextView episodeNbView = (TextView) getView().findViewById(R.id.episodeNbTextView);
         ImageView episodeView = (ImageView) getView().findViewById(R.id.episodeImageView);
@@ -195,8 +199,6 @@ public class EpisodeFragment extends Fragment {
         episodeView.setImageURI(imageUri);
         episodeView.setVisibility(View.VISIBLE);
     }
-
-
 
     private BroadcastReceiver mLibraryServiceHelperReceiver = new BroadcastReceiver()
     {
@@ -225,9 +227,6 @@ public class EpisodeFragment extends Fragment {
                         break;
                 }
             }
-
-            // Reset library service helper instance
-            mLibraryServiceHelper = null;
         }
     };
 
