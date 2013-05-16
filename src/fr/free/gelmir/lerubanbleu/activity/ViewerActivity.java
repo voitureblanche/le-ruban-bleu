@@ -6,8 +6,10 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.Toast;
 import fr.free.gelmir.lerubanbleu.LeRubanBleuApplication;
 import fr.free.gelmir.lerubanbleu.R;
 import fr.free.gelmir.lerubanbleu.fragment.EpisodeFragment;
@@ -45,7 +47,6 @@ public class ViewerActivity extends FragmentActivity
         Log.d("ViewerActivity", "setCurrentItem " + Integer.toString(lastEpisode));
         mViewPager.setCurrentItem(lastEpisode);
     }
-
 
     @Override
     protected void onPause() {

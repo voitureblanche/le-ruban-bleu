@@ -48,7 +48,7 @@ public class EpisodeProcessor
         EpisodeProcessorCallback.Result result = EpisodeProcessorCallback.Result.EPISODE_PROCESSOR_OK;
         Cursor cursor;
 
-        // Database variables
+        // Retrieve database variables
         ContentResolver contentResolver = mContext.getContentResolver();
         Uri episodeUri = Uri.withAppendedPath(EpisodeProvider.CONTENT_URI, Integer.toString(episodeNb));
         Log.d("EpisodeProcessor", episodeUri.toString());
@@ -130,6 +130,8 @@ public class EpisodeProcessor
             result = download(cursor, context);
         }
 
+        cursor.close();
+
         // Callback
         callback.send(result, mEpisode);
 
@@ -163,15 +165,15 @@ public class EpisodeProcessor
 
     private EpisodeProcessorCallback.Result download(Cursor cursor, Context context)
     {
-        cursor.moveToFirst();
-
         // Database variables
+        cursor.moveToFirst();
         String where = EpisodeTable.COLUMN_ID + " = ? ";
         int id = cursor.getInt(cursor.getColumnIndex(EpisodeTable.COLUMN_ID));
         String[] whereArgs = { Integer.toString(id) };
         int episodeNb = cursor.getInt(cursor.getColumnIndex(EpisodeTable.COLUMN_EPISODE_NB));
         ContentResolver contentResolver = context.getContentResolver();
         Uri episodeUri = Uri.withAppendedPath(EpisodeProvider.CONTENT_URI, Integer.toString(episodeNb));
+        cursor.close();
 
         EpisodeProcessorCallback.Result result = EpisodeProcessorCallback.Result.EPISODE_PROCESSOR_KO;
         HttpURLConnection connection = null;

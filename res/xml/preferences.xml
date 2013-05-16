@@ -15,5 +15,9 @@
         android:key="@string/prefs_user_latest_episode_key"
         android:defaultValue="@string/prefs_user_latest_episode_default"/>
 
+    <EditTextPreference
+        android:key="@string/prefs_user_zoom_level_key"
+        android:defaultValue="@string/prefs_user_zoom_level_default"/>
+
 </PreferenceScreen>
 

@@ -21,6 +21,9 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.zip.GZIPInputStream;
 
 /**
@@ -32,8 +35,8 @@ import java.util.zip.GZIPInputStream;
  */
 public class SplashActivity extends Activity {
 
-    private Thread mWaitThread = null;
-    private AsyncTask mFetchDataTask = null;
+    private Thread mSplashThread = null;
+    private AsyncTask mSplashAsyncTask = null;
 
     @Override
     public void onCreate(Bundle savedInstanceState)
@@ -44,43 +47,17 @@ public class SplashActivity extends Activity {
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.ac_splash);
 
-        // Init async task
-        mFetchDataTask = new GetTotalNumberTask();
+        // Allocate async task
+        mSplashAsyncTask = new SplashAsyncTask();
 
-        // Start wait thread
-        startWaitThread();
-
-        // TODO launch tread
-        // Runnable r = new WaitThread();
-        // new Thread(r).start();
-
+        // Launch thread
+        Runnable splashRunnable = new SplashRunnable(mSplashAsyncTask);
+        mSplashThread = new Thread(splashRunnable);
+        mSplashThread.start();
     }
 
 
-    // Start wait thread
-    private void startWaitThread()
-    {
-        mWaitThread = new Thread(new Runnable() {
-            public void run() {
-                try {
-                    Thread.sleep(3000);
-                    runOnUiThread(new Runnable() {
-                        public void run() {
-                            fetchData();
-                        }
-                    });
-                }
-                catch (InterruptedException e) {
-                    //Log.d(HFR4droidApplication.TAG, "Launch cancelled");
-                    finish();
-                }
-            }
-        });
-        mWaitThread.start();
-    }
-
-
-    private void fetchData()
+    private void startSplash()
     {
         // Check network
         ConnectivityManager connectivityManager = (ConnectivityManager) this.getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -88,8 +65,8 @@ public class SplashActivity extends Activity {
 
         // Get number of episodes
         if (networkInfo != null && networkInfo.isAvailable()) {
-            Log.d("SplashActivity", "fetching data!");
-            mFetchDataTask.execute((Void[]) null);
+            Log.d("SplashActivity", "launching asynctask!");
+            mSplashAsyncTask.execute((Void[]) null);
         }
 
         // The network is not available
@@ -117,21 +94,44 @@ public class SplashActivity extends Activity {
     }
 
 
+    private void endSplash()
+    {
+        // Launch main activity
+        // Retrieve total number of episodes
+        LeRubanBleuApplication application = LeRubanBleuApplication.getInstance();
+        int totalNbEpisodes = application.getTotalNbEpisodes();
+
+        // First start: display an error
+        if (totalNbEpisodes == 0) {
+            Toast.makeText(getApplicationContext(), "Grmbl !?", Toast.LENGTH_LONG).show();
+
+            // TODO: add a refresh button
+        }
+
+        // Launch the viewer
+        else {
+            finish();
+            Intent intent = new Intent(SplashActivity.this, ViewerActivity.class);
+            SplashActivity.this.startActivity(intent);
+        }
+    }
+
+
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event)
     {
         if (keyCode == KeyEvent.KEYCODE_BACK) {
-            if (mFetchDataTask != null) {
-                mFetchDataTask.cancel(true);
-                mFetchDataTask = null;
+            if (mSplashAsyncTask != null) {
+                mSplashAsyncTask.cancel(true);
+                mSplashAsyncTask = null;
             }
-            mWaitThread.interrupt();
+            mSplashThread.interrupt();
         }
         return super.onKeyDown(keyCode, event);
     }
 
 
-    private class GetTotalNumberTask extends AsyncTask<Void, Void, Integer>
+    private class SplashAsyncTask extends AsyncTask<Void, Void, Integer>
     {
         /** The system calls this to perform work in a worker thread and
          * delivers it the parameters given to AsyncTask.execute() */
@@ -151,7 +151,7 @@ public class SplashActivity extends Activity {
                 connection = (HttpURLConnection) url.openConnection();  // this does no network IO
                 InputStream inputStream = connection.getInputStream();  // this opens a connection, then sends GET & headers
                 int httpStatus = connection.getResponseCode();
-                Log.d("GetTotalNumberTask", "http status = " + Integer.toString(httpStatus));
+                Log.d("SplashAsyncTask", "http status = " + Integer.toString(httpStatus));
 
                 // Error!
                 if (httpStatus / 100 != 2) {
@@ -164,7 +164,7 @@ public class SplashActivity extends Activity {
                     GZIPInputStream gzis = new GZIPInputStream(inputStream);
                     XmlSaxParser parser = new XmlSaxParser();
                     errorCode = parser.getTotalNumber(gzis);
-                    Log.d("GetTotalNumberTask", "total number of episodes = " + Integer.toString(errorCode));
+                    Log.d("SplashAsyncTask", "total number of episodes = " + Integer.toString(errorCode));
                 }
             } catch (IOException e) {
                 e.printStackTrace();
@@ -187,53 +187,48 @@ public class SplashActivity extends Activity {
                 application.setTotalNbEpisodes(errorCode);
             }
 
-            // Launch main activity
-            // Retrieve total number of episodes
-            LeRubanBleuApplication application = LeRubanBleuApplication.getInstance();
-            int totalNbEpisodes = application.getTotalNbEpisodes();
-
-            // First start: display an error
-            if (totalNbEpisodes == 0) {
-                Toast.makeText(getApplicationContext(), "Grmbl !?", Toast.LENGTH_LONG).show();
-
-                // TODO: add a refresh button
-            }
-
-            // Launch the viewer
-            else {
-                finish();
-                Intent intent = new Intent(SplashActivity.this, ViewerActivity.class);
-                SplashActivity.this.startActivity(intent);
-            }
+            // End the splash session
+            endSplash();
         }
     }
 
 
-    // Runnable that will 1) sleep 2) launch a function 3) ensure the async task does not last for a too long time
+    // Runnable that will 1) sleep 2) launch the startSplash() function 3) ensure the async task does not last for a too long time
     // Runnable can be interrupted by the user
-    private class WaitThread implements Runnable {
+    private class SplashRunnable implements Runnable {
 
-        AsyncTask mAsyncTask;
+        //AsyncTask mAsyncTask;
 
         // Constructor
-        public WaitThread(AsyncTask asyncTask) {
-            mAsyncTask = asyncTask;
-
+        public SplashRunnable(AsyncTask asyncTask) {
+            //mAsyncTask = asyncTask;
         }
 
-        @Override
         public void run() {
             try {
                 Thread.sleep(3000);
                 runOnUiThread(new Runnable() {
                     public void run() {
-                        fetchData();
+                        startSplash();
                     }
                 });
-                mAsyncTask.get();
+                mSplashAsyncTask.get(7000, TimeUnit.MILLISECONDS);
             }
             catch (InterruptedException e) {
-                Log.d(, "Launch cancelled");
+                Log.d("SplashRunnable", "splash cancelled");
+                finish();
+            }
+            catch (TimeoutException e) {
+                Log.d("SplashRunnable", "splash timeout");
+                mSplashAsyncTask.cancel(true);
+                runOnUiThread(new Runnable() {
+                    public void run() {
+                        endSplash();
+                    }
+                });
+            }
+            catch (ExecutionException e) {
+                Log.d("SplashRunnable", "splash error");
                 finish();
             }
         }
