@@ -73,6 +73,7 @@ public class EpisodeFragment extends Fragment implements GestureDetector.OnGestu
         textView.setText(Integer.toString(episodeNb + 1));
 
         // Set touch listener
+        /*
         mGestureDetector = new GestureDetector(getActivity(), this);
         mGestureDetector.setOnDoubleTapListener(this);
         view.setOnTouchListener(new View.OnTouchListener() {
@@ -86,7 +87,7 @@ public class EpisodeFragment extends Fragment implements GestureDetector.OnGestu
                 return result;
             }
         });
-
+        */
         return view;
     }
 
@@ -212,8 +213,7 @@ public class EpisodeFragment extends Fragment implements GestureDetector.OnGestu
     private void displayEpisode(Uri imageUri)
     {
         Log.d("displayEpisode", "displaying episode " + imageUri.toString());
-        //TextView episodeNbView = (TextView) getView().findViewById(R.id.episodeNbTextView);
-        ImageView episodeView = (ImageView) getView().findViewById(R.id.episodeImageView);
+        ImageView episodeView = (ImageView) getView().findViewById(R.id.episodeCustomImageView);
         ImageView watchView = (ImageView) getView().findViewById(R.id.watchImageView);
 
         //episodeNbView.setVisibility(View.GONE);

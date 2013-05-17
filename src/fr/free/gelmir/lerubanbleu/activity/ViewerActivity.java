@@ -10,6 +10,8 @@ import android.view.MotionEvent;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Toast;
+import com.viewpagerindicator.TitlePageIndicator;
+import com.viewpagerindicator.UnderlinePageIndicator;
 import fr.free.gelmir.lerubanbleu.LeRubanBleuApplication;
 import fr.free.gelmir.lerubanbleu.R;
 import fr.free.gelmir.lerubanbleu.fragment.EpisodeFragment;
@@ -39,6 +41,9 @@ public class ViewerActivity extends FragmentActivity
         // FragmentPagerAdapter
         EpisodeFragmentPagerAdapter fragmentPagerAdapter = new EpisodeFragmentPagerAdapter(getSupportFragmentManager(), lastEpisode, totalNbEpisodes);
 
+        // OnPageChangeListener
+        MyOnPageChangeListener myOnPageChangeListener = new MyOnPageChangeListener();
+
         // Viewpager
         mViewPager = (ViewPager) findViewById(R.id.viewpager);
         // TODO useful?
@@ -46,6 +51,12 @@ public class ViewerActivity extends FragmentActivity
         mViewPager.setAdapter(fragmentPagerAdapter);
         Log.d("ViewerActivity", "setCurrentItem " + Integer.toString(lastEpisode));
         mViewPager.setCurrentItem(lastEpisode);
+        mViewPager.setOnPageChangeListener(myOnPageChangeListener);
+
+        //Bind the title indicator to the adapter
+        UnderlinePageIndicator underlinePageIndicator = (UnderlinePageIndicator)findViewById(R.id.underlinePageIndicator);
+        underlinePageIndicator.setViewPager(mViewPager);
+        underlinePageIndicator.setOnPageChangeListener(myOnPageChangeListener);
     }
 
     @Override
@@ -62,11 +73,6 @@ public class ViewerActivity extends FragmentActivity
     @Override
     protected void onStop() {
         super.onStop();
-
-        // Save episode
-        LeRubanBleuApplication application = LeRubanBleuApplication.getInstance();
-        application.setUserLatestEpisode(mViewPager.getCurrentItem());
-
     }
 
     @Override
@@ -125,6 +131,27 @@ public class ViewerActivity extends FragmentActivity
                     }
                 }
             }
+        }
+    }
+
+
+    private class MyOnPageChangeListener implements ViewPager.OnPageChangeListener
+    {
+        @Override
+        public void onPageScrolled(int i, float v, int i2) {
+        }
+
+        @Override
+        public void onPageSelected(int i) {
+            Log.d("MyOnPageChangeListener", "onPageSelected " + Integer.toString(i));
+
+            // Save episode
+            LeRubanBleuApplication application = LeRubanBleuApplication.getInstance();
+            application.setUserLatestEpisode(i);
+        }
+
+        @Override
+        public void onPageScrollStateChanged(int i) {
         }
     }
 

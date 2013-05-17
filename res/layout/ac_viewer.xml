@@ -12,4 +12,9 @@
         android:id="@+id/viewpager"
         android:background="#ABABAB"/>
 
+    <com.viewpagerindicator.UnderlinePageIndicator
+        android:id="@+id/underlinePageIndicator"
+        android:layout_height="wrap_content"
+        android:layout_width="fill_parent" />
+
 </LinearLayout>
