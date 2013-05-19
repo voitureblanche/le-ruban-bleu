@@ -13,6 +13,8 @@ abstract class LeRubanBleuActivity extends Activity {
 
 
 
+    // TODO rotation management
+
 
 
 

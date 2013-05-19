@@ -6,11 +6,8 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
-import android.view.MotionEvent;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.Toast;
-import com.viewpagerindicator.TitlePageIndicator;
 import com.viewpagerindicator.UnderlinePageIndicator;
 import fr.free.gelmir.lerubanbleu.LeRubanBleuApplication;
 import fr.free.gelmir.lerubanbleu.R;
@@ -42,21 +39,20 @@ public class ViewerActivity extends FragmentActivity
         EpisodeFragmentPagerAdapter fragmentPagerAdapter = new EpisodeFragmentPagerAdapter(getSupportFragmentManager(), lastEpisode, totalNbEpisodes);
 
         // OnPageChangeListener
-        MyOnPageChangeListener myOnPageChangeListener = new MyOnPageChangeListener();
+        MyOnPageChangeListener pageChangeListener = new MyOnPageChangeListener();
 
         // Viewpager
         mViewPager = (ViewPager) findViewById(R.id.viewpager);
-        // TODO useful?
-        //mViewPager.setOffscreenPageLimit(2);
         mViewPager.setAdapter(fragmentPagerAdapter);
-        Log.d("ViewerActivity", "setCurrentItem " + Integer.toString(lastEpisode));
         mViewPager.setCurrentItem(lastEpisode);
-        mViewPager.setOnPageChangeListener(myOnPageChangeListener);
 
-        //Bind the title indicator to the adapter
-        UnderlinePageIndicator underlinePageIndicator = (UnderlinePageIndicator)findViewById(R.id.underlinePageIndicator);
-        underlinePageIndicator.setViewPager(mViewPager);
-        underlinePageIndicator.setOnPageChangeListener(myOnPageChangeListener);
+        // Bind the indicator to the viewpager
+        UnderlinePageIndicator indicator = (UnderlinePageIndicator)findViewById(R.id.indicator);
+        indicator.setViewPager(mViewPager);
+        indicator.setFadeDelay(1000);
+        indicator.setFadeLength(1000);
+        indicator.setOnPageChangeListener(pageChangeListener);
+
     }
 
     @Override
@@ -143,8 +139,6 @@ public class ViewerActivity extends FragmentActivity
 
         @Override
         public void onPageSelected(int i) {
-            Log.d("MyOnPageChangeListener", "onPageSelected " + Integer.toString(i));
-
             // Save episode
             LeRubanBleuApplication application = LeRubanBleuApplication.getInstance();
             application.setUserLatestEpisode(i);
@@ -154,5 +148,8 @@ public class ViewerActivity extends FragmentActivity
         public void onPageScrollStateChanged(int i) {
         }
     }
+
+
+    private class My
 
 }
