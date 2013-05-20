@@ -7,7 +7,7 @@
     android:layout_height="fill_parent"
     android:background="#FFFFFF">
 
-    <android.support.v4.view.ViewPager
+    <fr.free.gelmir.lerubanbleu.util.CustomViewPager
         android:id="@+id/viewpager"
         android:layout_width="match_parent"
         android:layout_height="0dp"

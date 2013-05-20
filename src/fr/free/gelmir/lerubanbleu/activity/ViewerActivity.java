@@ -12,12 +12,13 @@ import com.viewpagerindicator.UnderlinePageIndicator;
 import fr.free.gelmir.lerubanbleu.LeRubanBleuApplication;
 import fr.free.gelmir.lerubanbleu.R;
 import fr.free.gelmir.lerubanbleu.fragment.EpisodeFragment;
+import fr.free.gelmir.lerubanbleu.util.CustomViewPager;
 
 import java.util.HashMap;
 
 public class ViewerActivity extends FragmentActivity
 {
-    private ViewPager mViewPager;
+    private CustomViewPager mViewPager;
 
     @Override
     public void onCreate(Bundle savedInstanceState)
@@ -42,7 +43,8 @@ public class ViewerActivity extends FragmentActivity
         MyOnPageChangeListener pageChangeListener = new MyOnPageChangeListener();
 
         // Viewpager
-        mViewPager = (ViewPager) findViewById(R.id.viewpager);
+        mViewPager = (CustomViewPager) findViewById(R.id.viewpager);
+        mViewPager.setOffscreenPageLimit(2);
         mViewPager.setAdapter(fragmentPagerAdapter);
         mViewPager.setCurrentItem(lastEpisode);
 
@@ -109,24 +111,6 @@ public class ViewerActivity extends FragmentActivity
             if (mHashMap.get(episodeNb) == null) {
                 mHashMap.put(episodeNb, EpisodeFragment.newInstance(episodeNb));
             }
-
-            // Allocate preceding fragments
-            for (int i=episodeNb-3; i<episodeNb; i++) {
-                if (i >= 0) {
-                    if (mHashMap.get(i) == null) {
-                        mHashMap.put(i, EpisodeFragment.newInstance(i));
-                    }
-                }
-            }
-
-            // Allocate following fragments
-            for (int i=episodeNb+1; i<episodeNb+4; i++) {
-                if (i <= mTotalNbEpisodes) {
-                    if (mHashMap.get(i) == null) {
-                        mHashMap.put(i, EpisodeFragment.newInstance(i));
-                    }
-                }
-            }
         }
     }
 
@@ -142,14 +126,14 @@ public class ViewerActivity extends FragmentActivity
             // Save episode
             LeRubanBleuApplication application = LeRubanBleuApplication.getInstance();
             application.setUserLatestEpisode(i);
+
+            // Get episode?
+
         }
 
         @Override
         public void onPageScrollStateChanged(int i) {
         }
     }
-
-
-    private class My
 
 }
