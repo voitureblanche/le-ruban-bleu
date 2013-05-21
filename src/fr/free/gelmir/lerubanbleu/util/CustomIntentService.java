@@ -1,3 +1,5 @@
+// cf. http://stackoverflow.com/questions/7318666/android-intentservice-how-abort-or-skip-a-task-in-the-handleintent-queue
+
 package fr.free.gelmir.lerubanbleu.util;
 
 /*

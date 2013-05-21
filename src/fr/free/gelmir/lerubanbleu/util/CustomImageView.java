@@ -6,10 +6,12 @@ import android.graphics.PointF;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 /**
  * Created with IntelliJ IDEA.
@@ -18,8 +20,9 @@ import android.widget.ImageView;
  * Time: 13:35
  * To change this template use File | Settings | File Templates.
  */
-public class CustomImageView extends ImageView {
+public class CustomImageView extends ImageView  implements GestureDetector.OnGestureListener , GestureDetector.OnDoubleTapListener {
 
+    private GestureDetector mGestureDetector;
 
     Matrix matrix;
 
@@ -50,15 +53,16 @@ public class CustomImageView extends ImageView {
 
     public CustomImageView(Context context) {
         super(context);
-        sharedConstructing(context);
+        construct(context);
     }
 
     public CustomImageView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        sharedConstructing(context);
+        construct(context);
     }
 
-    private void sharedConstructing(Context context) {
+    // Constructor
+    private void construct(Context context) {
         super.setClickable(true);
         this.context = context;
         mScaleDetector = new ScaleGestureDetector(context, new ScaleListener());
@@ -67,6 +71,7 @@ public class CustomImageView extends ImageView {
         setImageMatrix(matrix);
         setScaleType(ScaleType.MATRIX);
 
+        /*
         setOnTouchListener(new OnTouchListener() {
 
             @Override
@@ -111,6 +116,20 @@ public class CustomImageView extends ImageView {
                 return true; // indicate event was handled
             }
 
+        });
+        */
+        mGestureDetector = new GestureDetector(getContext(), this);
+        mGestureDetector.setOnDoubleTapListener(this);
+        setOnTouchListener(new View.OnTouchListener() {
+            public boolean onTouch(View v, MotionEvent event) {
+                Log.d("EpisodeFragment", "onTouch !");
+                //Toast.makeText(getActivity(), "Ouch !?", Toast.LENGTH_LONG).show();
+                boolean result = mGestureDetector.onTouchEvent(event);
+                if (result) {
+                    // Change zoom level
+                }
+                return result;
+            }
         });
     }
 
@@ -232,5 +251,51 @@ public class CustomImageView extends ImageView {
         fixTrans();
     }
 
+
+
+    // Gesture
+    @Override
+    public boolean onSingleTapConfirmed(MotionEvent motionEvent) {
+        return false;
+    }
+
+    @Override
+    public boolean onDoubleTap(MotionEvent motionEvent) {
+        Toast.makeText(getContext(), "Double-tap !?", Toast.LENGTH_LONG).show();
+        return true;
+    }
+
+    @Override
+    public boolean onDoubleTapEvent(MotionEvent motionEvent) {
+        return false;
+    }
+
+    @Override
+    public boolean onDown(MotionEvent motionEvent) {
+        return false;
+    }
+
+    @Override
+    public void onShowPress(MotionEvent motionEvent) {
+    }
+
+    @Override
+    public boolean onSingleTapUp(MotionEvent motionEvent) {
+        return false;
+    }
+
+    @Override
+    public boolean onScroll(MotionEvent motionEvent, MotionEvent motionEvent2, float v, float v2) {
+        return false;
+    }
+
+    @Override
+    public void onLongPress(MotionEvent motionEvent) {
+    }
+
+    @Override
+    public boolean onFling(MotionEvent motionEvent, MotionEvent motionEvent2, float v, float v2) {
+        return false;  //To change body of implemented methods use File | Settings | File Templates.
+    }
 
 }
