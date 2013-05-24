@@ -1,8 +1,10 @@
 package fr.free.gelmir.lerubanbleu.util;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.Matrix;
 import android.graphics.PointF;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -20,9 +22,15 @@ import android.widget.Toast;
  * Time: 13:35
  * To change this template use File | Settings | File Templates.
  */
-public class CustomImageView extends ImageView  implements GestureDetector.OnGestureListener , GestureDetector.OnDoubleTapListener {
+public class CustomImageView extends ImageView {
 
+    private MyGestureDetectorListener mGestureDetectorListener;
     private GestureDetector mGestureDetector;
+
+    private int mZoomLevel;
+    static final int ZOOM_LEVEL_0 = 0;
+    static final int ZOOM_LEVEL_1 = 1;
+
 
     Matrix matrix;
 
@@ -118,24 +126,32 @@ public class CustomImageView extends ImageView  implements GestureDetector.OnGes
 
         });
         */
-        mGestureDetector = new GestureDetector(getContext(), this);
-        mGestureDetector.setOnDoubleTapListener(this);
+
+        /*
+        mGestureDetectorListener = new MyGestureDetectorListener();
+        mGestureDetector = new GestureDetector(getContext(), mGestureDetectorListener);
+        mGestureDetector.setOnDoubleTapListener(mGestureDetectorListener);
+
+
+
         setOnTouchListener(new View.OnTouchListener() {
             public boolean onTouch(View v, MotionEvent event) {
-                Log.d("EpisodeFragment", "onTouch !");
-                //Toast.makeText(getActivity(), "Ouch !?", Toast.LENGTH_LONG).show();
-                boolean result = mGestureDetector.onTouchEvent(event);
-                if (result) {
-                    // Change zoom level
-                }
+                //Log.d("EpisodeFragment", "onTouch !");
+                boolean result;
+                result = mGestureDetector.onTouchEvent(event);
                 return result;
             }
         });
+        */
     }
 
     public void setMaxZoom(float x) {
         maxScale = x;
     }
+
+
+
+
 
     private class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureListener {
         @Override
@@ -253,49 +269,113 @@ public class CustomImageView extends ImageView  implements GestureDetector.OnGes
 
 
 
-    // Gesture
-    @Override
-    public boolean onSingleTapConfirmed(MotionEvent motionEvent) {
-        return false;
+
+    private class MyGestureDetectorListener implements GestureDetector.OnGestureListener , GestureDetector.OnDoubleTapListener {
+
+        @Override
+        public boolean onSingleTapConfirmed(MotionEvent motionEvent) {
+            return false;
+        }
+
+        @Override
+        public boolean onDoubleTap(MotionEvent motionEvent) {
+            if (mZoomLevel == ZOOM_LEVEL_0) {
+                Toast.makeText(getContext(), "Zoom!", Toast.LENGTH_LONG).show();
+                mZoomLevel = ZOOM_LEVEL_1;
+            }
+            else if (mZoomLevel == ZOOM_LEVEL_1) {
+                Toast.makeText(getContext(), "Unzoom!", Toast.LENGTH_LONG).show();
+                mZoomLevel = ZOOM_LEVEL_0;
+            }
+            return true;
+        }
+
+        @Override
+        public boolean onDoubleTapEvent(MotionEvent motionEvent) {
+            return false;
+        }
+
+        @Override
+        public boolean onDown(MotionEvent motionEvent) {
+            return false;
+        }
+
+        @Override
+        public void onShowPress(MotionEvent motionEvent) {
+        }
+
+        @Override
+        public boolean onSingleTapUp(MotionEvent motionEvent) {
+            return false;
+        }
+
+        @Override
+        public boolean onScroll(MotionEvent motionEvent, MotionEvent motionEvent2, float v, float v2) {
+            if (mZoomLevel == ZOOM_LEVEL_1) {
+                // Toast.makeText(getContext(), "Scrolling !?", Toast.LENGTH_LONG).show();
+                Log.d("MyGestureDetectorListener", "onScroll " + Float.toString(v) + " " + Float.toString(v2));
+                return true;
+            }
+            return false;
+        }
+
+        @Override
+        public void onLongPress(MotionEvent motionEvent) {
+        }
+
+        @Override
+        public boolean onFling(MotionEvent motionEvent, MotionEvent motionEvent2, float v, float v2) {
+            return false;
+        }
     }
 
-    @Override
-    public boolean onDoubleTap(MotionEvent motionEvent) {
-        Toast.makeText(getContext(), "Double-tap !?", Toast.LENGTH_LONG).show();
-        return true;
+
+    private void fitToHeigth()
+    {
+        // Get the imageView dimensions
+        this.getHeight();
+
+        // Get the bitmap
+        Drawable drawing = getDrawable();
+        if (drawing == null) {
+            return; // Checking for null & return, as suggested in comments
+        }
+        Bitmap bitmap = ((BitmapDrawable)drawing).getBitmap();
+
+        // Get current dimensions AND the desired bounding box
+        int width = bitmap.getWidth();
+        int height = bitmap.getHeight();
+        int bounding = dpToPx(250);
+        Log.i("Test", "original width = " + Integer.toString(width));
+        Log.i("Test", "original height = " + Integer.toString(height));
+        Log.i("Test", "bounding = " + Integer.toString(bounding));
+
+        // Determine how much to scale
+        float scale = ((float) this.getHeight()) / height;
+        Log.i("Test", "scale = " + Float.toString(scale));
+
+        // Create a matrix for the scaling and add the scaling data
+        Matrix matrix = new Matrix();
+        matrix.postScale(scale, scale);
+
+        // Create a new bitmap and convert it to a format understood by the ImageView
+        Bitmap scaledBitmap = Bitmap.createBitmap(bitmap, 0, 0, width, height, matrix, true);
+        width = scaledBitmap.getWidth(); // re-use
+        height = scaledBitmap.getHeight(); // re-use
+        BitmapDrawable result = new BitmapDrawable(scaledBitmap);
+        Log.i("Test", "scaled width = " + Integer.toString(width));
+        Log.i("Test", "scaled height = " + Integer.toString(height));
+
+        // Apply the scaled bitmap
+        setImageDrawable(result);
+
+        Log.i("Test", "done");
     }
 
-    @Override
-    public boolean onDoubleTapEvent(MotionEvent motionEvent) {
-        return false;
-    }
-
-    @Override
-    public boolean onDown(MotionEvent motionEvent) {
-        return false;
-    }
-
-    @Override
-    public void onShowPress(MotionEvent motionEvent) {
-    }
-
-    @Override
-    public boolean onSingleTapUp(MotionEvent motionEvent) {
-        return false;
-    }
-
-    @Override
-    public boolean onScroll(MotionEvent motionEvent, MotionEvent motionEvent2, float v, float v2) {
-        return false;
-    }
-
-    @Override
-    public void onLongPress(MotionEvent motionEvent) {
-    }
-
-    @Override
-    public boolean onFling(MotionEvent motionEvent, MotionEvent motionEvent2, float v, float v2) {
-        return false;  //To change body of implemented methods use File | Settings | File Templates.
+    private int dpToPx(int dp)
+    {
+        float density = getContext().getResources().getDisplayMetrics().density;
+        return Math.round((float)dp * density);
     }
 
 }
