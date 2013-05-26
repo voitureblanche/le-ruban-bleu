@@ -33,36 +33,6 @@ public class CustomImageView extends ImageView {
     static final int ZOOM_LEVEL_0 = 0;
     static final int ZOOM_LEVEL_1 = 1;
 
-    static final int DIMENSION_WIDTH = 0;
-    static final int DIMENSION_HEIGHT = 1;
-
-
-    Matrix matrix;
-
-    // We can be in one of these 3 states
-    static final int NONE = 0;
-    static final int DRAG = 1;
-    static final int ZOOM = 2;
-    int mode = NONE;
-
-    // Remember some things for zooming
-    PointF last = new PointF();
-    PointF start = new PointF();
-    float minScale = 1f;
-    float maxScale = 3f;
-    float[] m;
-
-
-    int viewWidth, viewHeight;
-    static final int CLICK = 3;
-    float saveScale = 1f;
-    protected float origWidth, origHeight;
-    int oldMeasuredWidth, oldMeasuredHeight;
-
-
-    ScaleGestureDetector mScaleDetector;
-
-    Context context;
 
     public CustomImageView(Context context) {
         super(context);
@@ -75,159 +45,26 @@ public class CustomImageView extends ImageView {
     }
 
     // Constructor
-    private void construct(Context context) {
-
-
+    private void construct(Context context)
+    {
         super.setClickable(true);
 
-        /*this.context = context;
-        mScaleDetector = new ScaleGestureDetector(context, new ScaleListener());
-        matrix = new Matrix();
-        m = new float[9];
-        setImageMatrix(matrix);
-        */
-
-
-        /*
-        setOnTouchListener(new OnTouchListener() {
-
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                mScaleDetector.onTouchEvent(event);
-                PointF curr = new PointF(event.getX(), event.getY());
-
-                switch (event.getAction()) {
-                    case MotionEvent.ACTION_DOWN:
-                        last.set(curr);
-                        start.set(last);
-                        mode = DRAG;
-                        break;
-
-                    case MotionEvent.ACTION_MOVE:
-                        if (mode == DRAG) {
-                            float deltaX = curr.x - last.x;
-                            float deltaY = curr.y - last.y;
-                            float fixTransX = getFixDragTrans(deltaX, viewWidth, origWidth * saveScale);
-                            float fixTransY = getFixDragTrans(deltaY, viewHeight, origHeight * saveScale);
-                            matrix.postTranslate(fixTransX, fixTransY);
-                            fixTrans();
-                            last.set(curr.x, curr.y);
-                        }
-                        break;
-
-                    case MotionEvent.ACTION_UP:
-                        mode = NONE;
-                        int xDiff = (int) Math.abs(curr.x - start.x);
-                        int yDiff = (int) Math.abs(curr.y - start.y);
-                        if (xDiff < CLICK && yDiff < CLICK)
-                            performClick();
-                        break;
-
-                    case MotionEvent.ACTION_POINTER_UP:
-                        mode = NONE;
-                        break;
-                }
-
-                setImageMatrix(matrix);
-                invalidate();
-                return true; // indicate event was handled
-            }
-
-        });
-        */
-
-
+        // Gesture management
         mGestureDetectorListener = new MyGestureDetectorListener();
         mGestureDetector = new GestureDetector(getContext(), mGestureDetectorListener);
         mGestureDetector.setOnDoubleTapListener(mGestureDetectorListener);
-
-
-
         setOnTouchListener(new View.OnTouchListener() {
             public boolean onTouch(View v, MotionEvent event) {
-                //Log.d("EpisodeFragment", "onTouch !");
                 boolean result;
                 result = mGestureDetector.onTouchEvent(event);
                 return result;
             }
         });
 
-
     }
 
     public void setMaxZoom(float x) {
         maxScale = x;
-    }
-
-
-
-
-
-    private class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureListener {
-        @Override
-        public boolean onScaleBegin(ScaleGestureDetector detector) {
-            mode = ZOOM;
-            return true;
-        }
-
-        @Override
-        public boolean onScale(ScaleGestureDetector detector) {
-            float mScaleFactor = detector.getScaleFactor();
-            float origScale = saveScale;
-            saveScale *= mScaleFactor;
-            if (saveScale > maxScale) {
-                saveScale = maxScale;
-                mScaleFactor = maxScale / origScale;
-            } else if (saveScale < minScale) {
-                saveScale = minScale;
-                mScaleFactor = minScale / origScale;
-            }
-
-            if (origWidth * saveScale <= viewWidth || origHeight * saveScale <= viewHeight)
-                matrix.postScale(mScaleFactor, mScaleFactor, viewWidth / 2, viewHeight / 2);
-            else
-                matrix.postScale(mScaleFactor, mScaleFactor, detector.getFocusX(), detector.getFocusY());
-
-            fixTrans();
-            return true;
-        }
-    }
-
-    void fixTrans() {
-        matrix.getValues(m);
-        float transX = m[Matrix.MTRANS_X];
-        float transY = m[Matrix.MTRANS_Y];
-
-        float fixTransX = getFixTrans(transX, viewWidth, origWidth * saveScale);
-        float fixTransY = getFixTrans(transY, viewHeight, origHeight * saveScale);
-
-        if (fixTransX != 0 || fixTransY != 0)
-            matrix.postTranslate(fixTransX, fixTransY);
-    }
-
-    float getFixTrans(float trans, float viewSize, float contentSize) {
-        float minTrans, maxTrans;
-
-        if (contentSize <= viewSize) {
-            minTrans = 0;
-            maxTrans = viewSize - contentSize;
-        } else {
-            minTrans = viewSize - contentSize;
-            maxTrans = 0;
-        }
-
-        if (trans < minTrans)
-            return -trans + minTrans;
-        if (trans > maxTrans)
-            return -trans + maxTrans;
-        return 0;
-    }
-
-    float getFixDragTrans(float delta, float viewSize, float contentSize) {
-        if (contentSize <= viewSize) {
-            return 0;
-        }
-        return delta;
     }
 
     /*
@@ -383,57 +220,5 @@ public class CustomImageView extends ImageView {
         startAnimation(zoomAnimation);
 
     }
-
-
-    // cf. http://stackoverflow.com/q/8232608
-    private void fitToHeight()
-    {
-        // Get the bitmap
-        Drawable drawing = getDrawable();
-        if (drawing == null) {
-            return; // Checking for null & return, as suggested in comments
-        }
-        Bitmap bitmap = ((BitmapDrawable)drawing).getBitmap();
-
-        // Get current dimensions AND the desired bounding box
-        int width = bitmap.getWidth();
-        int height = bitmap.getHeight();
-        int bounding = dpToPx(266); //TODO recover that parameter programmatically
-        Log.i("Test", "original width = " + Integer.toString(width));
-        Log.i("Test", "original height = " + Integer.toString(height));
-        Log.i("Test", "bounding = " + Integer.toString(bounding));
-
-        // Determine how much to scale
-        float scale = ((float) this.getHeight()) / height;
-        Log.i("Test", "scale = " + Float.toString(scale));
-
-        // Create a matrix for the scaling and add the scaling data
-        Matrix matrix = new Matrix();
-        matrix.postScale(scale, scale);
-
-        // Create a new bitmap and convert it to a format understood by the ImageView
-        Bitmap scaledBitmap = Bitmap.createBitmap(bitmap, 0, 0, width, height, matrix, true);
-        width = scaledBitmap.getWidth(); // re-use
-        height = scaledBitmap.getHeight(); // re-use
-        BitmapDrawable result = new BitmapDrawable(scaledBitmap);
-        Log.i("Test", "scaled width = " + Integer.toString(width));
-        Log.i("Test", "scaled height = " + Integer.toString(height));
-
-        // Change scale type
-        setScaleType(ScaleType.CENTER);
-
-        // Apply the scaled bitmap
-        //setImageDrawable(result);
-        setImageBitmap(scaledBitmap);
-
-        Log.i("Test", "done");
-    }
-
-    private int dpToPx(int dp)
-    {
-        float density = getContext().getResources().getDisplayMetrics().density;
-        return Math.round((float)dp * density);
-    }
-
 
 }
