@@ -4,7 +4,6 @@ import android.content.*;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.*;
@@ -214,10 +213,12 @@ public class EpisodeFragment extends Fragment implements GestureDetector.OnGestu
     {
         Log.d("displayEpisode", "displaying episode " + imageUri.toString());
         ImageView episodeView = (ImageView) getView().findViewById(R.id.episodeCustomImageView);
+        //ImageView episodeView = (ImageView) getView().findViewById(R.id.episodeImageView);
         ImageView watchView = (ImageView) getView().findViewById(R.id.watchImageView);
 
         //episodeNbView.setVisibility(View.GONE);
         watchView.setVisibility(View.GONE);
+        // TODO consider using setImageBitmap() instead
         episodeView.setImageURI(imageUri);
         episodeView.setVisibility(View.VISIBLE);
     }

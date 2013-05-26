@@ -12,6 +12,8 @@ import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
+import android.view.animation.AnimationSet;
+import android.view.animation.ScaleAnimation;
 import android.widget.ImageView;
 import android.widget.Toast;
 
@@ -30,6 +32,9 @@ public class CustomImageView extends ImageView {
     private int mZoomLevel;
     static final int ZOOM_LEVEL_0 = 0;
     static final int ZOOM_LEVEL_1 = 1;
+
+    static final int DIMENSION_WIDTH = 0;
+    static final int DIMENSION_HEIGHT = 1;
 
 
     Matrix matrix;
@@ -71,13 +76,17 @@ public class CustomImageView extends ImageView {
 
     // Constructor
     private void construct(Context context) {
+
+
         super.setClickable(true);
-        this.context = context;
+
+        /*this.context = context;
         mScaleDetector = new ScaleGestureDetector(context, new ScaleListener());
         matrix = new Matrix();
         m = new float[9];
         setImageMatrix(matrix);
-        setScaleType(ScaleType.MATRIX);
+        */
+
 
         /*
         setOnTouchListener(new OnTouchListener() {
@@ -127,7 +136,7 @@ public class CustomImageView extends ImageView {
         });
         */
 
-        /*
+
         mGestureDetectorListener = new MyGestureDetectorListener();
         mGestureDetector = new GestureDetector(getContext(), mGestureDetectorListener);
         mGestureDetector.setOnDoubleTapListener(mGestureDetectorListener);
@@ -142,7 +151,8 @@ public class CustomImageView extends ImageView {
                 return result;
             }
         });
-        */
+
+
     }
 
     public void setMaxZoom(float x) {
@@ -220,9 +230,12 @@ public class CustomImageView extends ImageView {
         return delta;
     }
 
+    /*
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+
+
         viewWidth = MeasureSpec.getSize(widthMeasureSpec);
         viewHeight = MeasureSpec.getSize(heightMeasureSpec);
 
@@ -266,7 +279,7 @@ public class CustomImageView extends ImageView {
         }
         fixTrans();
     }
-
+    */
 
 
 
@@ -282,10 +295,13 @@ public class CustomImageView extends ImageView {
             if (mZoomLevel == ZOOM_LEVEL_0) {
                 Toast.makeText(getContext(), "Zoom!", Toast.LENGTH_LONG).show();
                 mZoomLevel = ZOOM_LEVEL_1;
+                //fitToHeight();
+                zoomIn();
             }
             else if (mZoomLevel == ZOOM_LEVEL_1) {
                 Toast.makeText(getContext(), "Unzoom!", Toast.LENGTH_LONG).show();
                 mZoomLevel = ZOOM_LEVEL_0;
+                setScaleType(ScaleType.FIT_CENTER);
             }
             return true;
         }
@@ -330,11 +346,48 @@ public class CustomImageView extends ImageView {
     }
 
 
-    private void fitToHeigth()
+    private void zoomIn()
     {
-        // Get the imageView dimensions
-        this.getHeight();
+        // Get the view height
+        int viewHeightTemp = this.getHeight();
 
+        // Get the bitmap
+        Drawable drawing = getDrawable();
+        if (drawing == null) {
+            return; // Checking for null & return, as suggested in comments
+        }
+        Bitmap bitmap = ((BitmapDrawable)drawing).getBitmap();
+
+        // Get current dimensions AND the desired bounding box
+        int height = bitmap.getHeight();
+
+        AnimationSet zoomAnimation = new AnimationSet(true);
+        /*
+        TranslateAnimation translateAnimation = new TranslateAnimation(
+                Animation.ABSOLUTE, 0.0f, Animation.ABSOLUTE, -imageViewXCoord/(mScreenWidth/mImageViewWidth),
+                Animation.ABSOLUTE, 0.0f, Animation.ABSOLUTE, -imageViewYCoord/(mScreenWidth/mImageViewWidth)
+        );
+        translateAnimation.setDuration(200);
+        */
+
+        //float scale = (float) viewHeightTemp / height;
+        //ScaleAnimation scaleAnimation = new ScaleAnimation(1, scale, 1, scale);
+        ScaleAnimation scaleAnimation = new ScaleAnimation(1, 2, 1, 2);
+        scaleAnimation.setDuration(200);
+
+        //zoomAnimation.addAnimation(translateAnimation);
+        zoomAnimation.addAnimation(scaleAnimation);
+        zoomAnimation.setFillAfter(true);
+        zoomAnimation.setFillEnabled(true);
+
+        startAnimation(zoomAnimation);
+
+    }
+
+
+    // cf. http://stackoverflow.com/q/8232608
+    private void fitToHeight()
+    {
         // Get the bitmap
         Drawable drawing = getDrawable();
         if (drawing == null) {
@@ -345,7 +398,7 @@ public class CustomImageView extends ImageView {
         // Get current dimensions AND the desired bounding box
         int width = bitmap.getWidth();
         int height = bitmap.getHeight();
-        int bounding = dpToPx(250);
+        int bounding = dpToPx(266); //TODO recover that parameter programmatically
         Log.i("Test", "original width = " + Integer.toString(width));
         Log.i("Test", "original height = " + Integer.toString(height));
         Log.i("Test", "bounding = " + Integer.toString(bounding));
@@ -366,8 +419,12 @@ public class CustomImageView extends ImageView {
         Log.i("Test", "scaled width = " + Integer.toString(width));
         Log.i("Test", "scaled height = " + Integer.toString(height));
 
+        // Change scale type
+        setScaleType(ScaleType.CENTER);
+
         // Apply the scaled bitmap
-        setImageDrawable(result);
+        //setImageDrawable(result);
+        setImageBitmap(scaledBitmap);
 
         Log.i("Test", "done");
     }
@@ -377,5 +434,6 @@ public class CustomImageView extends ImageView {
         float density = getContext().getResources().getDisplayMetrics().density;
         return Math.round((float)dp * density);
     }
+
 
 }

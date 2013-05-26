@@ -6,7 +6,6 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
-import android.view.View;
 import android.widget.Toast;
 
 /**
@@ -47,8 +46,10 @@ public class CustomViewPager extends ViewPager {
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
         //Log.d("CustomViewPager", "touch event");
-        boolean result = mGestureDetector.onTouchEvent(ev);
-        return super.onInterceptTouchEvent(ev);
+        //boolean result = mGestureDetector.onTouchEvent(ev);
+
+        return false;
+        //return super.onInterceptTouchEvent(ev);
     }
 
     public void setPageChange(boolean b) {

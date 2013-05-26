@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <RelativeLayout
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:background="#FFFFFF"
     android:clickable="true">
@@ -15,14 +15,24 @@
         android:layout_centerVertical="true"
         android:visibility="invisible"/>
 
-    <fr.free.gelmir.lerubanbleu.util.CustomImageView
-        android:layout_width="wrap_content"
+    <HorizontalScrollView
+        android:layout_width="match_parent"
         android:layout_height="266dp"
-        android:id="@+id/episodeCustomImageView"
+        android:id="@+id/horizontalScrollView"
         android:layout_centerHorizontal="true"
         android:layout_centerVertical="true"
-        android:visibility="invisible"
-        android:background="#FFFFFF"/>
+        android:fadingEdge="none"
+        android:scrollbars="none">
+
+        <fr.free.gelmir.lerubanbleu.util.CustomImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/episodeCustomImageView"
+            android:visibility="invisible"
+            android:background="#ABCDEF"
+            android:scaleType="fitCenter"/>
+
+    </HorizontalScrollView>
 
     <ImageView
         android:layout_width="wrap_content"
