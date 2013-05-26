@@ -1,7 +1,6 @@
 package fr.free.gelmir.lerubanbleu;
 
 import android.app.Application;
-import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.util.Log;
@@ -81,6 +80,16 @@ public class LeRubanBleuApplication extends Application {
     public Locale getUserLanguage() {
         SharedPreferences preferences = getSharedPreferences(PREFERENCES, MODE_PRIVATE);
         return getLocaleFromString(preferences.getString(getString(R.string.prefs_user_language_key), getString(R.string.prefs_user_language_default)));
+    }
+
+    // Zoom level
+    public void setZoomLevel(int zoomLevel) {
+        SharedPreferences preferences = getSharedPreferences(PREFERENCES, MODE_PRIVATE);
+        preferences.edit().putString(getString(R.string.prefs_user_zoom_level_key), Integer.toString(zoomLevel)).commit();
+    }
+    public int getZoomLevel() {
+        SharedPreferences preferences = getSharedPreferences(PREFERENCES, MODE_PRIVATE);
+        return Integer.parseInt(preferences.getString(getString(R.string.prefs_user_zoom_level_key), "0"));
     }
 
 

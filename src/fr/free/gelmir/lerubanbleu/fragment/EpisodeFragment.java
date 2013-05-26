@@ -15,6 +15,7 @@ import fr.free.gelmir.lerubanbleu.provider.EpisodeProvider;
 import fr.free.gelmir.lerubanbleu.provider.EpisodeTable;
 import fr.free.gelmir.lerubanbleu.service.Episode;
 import fr.free.gelmir.lerubanbleu.service.LibraryServiceHelper;
+import fr.free.gelmir.lerubanbleu.util.CustomImageView;
 
 /**
  * Created with IntelliJ IDEA.
@@ -212,13 +213,15 @@ public class EpisodeFragment extends Fragment implements GestureDetector.OnGestu
     private void displayEpisode(Uri imageUri)
     {
         Log.d("displayEpisode", "displaying episode " + imageUri.toString());
-        ImageView episodeView = (ImageView) getView().findViewById(R.id.episodeCustomImageView);
-        //ImageView episodeView = (ImageView) getView().findViewById(R.id.episodeImageView);
-        ImageView watchView = (ImageView) getView().findViewById(R.id.watchImageView);
 
-        //episodeNbView.setVisibility(View.GONE);
+        // Hide watch
+        ImageView watchView = (ImageView) getView().findViewById(R.id.watchImageView);
         watchView.setVisibility(View.GONE);
+
+        // Show episode
         // TODO consider using setImageBitmap() instead
+        // ImageView episodeView = (ImageView) getView().findViewById(R.id.episodeImageView);
+        CustomImageView episodeView = (CustomImageView) getView().findViewById(R.id.episodeCustomImageView);
         episodeView.setImageURI(imageUri);
         episodeView.setVisibility(View.VISIBLE);
     }

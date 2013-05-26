@@ -27,20 +27,19 @@ public class CustomViewPager extends ViewPager {
 
     public CustomViewPager(Context context) {
         super(context);
-        construct(context);
+        init(context);
     }
 
     public CustomViewPager(Context context, AttributeSet attrs) {
         super(context, attrs);
-        construct(context);
+        init(context);
     }
 
 
-    private void construct(Context context) {
+    private void init(Context context) {
         mGestureDetectorListener = new MyGestureDetectorListener();
         mGestureDetector = new GestureDetector(getContext(), mGestureDetectorListener);
         mGestureDetector.setOnDoubleTapListener(mGestureDetectorListener);
-
     }
 
     @Override
@@ -52,10 +51,7 @@ public class CustomViewPager extends ViewPager {
         //return super.onInterceptTouchEvent(ev);
     }
 
-    public void setPageChange(boolean b) {
-    }
-
-
+    // Gesture
     private class MyGestureDetectorListener implements GestureDetector.OnGestureListener , GestureDetector.OnDoubleTapListener {
 
         @Override

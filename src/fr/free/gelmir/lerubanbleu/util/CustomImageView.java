@@ -2,16 +2,11 @@ package fr.free.gelmir.lerubanbleu.util;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.Matrix;
-import android.graphics.PointF;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.view.GestureDetector;
-import android.view.MotionEvent;
-import android.view.ScaleGestureDetector;
-import android.view.View;
+import android.view.*;
 import android.view.animation.AnimationSet;
 import android.view.animation.ScaleAnimation;
 import android.widget.ImageView;
@@ -63,63 +58,56 @@ public class CustomImageView extends ImageView {
 
     }
 
-    public void setMaxZoom(float x) {
-        maxScale = x;
-    }
-
+    // cf. http://stackoverflow.com/questions/12266899/onmeasure-custom-view-explanation
     /*
     @Override
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec)
+    {
+        // Get display size
+        WindowManager wm = (WindowManager) getContext().getSystemService(Context.WINDOW_SERVICE);
+        Display display = wm.getDefaultDisplay();
+        int desiredWidth = display.getWidth();  // deprecated
+        int desiredHeight = display.getHeight();  // deprecated
 
+        int widthMode = MeasureSpec.getMode(widthMeasureSpec);
+        int widthSize = MeasureSpec.getSize(widthMeasureSpec);
+        int heightMode = MeasureSpec.getMode(heightMeasureSpec);
+        int heightSize = MeasureSpec.getSize(heightMeasureSpec);
 
-        viewWidth = MeasureSpec.getSize(widthMeasureSpec);
-        viewHeight = MeasureSpec.getSize(heightMeasureSpec);
+        int width;
+        int height;
 
-        //
-        // Rescales image on rotation
-        //
-        if (oldMeasuredHeight == viewWidth && oldMeasuredHeight == viewHeight
-                || viewWidth == 0 || viewHeight == 0)
-            return;
-        oldMeasuredHeight = viewHeight;
-        oldMeasuredWidth = viewWidth;
-
-        if (saveScale == 1) {
-            //Fit to screen.
-            float scale;
-
-            Drawable drawable = getDrawable();
-            if (drawable == null || drawable.getIntrinsicWidth() == 0 || drawable.getIntrinsicHeight() == 0)
-                return;
-            int bmWidth = drawable.getIntrinsicWidth();
-            int bmHeight = drawable.getIntrinsicHeight();
-
-            Log.d("bmSize", "bmWidth: " + bmWidth + " bmHeight : " + bmHeight);
-
-            float scaleX = (float) viewWidth / (float) bmWidth;
-            float scaleY = (float) viewHeight / (float) bmHeight;
-            scale = Math.min(scaleX, scaleY);
-            matrix.setScale(scale, scale);
-
-            // Center the image
-            float redundantYSpace = (float) viewHeight - (scale * (float) bmHeight);
-            float redundantXSpace = (float) viewWidth - (scale * (float) bmWidth);
-            redundantYSpace /= (float) 2;
-            redundantXSpace /= (float) 2;
-
-            matrix.postTranslate(redundantXSpace, redundantYSpace);
-
-            origWidth = viewWidth - 2 * redundantXSpace;
-            origHeight = viewHeight - 2 * redundantYSpace;
-            setImageMatrix(matrix);
+        // Measure Width
+        if (widthMode == MeasureSpec.EXACTLY) {
+            // Must be this size
+            width = widthSize;
+        } else if (widthMode == MeasureSpec.AT_MOST) {
+            // Can't be bigger than...
+            width = Math.min(desiredWidth, widthSize);
+        } else {
+            // Be whatever you want
+            width = desiredWidth;
         }
-        fixTrans();
+
+        // Measure Height
+        if (heightMode == MeasureSpec.EXACTLY) {
+            // Must be this size
+            height = heightSize;
+        } else if (heightMode == MeasureSpec.AT_MOST) {
+            // Can't be bigger than...
+            height = Math.min(desiredHeight, heightSize);
+        } else {
+            // Be whatever you want
+            height = desiredHeight;
+        }
+
+        // MUST CALL THIS
+        setMeasuredDimension(width, height);
     }
     */
 
 
-
+    // Gesture listener
     private class MyGestureDetectorListener implements GestureDetector.OnGestureListener , GestureDetector.OnDoubleTapListener {
 
         @Override
@@ -130,15 +118,15 @@ public class CustomImageView extends ImageView {
         @Override
         public boolean onDoubleTap(MotionEvent motionEvent) {
             if (mZoomLevel == ZOOM_LEVEL_0) {
-                Toast.makeText(getContext(), "Zoom!", Toast.LENGTH_LONG).show();
+                //Toast.makeText(getContext(), "Zoom!", Toast.LENGTH_LONG).show();
                 mZoomLevel = ZOOM_LEVEL_1;
-                //fitToHeight();
-                zoomIn();
+                zoom();
             }
             else if (mZoomLevel == ZOOM_LEVEL_1) {
                 Toast.makeText(getContext(), "Unzoom!", Toast.LENGTH_LONG).show();
                 mZoomLevel = ZOOM_LEVEL_0;
-                setScaleType(ScaleType.FIT_CENTER);
+                //setScaleType(ScaleType.FIT_CENTER);
+                dummy();
             }
             return true;
         }
@@ -183,22 +171,28 @@ public class CustomImageView extends ImageView {
     }
 
 
-    private void zoomIn()
+    private void zoom()
     {
-        // Get the view height
-        int viewHeightTemp = this.getHeight();
+        // Get view height
+        int viewWidth = getWidth();
+        int viewHeight = getHeight();
 
-        // Get the bitmap
+        // Get bitmap height
         Drawable drawing = getDrawable();
         if (drawing == null) {
             return; // Checking for null & return, as suggested in comments
         }
         Bitmap bitmap = ((BitmapDrawable)drawing).getBitmap();
+        int bitmapWidth = bitmap.getWidth();
+        int bitmapHeight = bitmap.getHeight();
 
-        // Get current dimensions AND the desired bounding box
-        int height = bitmap.getHeight();
+        // Scale
+        float bitmapScale = (float) viewHeight / bitmapHeight;
+        float viewScale = (float) bitmapWidth * bitmapScale / viewWidth;
+        ScaleAnimation scaleAnimation = new ScaleAnimation(1, viewScale, 1, viewScale);
+        scaleAnimation.setDuration(200);
 
-        AnimationSet zoomAnimation = new AnimationSet(true);
+        // Translate
         /*
         TranslateAnimation translateAnimation = new TranslateAnimation(
                 Animation.ABSOLUTE, 0.0f, Animation.ABSOLUTE, -imageViewXCoord/(mScreenWidth/mImageViewWidth),
@@ -207,18 +201,21 @@ public class CustomImageView extends ImageView {
         translateAnimation.setDuration(200);
         */
 
-        //float scale = (float) viewHeightTemp / height;
-        //ScaleAnimation scaleAnimation = new ScaleAnimation(1, scale, 1, scale);
-        ScaleAnimation scaleAnimation = new ScaleAnimation(1, 2, 1, 2);
-        scaleAnimation.setDuration(200);
-
+        // Configure animation set
+        AnimationSet zoomAnimation = new AnimationSet(true);
         //zoomAnimation.addAnimation(translateAnimation);
         zoomAnimation.addAnimation(scaleAnimation);
         zoomAnimation.setFillAfter(true);
         zoomAnimation.setFillEnabled(true);
 
+        // Start animation
         startAnimation(zoomAnimation);
 
+    }
+
+
+    private void dummy() {
+        Toast.makeText(getContext(), "width=" + Integer.toString(this.getWidth()) + " - height=" + Integer.toString(this.getHeight()), Toast.LENGTH_LONG).show();
     }
 
 }
