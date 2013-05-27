@@ -12,13 +12,8 @@ import android.view.animation.ScaleAnimation;
 import android.widget.ImageView;
 import android.widget.Toast;
 
-/**
- * Created with IntelliJ IDEA.
- * User: gerard
- * Date: 18/05/13
- * Time: 13:35
- * To change this template use File | Settings | File Templates.
- */
+
+// cf. http://stackoverflow.com/questions/7418955/how-to-animate-zoom-out-with-imageview-that-uses-matrix-scaling
 public class CustomImageView extends ImageView {
 
     private MyGestureDetectorListener mGestureDetectorListener;
@@ -118,15 +113,14 @@ public class CustomImageView extends ImageView {
         @Override
         public boolean onDoubleTap(MotionEvent motionEvent) {
             if (mZoomLevel == ZOOM_LEVEL_0) {
-                //Toast.makeText(getContext(), "Zoom!", Toast.LENGTH_LONG).show();
+                Toast.makeText(getContext(), "Zoom!", Toast.LENGTH_LONG).show();
                 mZoomLevel = ZOOM_LEVEL_1;
-                zoom();
+                setScaleType(ScaleType.CENTER);
             }
             else if (mZoomLevel == ZOOM_LEVEL_1) {
                 Toast.makeText(getContext(), "Unzoom!", Toast.LENGTH_LONG).show();
                 mZoomLevel = ZOOM_LEVEL_0;
-                //setScaleType(ScaleType.FIT_CENTER);
-                dummy();
+                setScaleType(ScaleType.FIT_CENTER);
             }
             return true;
         }
@@ -169,53 +163,4 @@ public class CustomImageView extends ImageView {
             return false;
         }
     }
-
-
-    private void zoom()
-    {
-        // Get view height
-        int viewWidth = getWidth();
-        int viewHeight = getHeight();
-
-        // Get bitmap height
-        Drawable drawing = getDrawable();
-        if (drawing == null) {
-            return; // Checking for null & return, as suggested in comments
-        }
-        Bitmap bitmap = ((BitmapDrawable)drawing).getBitmap();
-        int bitmapWidth = bitmap.getWidth();
-        int bitmapHeight = bitmap.getHeight();
-
-        // Scale
-        float bitmapScale = (float) viewHeight / bitmapHeight;
-        float viewScale = (float) bitmapWidth * bitmapScale / viewWidth;
-        ScaleAnimation scaleAnimation = new ScaleAnimation(1, viewScale, 1, viewScale);
-        scaleAnimation.setDuration(200);
-
-        // Translate
-        /*
-        TranslateAnimation translateAnimation = new TranslateAnimation(
-                Animation.ABSOLUTE, 0.0f, Animation.ABSOLUTE, -imageViewXCoord/(mScreenWidth/mImageViewWidth),
-                Animation.ABSOLUTE, 0.0f, Animation.ABSOLUTE, -imageViewYCoord/(mScreenWidth/mImageViewWidth)
-        );
-        translateAnimation.setDuration(200);
-        */
-
-        // Configure animation set
-        AnimationSet zoomAnimation = new AnimationSet(true);
-        //zoomAnimation.addAnimation(translateAnimation);
-        zoomAnimation.addAnimation(scaleAnimation);
-        zoomAnimation.setFillAfter(true);
-        zoomAnimation.setFillEnabled(true);
-
-        // Start animation
-        startAnimation(zoomAnimation);
-
-    }
-
-
-    private void dummy() {
-        Toast.makeText(getContext(), "width=" + Integer.toString(this.getWidth()) + " - height=" + Integer.toString(this.getHeight()), Toast.LENGTH_LONG).show();
-    }
-
 }
