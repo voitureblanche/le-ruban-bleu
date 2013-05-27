@@ -2,13 +2,16 @@ package fr.free.gelmir.lerubanbleu.util;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Matrix;
+import android.graphics.RectF;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.*;
-import android.view.animation.AnimationSet;
-import android.view.animation.ScaleAnimation;
+import android.view.animation.AccelerateDecelerateInterpolator;
+import android.view.animation.Interpolator;
 import android.widget.ImageView;
 import android.widget.Toast;
 
@@ -16,6 +19,7 @@ import android.widget.Toast;
 // cf. http://stackoverflow.com/questions/7418955/how-to-animate-zoom-out-with-imageview-that-uses-matrix-scaling
 public class CustomImageView extends ImageView {
 
+    // Gesture
     private MyGestureDetectorListener mGestureDetectorListener;
     private GestureDetector mGestureDetector;
 
@@ -23,21 +27,32 @@ public class CustomImageView extends ImageView {
     static final int ZOOM_LEVEL_0 = 0;
     static final int ZOOM_LEVEL_1 = 1;
 
+    // Zoom management
+    Matrix mMatrix;
+    Matrix mInverseMatrix;
+    float[] mDoubleTapImagePoint = new float[2];
+    float mScaleMin = 0;
+    float mScaleMax = 0;
+
 
     public CustomImageView(Context context) {
         super(context);
-        construct(context);
+        init(context);
     }
 
     public CustomImageView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        construct(context);
+        init(context);
     }
 
     // Constructor
-    private void construct(Context context)
+    private void init(Context context)
     {
         super.setClickable(true);
+
+        // Zoom management
+        mMatrix = new Matrix();
+        mInverseMatrix = new Matrix();
 
         // Gesture management
         mGestureDetectorListener = new MyGestureDetectorListener();
@@ -50,57 +65,30 @@ public class CustomImageView extends ImageView {
                 return result;
             }
         });
-
     }
 
-    // cf. http://stackoverflow.com/questions/12266899/onmeasure-custom-view-explanation
-    /*
     @Override
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec)
-    {
-        // Get display size
-        WindowManager wm = (WindowManager) getContext().getSystemService(Context.WINDOW_SERVICE);
-        Display display = wm.getDefaultDisplay();
-        int desiredWidth = display.getWidth();  // deprecated
-        int desiredHeight = display.getHeight();  // deprecated
+    protected void onDraw(Canvas canvas) {
+        super.onDraw(canvas);
 
-        int widthMode = MeasureSpec.getMode(widthMeasureSpec);
-        int widthSize = MeasureSpec.getSize(widthMeasureSpec);
-        int heightMode = MeasureSpec.getMode(heightMeasureSpec);
-        int heightSize = MeasureSpec.getSize(heightMeasureSpec);
+        // Get view dimension
+        int viewHeight = getHeight();
+        int viewWidth = getWidth();
 
-        int width;
-        int height;
-
-        // Measure Width
-        if (widthMode == MeasureSpec.EXACTLY) {
-            // Must be this size
-            width = widthSize;
-        } else if (widthMode == MeasureSpec.AT_MOST) {
-            // Can't be bigger than...
-            width = Math.min(desiredWidth, widthSize);
-        } else {
-            // Be whatever you want
-            width = desiredWidth;
+        // Get bitmap dimension
+        Drawable drawing = getDrawable();
+        if (drawing == null) {
+            return;
         }
+        Bitmap bitmap = ((BitmapDrawable)drawing).getBitmap();
+        int bitmapHeight = bitmap.getHeight();
+        int bitmapWidth = bitmap.getWidth();
 
-        // Measure Height
-        if (heightMode == MeasureSpec.EXACTLY) {
-            // Must be this size
-            height = heightSize;
-        } else if (heightMode == MeasureSpec.AT_MOST) {
-            // Can't be bigger than...
-            height = Math.min(desiredHeight, heightSize);
-        } else {
-            // Be whatever you want
-            height = desiredHeight;
-        }
+        // Compute scales
+        mScaleMax = (float) viewHeight / bitmapHeight;
+        mScaleMin = (float) viewWidth / bitmapWidth;
 
-        // MUST CALL THIS
-        setMeasuredDimension(width, height);
     }
-    */
-
 
     // Gesture listener
     private class MyGestureDetectorListener implements GestureDetector.OnGestureListener , GestureDetector.OnDoubleTapListener {
@@ -115,7 +103,7 @@ public class CustomImageView extends ImageView {
             if (mZoomLevel == ZOOM_LEVEL_0) {
                 Toast.makeText(getContext(), "Zoom!", Toast.LENGTH_LONG).show();
                 mZoomLevel = ZOOM_LEVEL_1;
-                setScaleType(ScaleType.CENTER);
+                zoom(motionEvent);
             }
             else if (mZoomLevel == ZOOM_LEVEL_1) {
                 Toast.makeText(getContext(), "Unzoom!", Toast.LENGTH_LONG).show();
@@ -163,4 +151,77 @@ public class CustomImageView extends ImageView {
             return false;
         }
     }
+
+
+    private void zoom(MotionEvent event)
+    {
+        // Tapped point coordinates
+        float x = event.getX();
+        float y = event.getY();
+
+        // Matrix
+        float[] matrixValues = new float[9];
+        //setImageMatrix(matrix);
+        //setScaleType(ScaleType.MATRIX);
+
+        mMatrix.set(getImageMatrix());
+        mMatrix.getValues(matrixValues);
+        mMatrix.invert(mInverseMatrix);
+        mDoubleTapImagePoint[0] = x;
+        mDoubleTapImagePoint[1] = y;
+        mInverseMatrix.mapPoints(mDoubleTapImagePoint);
+        //final float scale = matrixValues[Matrix.MSCALE_X];
+        //final float targetScale = scale < 1.0f ? 1.0f : calculateFitToScreenScale();
+        final float targetScale = 0;
+        final float finalX;
+        final float finalY;
+
+        // Zoom out
+        if (targetScale == mScaleMin) {
+            // scaling the image to fit the screen, we want the resulting image to be centered. We need to take
+            // into account the shift that is applied to zoom on the tapped point, easiest way is to reuse
+            // the transformation matrix.
+            RectF imageBounds = new RectF(getDrawable().getBounds());
+            // set up matrix for target
+            mMatrix.reset();
+            mMatrix.postTranslate(-mDoubleTapImagePoint[0], -mDoubleTapImagePoint[1]);
+            mMatrix.postScale(targetScale, targetScale);
+            mMatrix.mapRect(imageBounds);
+
+            finalX = ((getWidth() - imageBounds.width()) / 2.0f) - imageBounds.left;
+            finalY = ((getHeight() - imageBounds.height()) / 2.0f) - imageBounds.top;
+        }
+        // else zoom around the double-tap point
+        else {
+            finalX = x;
+            finalY = y;
+        }
+
+        final Interpolator interpolator = new AccelerateDecelerateInterpolator();
+        final long startTime = System.currentTimeMillis();
+        final long duration = 800;
+        post(new Runnable() {
+            @Override
+            public void run() {
+                float t = (float) (System.currentTimeMillis() - startTime) / duration;
+                t = t > 1.0f ? 1.0f : t;
+                float interpolatedRatio = interpolator.getInterpolation(t);
+                float tempScale = scale + interpolatedRatio * (targetScale - scale);
+                float tempX = x + interpolatedRatio * (finalX - x);
+                float tempY = y + interpolatedRatio * (finalY - y);
+                mMatrix.reset();
+                // translate initialPoint to 0,0 before applying zoom
+                mMatrix.postTranslate(-mDoubleTapImagePoint[0], -mDoubleTapImagePoint[1]);
+                // zoom
+                mMatrix.postScale(tempScale, tempScale);
+                // translate back to equivalent point
+                mMatrix.postTranslate(tempX, tempY);
+                setImageMatrix(mMatrix);
+                if (t < 1f) {
+                    post(this);
+                }
+            }
+        });
+    }
+
 }
