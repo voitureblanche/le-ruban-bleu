@@ -9,14 +9,15 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.view.*;
+import android.view.GestureDetector;
+import android.view.MotionEvent;
+import android.view.View;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.Interpolator;
 import android.widget.ImageView;
 import android.widget.Toast;
 
 
-// cf. http://stackoverflow.com/questions/7418955/how-to-animate-zoom-out-with-imageview-that-uses-matrix-scaling
 public class CustomImageView extends ImageView {
 
     // Gesture
@@ -27,12 +28,14 @@ public class CustomImageView extends ImageView {
     static final int ZOOM_LEVEL_0 = 0;
     static final int ZOOM_LEVEL_1 = 1;
 
-    // Zoom management
+    // Zoom
     Matrix mMatrix;
     Matrix mInverseMatrix;
-    float[] mDoubleTapImagePoint = new float[2];
     float mScaleMin = 0;
     float mScaleMax = 0;
+
+    private boolean mFirstDraw = true;
+
 
 
     public CustomImageView(Context context) {
@@ -71,23 +74,34 @@ public class CustomImageView extends ImageView {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
 
-        // Get view dimension
-        int viewHeight = getHeight();
-        int viewWidth = getWidth();
+        if (mFirstDraw) {
+            // Get view dimension
+            int viewWidth = getWidth();
+            int viewHeight = getHeight();
 
-        // Get bitmap dimension
-        Drawable drawing = getDrawable();
-        if (drawing == null) {
-            return;
+            // Get bitmap dimension
+            Drawable drawing = getDrawable();
+            if (drawing == null) {
+                return;
+            }
+            Bitmap bitmap = ((BitmapDrawable)drawing).getBitmap();
+            int bitmapWidth = bitmap.getWidth();
+            int bitmapHeight = bitmap.getHeight();
+
+            // Compute scales
+            mScaleMax = (float) viewHeight / bitmapHeight;
+            mScaleMin = (float) viewWidth / bitmapWidth;
+
+            // First scaling
+            Matrix matrix = new Matrix();
+            RectF bitmapRect = new RectF(0, 0, bitmapWidth, bitmapHeight);
+            RectF viewRect = new RectF(0, 0, viewWidth, viewHeight);
+            matrix.setRectToRect(bitmapRect, viewRect, Matrix.ScaleToFit.CENTER);
+            setImageMatrix(matrix);
+            setScaleType(ScaleType.MATRIX);
+
+            mFirstDraw = false;
         }
-        Bitmap bitmap = ((BitmapDrawable)drawing).getBitmap();
-        int bitmapHeight = bitmap.getHeight();
-        int bitmapWidth = bitmap.getWidth();
-
-        // Compute scales
-        mScaleMax = (float) viewHeight / bitmapHeight;
-        mScaleMin = (float) viewWidth / bitmapWidth;
-
     }
 
     // Gesture listener
@@ -103,12 +117,12 @@ public class CustomImageView extends ImageView {
             if (mZoomLevel == ZOOM_LEVEL_0) {
                 Toast.makeText(getContext(), "Zoom!", Toast.LENGTH_LONG).show();
                 mZoomLevel = ZOOM_LEVEL_1;
-                zoom(motionEvent);
+                zoom(motionEvent, mScaleMax);
             }
             else if (mZoomLevel == ZOOM_LEVEL_1) {
                 Toast.makeText(getContext(), "Unzoom!", Toast.LENGTH_LONG).show();
                 mZoomLevel = ZOOM_LEVEL_0;
-                setScaleType(ScaleType.FIT_CENTER);
+                zoom(motionEvent, mScaleMin);
             }
             return true;
         }
@@ -153,70 +167,55 @@ public class CustomImageView extends ImageView {
     }
 
 
-    private void zoom(MotionEvent event)
+    // cf. http://stackoverflow.com/questions/7418955/how-to-animate-zoom-out-with-imageview-that-uses-matrix-scaling
+    private void zoom(MotionEvent event, float scale)
     {
-        // Tapped point coordinates
-        float x = event.getX();
-        float y = event.getY();
-
         // Matrix
         float[] matrixValues = new float[9];
-        //setImageMatrix(matrix);
-        //setScaleType(ScaleType.MATRIX);
+        setImageMatrix(mMatrix);
+        setScaleType(ScaleType.MATRIX);
 
+        // Get current matrix
         mMatrix.set(getImageMatrix());
         mMatrix.getValues(matrixValues);
-        mMatrix.invert(mInverseMatrix);
-        mDoubleTapImagePoint[0] = x;
-        mDoubleTapImagePoint[1] = y;
-        mInverseMatrix.mapPoints(mDoubleTapImagePoint);
-        //final float scale = matrixValues[Matrix.MSCALE_X];
-        //final float targetScale = scale < 1.0f ? 1.0f : calculateFitToScreenScale();
-        final float targetScale = 0;
+
+        // Final variables
+        final float startScale = matrixValues[Matrix.MSCALE_X];
+        final float targetScale = scale;
         final float finalX;
         final float finalY;
 
-        // Zoom out
-        if (targetScale == mScaleMin) {
-            // scaling the image to fit the screen, we want the resulting image to be centered. We need to take
-            // into account the shift that is applied to zoom on the tapped point, easiest way is to reuse
-            // the transformation matrix.
-            RectF imageBounds = new RectF(getDrawable().getBounds());
-            // set up matrix for target
-            mMatrix.reset();
-            mMatrix.postTranslate(-mDoubleTapImagePoint[0], -mDoubleTapImagePoint[1]);
-            mMatrix.postScale(targetScale, targetScale);
-            mMatrix.mapRect(imageBounds);
-
-            finalX = ((getWidth() - imageBounds.width()) / 2.0f) - imageBounds.left;
-            finalY = ((getHeight() - imageBounds.height()) / 2.0f) - imageBounds.top;
-        }
-        // else zoom around the double-tap point
-        else {
-            finalX = x;
-            finalY = y;
-        }
-
+        // Interpolator
         final Interpolator interpolator = new AccelerateDecelerateInterpolator();
+
+        // Time
         final long startTime = System.currentTimeMillis();
-        final long duration = 800;
+        final long duration = 300;
+
+        // Thread
         post(new Runnable() {
             @Override
             public void run() {
+
+                // Increment time
                 float t = (float) (System.currentTimeMillis() - startTime) / duration;
                 t = t > 1.0f ? 1.0f : t;
+
+                // Compute scale
                 float interpolatedRatio = interpolator.getInterpolation(t);
-                float tempScale = scale + interpolatedRatio * (targetScale - scale);
-                float tempX = x + interpolatedRatio * (finalX - x);
-                float tempY = y + interpolatedRatio * (finalY - y);
+                float tempScale = startScale + interpolatedRatio * (targetScale - startScale);
                 mMatrix.reset();
+
                 // translate initialPoint to 0,0 before applying zoom
-                mMatrix.postTranslate(-mDoubleTapImagePoint[0], -mDoubleTapImagePoint[1]);
+                //mMatrix.postTranslate(-mDoubleTapImagePoint[0], -mDoubleTapImagePoint[1]);
+
                 // zoom
                 mMatrix.postScale(tempScale, tempScale);
+
                 // translate back to equivalent point
-                mMatrix.postTranslate(tempX, tempY);
+                //mMatrix.postTranslate(tempX, tempY);
                 setImageMatrix(mMatrix);
+
                 if (t < 1f) {
                     post(this);
                 }
