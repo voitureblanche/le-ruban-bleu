@@ -15,7 +15,6 @@ import android.view.View;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.Interpolator;
 import android.widget.ImageView;
-import android.widget.Toast;
 
 
 public class CustomImageView extends ImageView {
@@ -29,13 +28,14 @@ public class CustomImageView extends ImageView {
     static final int ZOOM_LEVEL_1 = 1;
 
     // Zoom
-    Matrix mMatrix;
-    Matrix mInverseMatrix;
     float mScaleMin = 0;
     float mScaleMax = 0;
+    float mInitPointX = 0;
+    float mInitPointY = 0;
+    private boolean mFirstScale = true;
 
-    private boolean mFirstDraw = true;
-
+    // Drag
+    private boolean mDrag = false;
 
 
     public CustomImageView(Context context) {
@@ -52,10 +52,6 @@ public class CustomImageView extends ImageView {
     private void init(Context context)
     {
         super.setClickable(true);
-
-        // Zoom management
-        mMatrix = new Matrix();
-        mInverseMatrix = new Matrix();
 
         // Gesture management
         mGestureDetectorListener = new MyGestureDetectorListener();
@@ -74,7 +70,7 @@ public class CustomImageView extends ImageView {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
 
-        if (mFirstDraw) {
+        if (mFirstScale) {
             // Get view dimension
             int viewWidth = getWidth();
             int viewHeight = getHeight();
@@ -94,13 +90,20 @@ public class CustomImageView extends ImageView {
 
             // First scaling
             Matrix matrix = new Matrix();
+            float[] matrixValues = new float[9];
             RectF bitmapRect = new RectF(0, 0, bitmapWidth, bitmapHeight);
             RectF viewRect = new RectF(0, 0, viewWidth, viewHeight);
             matrix.setRectToRect(bitmapRect, viewRect, Matrix.ScaleToFit.CENTER);
+            matrix.getValues(matrixValues);
             setImageMatrix(matrix);
             setScaleType(ScaleType.MATRIX);
 
-            mFirstDraw = false;
+            // Init point
+            mInitPointX = matrixValues[Matrix.MTRANS_X];
+            mInitPointY = matrixValues[Matrix.MTRANS_Y];
+
+            // First scale done
+            mFirstScale = false;
         }
     }
 
@@ -115,12 +118,12 @@ public class CustomImageView extends ImageView {
         @Override
         public boolean onDoubleTap(MotionEvent motionEvent) {
             if (mZoomLevel == ZOOM_LEVEL_0) {
-                Toast.makeText(getContext(), "Zoom!", Toast.LENGTH_LONG).show();
+                //Toast.makeText(getContext(), "Zoom!", Toast.LENGTH_LONG).show();
                 mZoomLevel = ZOOM_LEVEL_1;
                 zoom(motionEvent, mScaleMax);
             }
             else if (mZoomLevel == ZOOM_LEVEL_1) {
-                Toast.makeText(getContext(), "Unzoom!", Toast.LENGTH_LONG).show();
+                //Toast.makeText(getContext(), "Unzoom!", Toast.LENGTH_LONG).show();
                 mZoomLevel = ZOOM_LEVEL_0;
                 zoom(motionEvent, mScaleMin);
             }
@@ -171,24 +174,38 @@ public class CustomImageView extends ImageView {
     private void zoom(MotionEvent event, float scale)
     {
         // Matrix
+        final Matrix matrix = new Matrix();
         float[] matrixValues = new float[9];
-        setImageMatrix(mMatrix);
-        setScaleType(ScaleType.MATRIX);
+        matrix.set(getImageMatrix());
+        matrix.getValues(matrixValues);
 
-        // Get current matrix
-        mMatrix.set(getImageMatrix());
-        mMatrix.getValues(matrixValues);
-
-        // Final variables
+        // Scaling variables
         final float startScale = matrixValues[Matrix.MSCALE_X];
-        final float targetScale = scale;
-        final float finalX;
-        final float finalY;
+        final float endScale = scale;
+        final float startX;
+        final float startY;
+        final float endX;
+        final float endY;
 
-        // Interpolator
+        // Zoom
+        if (startScale < endScale) {
+            startX = matrixValues[Matrix.MTRANS_X];
+            startY = matrixValues[Matrix.MTRANS_Y];
+            // Always zoom to the origin
+            endX = 0;
+            endY = 0;
+        }
+        // Unzoom
+        else {
+            startX = matrixValues[Matrix.MTRANS_X];
+            startY = matrixValues[Matrix.MTRANS_Y];
+            endX = mInitPointX;
+            endY = mInitPointY;
+        }
+        // Log.i("zoom", "translate from (" + Float.toString(startX) + "," + Float.toString(startY) + ") to (" + Float.toString(endX) + "," + Float.toString(endY) + ")" );
+
+        // Interpolation
         final Interpolator interpolator = new AccelerateDecelerateInterpolator();
-
-        // Time
         final long startTime = System.currentTimeMillis();
         final long duration = 300;
 
@@ -201,20 +218,18 @@ public class CustomImageView extends ImageView {
                 float t = (float) (System.currentTimeMillis() - startTime) / duration;
                 t = t > 1.0f ? 1.0f : t;
 
-                // Compute scale
+                // Compute scale variables
                 float interpolatedRatio = interpolator.getInterpolation(t);
-                float tempScale = startScale + interpolatedRatio * (targetScale - startScale);
-                mMatrix.reset();
+                float tempScale = startScale + interpolatedRatio * (endScale - startScale);
+                float tempX = startX + interpolatedRatio * (endX - startX);
+                float tempY = startY + interpolatedRatio * (endY - startY);
 
-                // translate initialPoint to 0,0 before applying zoom
-                //mMatrix.postTranslate(-mDoubleTapImagePoint[0], -mDoubleTapImagePoint[1]);
-
-                // zoom
-                mMatrix.postScale(tempScale, tempScale);
-
-                // translate back to equivalent point
-                //mMatrix.postTranslate(tempX, tempY);
-                setImageMatrix(mMatrix);
+                // Apply matrix
+                matrix.reset();
+                //matrix.postTranslate(0, 0); // apply zoom on (0, 0)
+                matrix.postScale(tempScale, tempScale);
+                matrix.postTranslate(tempX, tempY);
+                setImageMatrix(matrix);
 
                 if (t < 1f) {
                     post(this);
