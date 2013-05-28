@@ -42,14 +42,27 @@ public class CustomViewPager extends ViewPager {
         mGestureDetector.setOnDoubleTapListener(mGestureDetectorListener);
     }
 
+
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
-        //Log.d("CustomViewPager", "touch event");
+        //Log.d("CustomViewPager", "onInterceptTouchEvent");
         //boolean result = mGestureDetector.onTouchEvent(ev);
-
-        return false;
         //return super.onInterceptTouchEvent(ev);
+
+        // Do not intercept touch event, will propagate to the children, will be handled in the ViewPager last
+        //return false;
+
+        // Intercept touch event, will not be propagated to the children, will be handled in the
+        return true;
     }
+
+    /*
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        Log.d("CustomViewPager", "onTouchEvent");
+        return super.onTouchEvent(event);
+    }
+    */
 
     // Gesture
     private class MyGestureDetectorListener implements GestureDetector.OnGestureListener , GestureDetector.OnDoubleTapListener {

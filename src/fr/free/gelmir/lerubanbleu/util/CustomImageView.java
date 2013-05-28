@@ -8,7 +8,6 @@ import android.graphics.RectF;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
@@ -20,22 +19,24 @@ import android.widget.ImageView;
 public class CustomImageView extends ImageView {
 
     // Gesture
-    private MyGestureDetectorListener mGestureDetectorListener;
-    private GestureDetector mGestureDetector;
+    GestureDetector mGestureDetector;
 
     private int mZoomLevel;
     static final int ZOOM_LEVEL_0 = 0;
     static final int ZOOM_LEVEL_1 = 1;
 
     // Zoom
-    float mScaleMin = 0;
-    float mScaleMax = 0;
-    float mInitPointX = 0;
-    float mInitPointY = 0;
+    private float mScaleMin = 0;
+    private float mScaleMax = 0;
+    private float mInitPointX = 0;
+    private float mInitPointY = 0;
     private boolean mFirstScale = true;
 
     // Drag
     private boolean mDrag = false;
+    private float mDragStartX;
+    private float mDragStartY;
+
 
 
     public CustomImageView(Context context) {
@@ -54,9 +55,9 @@ public class CustomImageView extends ImageView {
         super.setClickable(true);
 
         // Gesture management
-        mGestureDetectorListener = new MyGestureDetectorListener();
-        mGestureDetector = new GestureDetector(getContext(), mGestureDetectorListener);
-        mGestureDetector.setOnDoubleTapListener(mGestureDetectorListener);
+        MyGestureDetectorListener gestureDetectorListener = new MyGestureDetectorListener();
+        mGestureDetector = new GestureDetector(getContext(), gestureDetectorListener);
+        mGestureDetector.setOnDoubleTapListener(gestureDetectorListener);
         setOnTouchListener(new View.OnTouchListener() {
             public boolean onTouch(View v, MotionEvent event) {
                 boolean result;
@@ -107,6 +108,35 @@ public class CustomImageView extends ImageView {
         }
     }
 
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        //Log.d("CustomImageView", "onTouchEvent");
+        //return super.onTouchEvent(event);
+
+        if (mDrag)
+        {
+            switch (event.getAction()) {
+                case MotionEvent.ACTION_DOWN:
+                    mDragStartX = event.getRawX();
+                    mDragStartY = event.getRawY();
+                    break;
+
+                case MotionEvent.ACTION_MOVE:
+                    float endX = event.getRawX();
+                    float endY = event.getRawY();
+                    float distanceX = endX - mDragStartX;
+                    float distanceY = endY - mDragStartY;
+
+                    // Scroll
+                    HorizontalScroll(distanceX);
+                    break;
+            }
+            return true;
+        }
+
+        return super.onTouchEvent(event);
+    }
+
     // Gesture listener
     private class MyGestureDetectorListener implements GestureDetector.OnGestureListener , GestureDetector.OnDoubleTapListener {
 
@@ -120,11 +150,13 @@ public class CustomImageView extends ImageView {
             if (mZoomLevel == ZOOM_LEVEL_0) {
                 //Toast.makeText(getContext(), "Zoom!", Toast.LENGTH_LONG).show();
                 mZoomLevel = ZOOM_LEVEL_1;
+                mDrag = true;
                 zoom(motionEvent, mScaleMax);
             }
             else if (mZoomLevel == ZOOM_LEVEL_1) {
                 //Toast.makeText(getContext(), "Unzoom!", Toast.LENGTH_LONG).show();
                 mZoomLevel = ZOOM_LEVEL_0;
+                mDrag = false;
                 zoom(motionEvent, mScaleMin);
             }
             return true;
@@ -150,12 +182,7 @@ public class CustomImageView extends ImageView {
         }
 
         @Override
-        public boolean onScroll(MotionEvent motionEvent, MotionEvent motionEvent2, float v, float v2) {
-            if (mZoomLevel == ZOOM_LEVEL_1) {
-                // Toast.makeText(getContext(), "Scrolling !?", Toast.LENGTH_LONG).show();
-                Log.d("MyGestureDetectorListener", "onScroll " + Float.toString(v) + " " + Float.toString(v2));
-                return true;
-            }
+        public boolean onScroll(MotionEvent motionEvent, MotionEvent motionEvent2, float distanceX, float distanceY) {
             return false;
         }
 
@@ -236,6 +263,24 @@ public class CustomImageView extends ImageView {
                 }
             }
         });
+    }
+
+    //
+    private void HorizontalScroll(float distanceX)
+    {
+        // Matrix
+        Matrix matrix = new Matrix();
+        float[] matrixValues = new float[9];
+        matrix.set(getImageMatrix());
+        matrix.getValues(matrixValues);
+
+        // Scaling variables
+        float endX = matrixValues[Matrix.MTRANS_X] + distanceX;
+        float endY = matrixValues[Matrix.MTRANS_Y];
+
+        // Apply matrix
+        matrix.postTranslate(endX, endY);
+        setImageMatrix(matrix);
     }
 
 }
