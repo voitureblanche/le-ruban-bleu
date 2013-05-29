@@ -142,10 +142,19 @@ public class CustomImageView extends ImageView {
 
                 case MotionEvent.ACTION_MOVE:
                     Log.i("CustomImageView", "onTouchEvent ACTION_MOVE");
+
+                    // Scroll
                     float endX = event.getRawX();
                     float distanceX = endX - mDragStartX;
                     mDragStartX = endX;
-                    horizontalScroll(distanceX);
+                    boolean boundary = horizontalScroll(distanceX);
+
+                    // Boundary has been reached: re-enable page swiping
+                    if (boundary) {
+                        //CustomViewPager viewPager = (CustomViewPager) getParent();
+                        //viewPager.setPaging(true);
+                    }
+
                     break;
             }
             return true;
@@ -167,14 +176,23 @@ public class CustomImageView extends ImageView {
         {
             // Change zoom level
             int zoomLevel = mApplication.getZoomLevel();
+            //CustomViewPager viewPager = (CustomViewPager) getParent();
             switch (zoomLevel) {
                 case 0:
+                    // Disable swiping
+                    //viewPager.setPaging(false);
+
+                    // Zoom
                     mApplication.setZoomLevel(1);
                     mDrag = true;
                     zoom(motionEvent, mScaleMax);
                     break;
 
                 case 1:
+                    // Enable swiping
+                    //viewPager.setPaging(true);
+
+                    // Unzoom
                     mApplication.setZoomLevel(0);
                     mDrag = false;
                     zoom(motionEvent, mScaleMin);
@@ -243,6 +261,7 @@ public class CustomImageView extends ImageView {
             endX = 0;
             endY = 0;
         }
+
         // Unzoom
         else {
             startX = matrixValues[Matrix.MTRANS_X];
@@ -250,7 +269,6 @@ public class CustomImageView extends ImageView {
             endX = mScaleToFitPointX;
             endY = mScaleToFitPointY;
         }
-        // Log.i("zoom", "translate from (" + Float.toString(startX) + "," + Float.toString(startY) + ") to (" + Float.toString(endX) + "," + Float.toString(endY) + ")" );
 
         // Interpolation
         final Interpolator interpolator = new AccelerateDecelerateInterpolator();
@@ -286,8 +304,10 @@ public class CustomImageView extends ImageView {
     }
 
     //
-    private void horizontalScroll(float distanceX)
+    private boolean horizontalScroll(float distanceX)
     {
+        boolean boundary = false;
+
         // Matrix
         Matrix matrix = new Matrix();
         float[] matrixValues = new float[9];
@@ -310,10 +330,12 @@ public class CustomImageView extends ImageView {
         // Left boundary has been reached
         if (endX < minX) {
             translateX = minX - startX;
+            boundary = true;
         }
         // Right boundary has been reached
         else if (endX > 0) {
             translateX = -startX;
+            boundary = true;
         }
         else {
             translateX = distanceX;
@@ -322,6 +344,8 @@ public class CustomImageView extends ImageView {
         // Apply matrix
         matrix.postTranslate(translateX, 0);
         setImageMatrix(matrix);
+
+        return boundary;
     }
 
 }

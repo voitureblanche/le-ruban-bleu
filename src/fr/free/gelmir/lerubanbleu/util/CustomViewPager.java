@@ -3,10 +3,11 @@ package fr.free.gelmir.lerubanbleu.util;
 import android.content.Context;
 import android.support.v4.view.ViewPager;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
+import android.view.View;
 import android.widget.Toast;
+import fr.free.gelmir.lerubanbleu.LeRubanBleuApplication;
 
 /**
  * Created with IntelliJ IDEA.
@@ -17,13 +18,11 @@ import android.widget.Toast;
  */
 public class CustomViewPager extends ViewPager {
 
-    static final int ZOOM_LEVEL_0 = 0;
-    static final int ZOOM_LEVEL_1 = 1;
-    private int mZoomLevel = ZOOM_LEVEL_0;
+    // Paging
+    private boolean mPagingEnabled = true;
 
-    MyGestureDetectorListener mGestureDetectorListener;
+    // Gesture
     GestureDetector mGestureDetector;
-
 
     public CustomViewPager(Context context) {
         super(context);
@@ -35,34 +34,58 @@ public class CustomViewPager extends ViewPager {
         init(context);
     }
 
-
+    // Constructor
     private void init(Context context) {
-        mGestureDetectorListener = new MyGestureDetectorListener();
-        mGestureDetector = new GestureDetector(getContext(), mGestureDetectorListener);
-        mGestureDetector.setOnDoubleTapListener(mGestureDetectorListener);
-    }
 
+        // Disable paging when image is zoomed
+        LeRubanBleuApplication application = LeRubanBleuApplication.getInstance();
+        if (application.getZoomLevel() == 1) {
+            mPagingEnabled = false;
+        }
 
-    @Override
-    public boolean onInterceptTouchEvent(MotionEvent ev) {
-        //Log.d("CustomViewPager", "onInterceptTouchEvent");
-        //boolean result = mGestureDetector.onTouchEvent(ev);
-        //return super.onInterceptTouchEvent(ev);
-
-        // Do not intercept touch event, will propagate to the children, will be handled in the ViewPager last
-        return false;
-
-        // Intercept touch event, will not be propagated to the children, will be handled in the
-        //return true;
+        // Gesture
+        MyGestureDetectorListener gestureDetectorListener = new MyGestureDetectorListener();
+        mGestureDetector = new GestureDetector(getContext(), gestureDetectorListener);
+        mGestureDetector.setOnDoubleTapListener(gestureDetectorListener);
+        setOnTouchListener(new View.OnTouchListener() {
+            public boolean onTouch(View v, MotionEvent event) {
+                boolean result;
+                result = mGestureDetector.onTouchEvent(event);
+                return result;
+            }
+        });
     }
 
     /*
     @Override
+    public boolean onInterceptTouchEvent(MotionEvent ev) {
+        //Log.d("CustomViewPager", "onInterceptTouchEvent");
+
+        if (mPagingEnabled) {
+            return super.onInterceptTouchEvent(ev);
+        }
+
+        // Do not intercept touch event, will propagate to the children, will be handled in the ViewPager last
+        return false;
+
+        // Intercept touch return true, will not propagate to the children, will be handled in onTouchedEvent()
+        // return true;
+    }
+
+    @Override
     public boolean onTouchEvent(MotionEvent event) {
-        Log.d("CustomViewPager", "onTouchEvent");
-        return super.onTouchEvent(event);
+        //Log.d("CustomViewPager", "onTouchEvent");
+        if (mPagingEnabled) {
+            return super.onTouchEvent(event);
+        }
+        return false;
     }
     */
+
+    public void setPaging(boolean b) {
+        mPagingEnabled = b;
+    }
+
 
     // Gesture
     private class MyGestureDetectorListener implements GestureDetector.OnGestureListener , GestureDetector.OnDoubleTapListener {
@@ -74,21 +97,7 @@ public class CustomViewPager extends ViewPager {
 
         @Override
         public boolean onDoubleTap(MotionEvent motionEvent) {
-            if (mZoomLevel == ZOOM_LEVEL_0) {
-                Toast.makeText(getContext(), "Zoom!", Toast.LENGTH_LONG).show();
-                mZoomLevel = ZOOM_LEVEL_1;
-
-                // TODO zoom fragments
-
-
-
-            }
-            else if (mZoomLevel == ZOOM_LEVEL_1) {
-                Toast.makeText(getContext(), "Unzoom!", Toast.LENGTH_LONG).show();
-                mZoomLevel = ZOOM_LEVEL_0;
-
-                // TODO unzoom fragments
-            }
+            Toast.makeText(getContext(), "Intercepted double-tap!?", Toast.LENGTH_LONG).show();
             return true;
         }
 
@@ -113,11 +122,6 @@ public class CustomViewPager extends ViewPager {
 
         @Override
         public boolean onScroll(MotionEvent motionEvent, MotionEvent motionEvent2, float v, float v2) {
-            if (mZoomLevel == ZOOM_LEVEL_1) {
-                // Toast.makeText(getContext(), "Scrolling !?", Toast.LENGTH_LONG).show();
-                Log.d("CustomViewPager", "onScroll " + Float.toString(v) + " " + Float.toString(v2));
-                return true;
-            }
             return false;
         }
 
