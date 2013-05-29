@@ -1,12 +1,8 @@
 package fr.free.gelmir.lerubanbleu.util;
 
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.Matrix;
-import android.graphics.RectF;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
+import android.graphics.*;
+import android.net.Uri;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.GestureDetector;
@@ -15,31 +11,34 @@ import android.view.View;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.Interpolator;
 import android.widget.ImageView;
+import fr.free.gelmir.lerubanbleu.LeRubanBleuApplication;
 
 
 public class CustomImageView extends ImageView {
 
+    // Application
+    LeRubanBleuApplication mApplication;
+
     // Gesture
     GestureDetector mGestureDetector;
 
-    private int mZoomLevel;
-    static final int ZOOM_LEVEL_0 = 0;
-    static final int ZOOM_LEVEL_1 = 1;
+    // Dimensions
+    private int mViewWidth;
+    private int mViewHeight;
+    private int mBitmapWidth;
+    private int mBitmapHeight;
 
     // Zoom
     private float mScaleMin = 0;
     private float mScaleMax = 0;
-    private float mInitPointX = 0;
-    private float mInitPointY = 0;
-    private boolean mFirstScale = true;
+    private float mScaleToFitPointX = 0;
+    private float mScaleToFitPointY = 0;
+    private boolean mFirstDraw = true;
 
     // Drag
     private boolean mDrag = false;
     private float mDragStartX;
 
-    // Rectangles
-    RectF mBitmapRect;
-    RectF mViewRect;
 
     public CustomImageView(Context context) {
         super(context);
@@ -70,46 +69,62 @@ public class CustomImageView extends ImageView {
     }
 
     @Override
-    protected void onDraw(Canvas canvas) {
-        super.onDraw(canvas);
+    public void setImageURI(Uri uri) {
 
-        if (mFirstScale) {
-            // Get view dimension
-            int viewWidth = getWidth();
-            int viewHeight = getHeight();
+        // Get bitmap dimension
+        Bitmap bitmap = BitmapFactory.decodeFile(uri.getPath());
+        mBitmapWidth = bitmap.getWidth();
+        mBitmapHeight = bitmap.getHeight();
 
-            // Get bitmap dimension
-            Drawable drawing = getDrawable();
-            if (drawing == null) {
-                return;
-            }
-            Bitmap bitmap = ((BitmapDrawable)drawing).getBitmap();
-            int bitmapWidth = bitmap.getWidth();
-            int bitmapHeight = bitmap.getHeight();
+        super.setImageURI(uri);
 
-            // Compute scales
-            mScaleMax = (float) viewHeight / bitmapHeight;
-            mScaleMin = (float) viewWidth / bitmapWidth;
+    }
 
-            // TODO consider zoom status
+    // cf. http://stackoverflow.com/questions/12266899/onmeasure-custom-view-explanation
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
 
-            // First scaling
-            Matrix matrix = new Matrix();
-            float[] matrixValues = new float[9];
-            mBitmapRect = new RectF(0, 0, bitmapWidth, bitmapHeight);
-            mViewRect = new RectF(0, 0, viewWidth, viewHeight);
-            matrix.setRectToRect(mBitmapRect, mViewRect, Matrix.ScaleToFit.CENTER);
-            matrix.getValues(matrixValues);
-            setImageMatrix(matrix);
-            setScaleType(ScaleType.MATRIX);
+        // Get view dimension
+        mViewWidth = MeasureSpec.getSize(widthMeasureSpec);
+        mViewHeight = MeasureSpec.getSize(heightMeasureSpec);
 
-            // Init point
-            mInitPointX = matrixValues[Matrix.MTRANS_X];
-            mInitPointY = matrixValues[Matrix.MTRANS_Y];
+        // Compute scales
+        mScaleMin = (float) mViewWidth / mBitmapWidth;
+        mScaleMax = (float) mViewHeight / mBitmapHeight;
 
-            // First scale done
-            mFirstScale = false;
+        // Compute default matrix that fits the image in the view
+        Matrix matrix = new Matrix();
+        float[] matrixValues = new float[9];
+        RectF bitmapRect = new RectF(0, 0, mBitmapWidth, mBitmapHeight);
+        RectF viewRect = new RectF(0, 0, mViewWidth, mViewHeight);
+        matrix.setRectToRect(bitmapRect, viewRect, Matrix.ScaleToFit.CENTER);
+        matrix.getValues(matrixValues);
+
+        // Scale to fit point
+        mScaleToFitPointX = matrixValues[Matrix.MTRANS_X];
+        mScaleToFitPointY = matrixValues[Matrix.MTRANS_Y];
+
+        // Apply zoom level
+        mApplication = LeRubanBleuApplication.getInstance();
+        int zoomLevel = mApplication.getZoomLevel();
+        switch (zoomLevel)
+        {
+            case 0:
+                setScaleType(ScaleType.MATRIX);
+                setImageMatrix(matrix);
+                break;
+
+            case 1:
+                setScaleType(ScaleType.MATRIX);
+                matrix.reset();
+                matrix.postScale(mScaleMax, mScaleMax);
+                matrix.postTranslate(0, 0);
+                setImageMatrix(matrix);
+                break;
         }
+
+        // Mandatory call
+        setMeasuredDimension(mViewWidth, mViewHeight);
     }
 
     @Override
@@ -148,22 +163,22 @@ public class CustomImageView extends ImageView {
         }
 
         @Override
-        public boolean onDoubleTap(MotionEvent motionEvent) {
-            if (mZoomLevel == ZOOM_LEVEL_0) {
-                //Toast.makeText(getContext(), "Zoom!", Toast.LENGTH_LONG).show();
-                mZoomLevel = ZOOM_LEVEL_1;
-                mDrag = true;
-                zoom(motionEvent, mScaleMax);
+        public boolean onDoubleTap(MotionEvent motionEvent)
+        {
+            // Change zoom level
+            int zoomLevel = mApplication.getZoomLevel();
+            switch (zoomLevel) {
+                case 0:
+                    mApplication.setZoomLevel(1);
+                    mDrag = true;
+                    zoom(motionEvent, mScaleMax);
+                    break;
 
-                // TODO save zoom status
-            }
-            else if (mZoomLevel == ZOOM_LEVEL_1) {
-                //Toast.makeText(getContext(), "Unzoom!", Toast.LENGTH_LONG).show();
-                mZoomLevel = ZOOM_LEVEL_0;
-                mDrag = false;
-                zoom(motionEvent, mScaleMin);
-
-                // TODO save zoom status
+                case 1:
+                    mApplication.setZoomLevel(0);
+                    mDrag = false;
+                    zoom(motionEvent, mScaleMin);
+                    break;
             }
             return true;
         }
@@ -232,8 +247,8 @@ public class CustomImageView extends ImageView {
         else {
             startX = matrixValues[Matrix.MTRANS_X];
             startY = matrixValues[Matrix.MTRANS_Y];
-            endX = mInitPointX;
-            endY = mInitPointY;
+            endX = mScaleToFitPointX;
+            endY = mScaleToFitPointY;
         }
         // Log.i("zoom", "translate from (" + Float.toString(startX) + "," + Float.toString(startY) + ") to (" + Float.toString(endX) + "," + Float.toString(endY) + ")" );
 
@@ -259,7 +274,6 @@ public class CustomImageView extends ImageView {
 
                 // Apply matrix
                 matrix.reset();
-                //matrix.postTranslate(0, 0); // apply zoom on (0, 0)
                 matrix.postScale(tempScale, tempScale);
                 matrix.postTranslate(tempX, tempY);
                 setImageMatrix(matrix);
@@ -285,23 +299,25 @@ public class CustomImageView extends ImageView {
         float scale = matrixValues[Matrix.MSCALE_X];
 
         // Compute boundaries
-        float minX = - ((mBitmapRect.right * scale) - mViewRect.right);
+        float minX = - ((mBitmapWidth * scale) - mViewWidth);
         float maxX = 0;
 
         // Compute translation
         float translateX;
         float endX = startX + distanceX;
+
+        // Detect boundaries
+        // Left boundary has been reached
         if (endX < minX) {
             translateX = minX - startX;
         }
+        // Right boundary has been reached
         else if (endX > 0) {
             translateX = -startX;
         }
         else {
             translateX = distanceX;
         }
-
-        // TODO detect boundaries touch
 
         // Apply matrix
         matrix.postTranslate(translateX, 0);
