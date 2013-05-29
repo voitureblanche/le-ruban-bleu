@@ -206,13 +206,13 @@ public class SplashActivity extends Activity {
 
         public void run() {
             try {
-                Thread.sleep(3000);
+                Thread.sleep(2000);
                 runOnUiThread(new Runnable() {
                     public void run() {
                         startSplash();
                     }
                 });
-                mSplashAsyncTask.get(7000, TimeUnit.MILLISECONDS);
+                mSplashAsyncTask.get(4000, TimeUnit.MILLISECONDS);
             }
             catch (InterruptedException e) {
                 Log.d("SplashRunnable", "splash cancelled");

@@ -50,10 +50,10 @@ public class CustomViewPager extends ViewPager {
         //return super.onInterceptTouchEvent(ev);
 
         // Do not intercept touch event, will propagate to the children, will be handled in the ViewPager last
-        //return false;
+        return false;
 
         // Intercept touch event, will not be propagated to the children, will be handled in the
-        return true;
+        //return true;
     }
 
     /*

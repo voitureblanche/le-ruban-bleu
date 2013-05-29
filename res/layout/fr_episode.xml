@@ -22,7 +22,7 @@
         android:layout_centerHorizontal="true"
         android:layout_centerVertical="true"
         android:visibility="invisible"
-        android:background="#ABCDEF"
+        android:background="#FFFFFF"
         android:scaleType="fitCenter"/>
 
     <ImageView
