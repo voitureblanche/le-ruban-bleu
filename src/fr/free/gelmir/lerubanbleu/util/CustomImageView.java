@@ -15,7 +15,6 @@ import android.view.View;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.Interpolator;
 import android.widget.ImageView;
-import android.widget.Toast;
 
 
 public class CustomImageView extends ImageView {
@@ -36,11 +35,7 @@ public class CustomImageView extends ImageView {
 
     // Drag
     private boolean mDrag = false;
-    private int mPreviousAction = -1;
     private float mDragStartX;
-    private float mDragStartY;
-    private float mDistanceX;
-    private float mDistanceY;
 
     // Rectangles
     RectF mBitmapRect;
@@ -96,6 +91,8 @@ public class CustomImageView extends ImageView {
             mScaleMax = (float) viewHeight / bitmapHeight;
             mScaleMin = (float) viewWidth / bitmapWidth;
 
+            // TODO consider zoom status
+
             // First scaling
             Matrix matrix = new Matrix();
             float[] matrixValues = new float[9];
@@ -126,39 +123,14 @@ public class CustomImageView extends ImageView {
                 case MotionEvent.ACTION_DOWN:
                     Log.i("CustomImageView", "onTouchEvent ACTION_DOWN");
                     mDragStartX = event.getRawX();
-                    mDragStartY = event.getRawY();
-                    mDistanceX = 0;
-                    mDistanceY = 0;
-                    mPreviousAction = MotionEvent.ACTION_DOWN;
                     break;
 
                 case MotionEvent.ACTION_MOVE:
                     Log.i("CustomImageView", "onTouchEvent ACTION_MOVE");
                     float endX = event.getRawX();
-                    float endY = event.getRawY();
                     float distanceX = endX - mDragStartX;
-                    mDistanceX = mDistanceX + endX - mDragStartX;
-                    mDistanceY = mDistanceY + endY - mDragStartY;
                     mDragStartX = endX;
-                    mDragStartY = endY;
-
-                    // Scroll
-                    HorizontalScroll(distanceX);
-                    break;
-
-                case MotionEvent.ACTION_UP:
-                    if (mPreviousAction == MotionEvent.ACTION_DOWN) {
-                        Log.i("CustomImageView", "onTouchEvent ACTION_UP - total distance " + Float.toString(mDistanceX));
-                        Toast.makeText(getContext(), "Total distance " + Float.toString(mDistanceX), Toast.LENGTH_LONG).show();
-
-                        // Scroll
-                        // HorizontalScroll(mDistanceX);
-
-                        // Reset
-                        mDistanceX = 0;
-                        mDistanceY = 0;
-                        mPreviousAction = MotionEvent.ACTION_UP;
-                    }
+                    horizontalScroll(distanceX);
                     break;
             }
             return true;
@@ -182,12 +154,16 @@ public class CustomImageView extends ImageView {
                 mZoomLevel = ZOOM_LEVEL_1;
                 mDrag = true;
                 zoom(motionEvent, mScaleMax);
+
+                // TODO save zoom status
             }
             else if (mZoomLevel == ZOOM_LEVEL_1) {
                 //Toast.makeText(getContext(), "Unzoom!", Toast.LENGTH_LONG).show();
                 mZoomLevel = ZOOM_LEVEL_0;
                 mDrag = false;
                 zoom(motionEvent, mScaleMin);
+
+                // TODO save zoom status
             }
             return true;
         }
@@ -296,7 +272,7 @@ public class CustomImageView extends ImageView {
     }
 
     //
-    private void HorizontalScroll(float distanceX)
+    private void horizontalScroll(float distanceX)
     {
         // Matrix
         Matrix matrix = new Matrix();
@@ -324,6 +300,8 @@ public class CustomImageView extends ImageView {
         else {
             translateX = distanceX;
         }
+
+        // TODO detect boundaries touch
 
         // Apply matrix
         matrix.postTranslate(translateX, 0);

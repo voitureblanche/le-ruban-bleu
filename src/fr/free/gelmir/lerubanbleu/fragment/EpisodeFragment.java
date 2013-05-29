@@ -8,6 +8,7 @@ import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.*;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import fr.free.gelmir.lerubanbleu.R;
@@ -67,8 +68,6 @@ public class EpisodeFragment extends Fragment implements GestureDetector.OnGestu
 
         // Inflate view
         View view = inflater.inflate(R.layout.fr_episode, container, false);
-        ImageView imageView = (ImageView) view.findViewById(R.id.watchImageView);
-        imageView.setImageResource(R.drawable.watch);
         TextView textView = (TextView) view.findViewById(R.id.episodeNbTextView);
         textView.setText(Integer.toString(episodeNb + 1));
 
@@ -214,9 +213,9 @@ public class EpisodeFragment extends Fragment implements GestureDetector.OnGestu
     {
         Log.d("displayEpisode", "displaying episode " + imageUri.toString());
 
-        // Hide watch
-        ImageView watchView = (ImageView) getView().findViewById(R.id.watchImageView);
-        watchView.setVisibility(View.GONE);
+        // Hide progress bar
+        ProgressBar progressBar = (ProgressBar) getView().findViewById(R.id.episodeProgressBar);
+        progressBar.setVisibility(View.GONE);
 
         // Show episode
         // TODO consider using setImageBitmap() instead

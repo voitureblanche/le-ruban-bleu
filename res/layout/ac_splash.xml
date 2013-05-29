@@ -9,15 +9,15 @@
     <ImageView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/title"
+        android:id="@+id/splashImage"
         android:src="@drawable/title"
         android:layout_centerInParent="true"/>
 
-    <ImageView
+    <ProgressBar
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/watch"
-        android:src="@drawable/watch"
+        android:id="@+id/splashProgressBar"
         android:layout_centerHorizontal="true"
-        android:layout_below="@+id/title"/>
+        android:layout_below="@+id/splashImage"/>
+
 </RelativeLayout>
