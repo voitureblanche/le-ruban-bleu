@@ -1,13 +1,15 @@
 package fr.free.gelmir.lerubanbleu.util;
 
 import android.content.Context;
-import android.graphics.*;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
+import android.graphics.RectF;
 import android.net.Uri;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
-import android.view.View;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.Interpolator;
 import android.widget.ImageView;
@@ -53,9 +55,10 @@ public class CustomImageView extends ImageView {
     // Constructor
     private void init(Context context)
     {
-        super.setClickable(true);
+        //super.setClickable(true);
 
         // Gesture management
+        /*
         MyGestureDetectorListener gestureDetectorListener = new MyGestureDetectorListener();
         mGestureDetector = new GestureDetector(getContext(), gestureDetectorListener);
         mGestureDetector.setOnDoubleTapListener(gestureDetectorListener);
@@ -66,6 +69,7 @@ public class CustomImageView extends ImageView {
                 return result;
             }
         });
+        */
     }
 
     @Override
@@ -129,9 +133,10 @@ public class CustomImageView extends ImageView {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        //Log.d("CustomImageView", "onTouchEvent");
-        //return super.onTouchEvent(event);
+        Log.d("CustomImageView", "onTouchEvent " + Integer.toString(event.getAction()));
+        return super.onTouchEvent(event);
 
+        /*
         if (mDrag)
         {
             switch (event.getAction()) {
@@ -157,10 +162,11 @@ public class CustomImageView extends ImageView {
 
                     break;
             }
+            // Consume the event
             return true;
         }
-
         return super.onTouchEvent(event);
+        */
     }
 
     // Gesture listener

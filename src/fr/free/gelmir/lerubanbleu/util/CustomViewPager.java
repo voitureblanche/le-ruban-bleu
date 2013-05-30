@@ -3,6 +3,7 @@ package fr.free.gelmir.lerubanbleu.util;
 import android.content.Context;
 import android.support.v4.view.ViewPager;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
@@ -56,11 +57,12 @@ public class CustomViewPager extends ViewPager {
         });
     }
 
-    /*
     @Override
-    public boolean onInterceptTouchEvent(MotionEvent ev) {
-        //Log.d("CustomViewPager", "onInterceptTouchEvent");
+    public boolean onInterceptTouchEvent(MotionEvent event) {
+        Log.d("CustomViewPager", "onInterceptTouchEvent " + Integer.toString(event.getAction()));
+        return super.onInterceptTouchEvent(event);
 
+        /*
         if (mPagingEnabled) {
             return super.onInterceptTouchEvent(ev);
         }
@@ -70,17 +72,21 @@ public class CustomViewPager extends ViewPager {
 
         // Intercept touch return true, will not propagate to the children, will be handled in onTouchedEvent()
         // return true;
+        */
     }
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        //Log.d("CustomViewPager", "onTouchEvent");
+        Log.d("CustomViewPager", "onTouchEvent " + Integer.toString(event.getAction()));
+        return super.onTouchEvent(event);
+        /*
         if (mPagingEnabled) {
             return super.onTouchEvent(event);
         }
         return false;
+        */
     }
-    */
+
 
     public void setPaging(boolean b) {
         mPagingEnabled = b;
