@@ -12,14 +12,13 @@ import com.viewpagerindicator.UnderlinePageIndicator;
 import fr.free.gelmir.lerubanbleu.LeRubanBleuApplication;
 import fr.free.gelmir.lerubanbleu.R;
 import fr.free.gelmir.lerubanbleu.fragment.EpisodeFragment;
+import fr.free.gelmir.lerubanbleu.fragment.EpisodeFragmentPagerAdapter;
 import fr.free.gelmir.lerubanbleu.util.CustomViewPager;
 
 import java.util.HashMap;
 
 public class ViewerActivity extends FragmentActivity
 {
-    private CustomViewPager mViewPager;
-
     @Override
     public void onCreate(Bundle savedInstanceState)
     {
@@ -43,18 +42,17 @@ public class ViewerActivity extends FragmentActivity
         MyOnPageChangeListener pageChangeListener = new MyOnPageChangeListener();
 
         // Viewpager
-        mViewPager = (CustomViewPager) findViewById(R.id.viewpager);
-        mViewPager.setOffscreenPageLimit(2);
-        mViewPager.setAdapter(fragmentPagerAdapter);
-        mViewPager.setCurrentItem(lastEpisode);
+        CustomViewPager viewPager = (CustomViewPager) findViewById(R.id.viewpager);
+        viewPager.setOffscreenPageLimit(2);
+        viewPager.setAdapter(fragmentPagerAdapter);
+        viewPager.setCurrentItem(lastEpisode);
 
         // Bind the indicator to the viewpager
         UnderlinePageIndicator indicator = (UnderlinePageIndicator)findViewById(R.id.indicator);
-        indicator.setViewPager(mViewPager);
+        indicator.setViewPager(viewPager);
         indicator.setFadeDelay(1000);
         indicator.setFadeLength(1000);
         indicator.setOnPageChangeListener(pageChangeListener);
-
     }
 
     @Override
@@ -77,43 +75,6 @@ public class ViewerActivity extends FragmentActivity
     protected void onDestroy() {
         super.onDestroy();
     }
-
-    /**
-     * Custom fragment pager adapter to populate fragments inside of a ViewPager
-     */
-    private class EpisodeFragmentPagerAdapter extends FragmentPagerAdapter
-    {
-        private HashMap<Integer, EpisodeFragment> mHashMap = new HashMap<Integer, EpisodeFragment>();
-        private int mTotalNbEpisodes;
-
-        public EpisodeFragmentPagerAdapter(FragmentManager fragmentManager, int initialEpisode, int totalNbEpisodes) {
-            super(fragmentManager);
-            mTotalNbEpisodes = totalNbEpisodes;
-            allocateFragments(initialEpisode);
-        }
-
-        @Override
-        public EpisodeFragment getItem(int i) {
-            Log.d("EpisodeFragmentPAgerAdapter", "getItem " + Integer.toString(i));
-            allocateFragments(i);
-            return mHashMap.get(i);
-        }
-
-        @Override
-        public int getCount() {
-            return mTotalNbEpisodes;
-        }
-
-        // Allocate fragments
-        private void allocateFragments(int episodeNb)
-        {
-            // Allocate episode number fragment
-            if (mHashMap.get(episodeNb) == null) {
-                mHashMap.put(episodeNb, EpisodeFragment.newInstance(episodeNb));
-            }
-        }
-    }
-
 
     private class MyOnPageChangeListener implements ViewPager.OnPageChangeListener
     {

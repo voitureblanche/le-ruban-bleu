@@ -7,8 +7,10 @@ import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.Toast;
 import fr.free.gelmir.lerubanbleu.LeRubanBleuApplication;
+import fr.free.gelmir.lerubanbleu.R;
+import fr.free.gelmir.lerubanbleu.fragment.EpisodeFragment;
+import fr.free.gelmir.lerubanbleu.fragment.EpisodeFragmentPagerAdapter;
 
 /**
  * Created with IntelliJ IDEA.
@@ -19,8 +21,9 @@ import fr.free.gelmir.lerubanbleu.LeRubanBleuApplication;
  */
 public class CustomViewPager extends ViewPager {
 
-    // Paging
-    private boolean mPagingEnabled = true;
+    // Swipe, drag management
+    private boolean mSwipeEnabled = true;
+    private float mDragStartX;
 
     // Gesture
     GestureDetector mGestureDetector;
@@ -41,7 +44,7 @@ public class CustomViewPager extends ViewPager {
         // Disable paging when image is zoomed
         LeRubanBleuApplication application = LeRubanBleuApplication.getInstance();
         if (application.getZoomLevel() == 1) {
-            mPagingEnabled = false;
+            mSwipeEnabled = false;
         }
 
         // Gesture
@@ -63,7 +66,7 @@ public class CustomViewPager extends ViewPager {
         return super.onInterceptTouchEvent(event);
 
         /*
-        if (mPagingEnabled) {
+        if (mSwipeEnabled) {
             return super.onInterceptTouchEvent(ev);
         }
 
@@ -78,20 +81,46 @@ public class CustomViewPager extends ViewPager {
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         Log.d("CustomViewPager", "onTouchEvent " + Integer.toString(event.getAction()));
-        return super.onTouchEvent(event);
-        /*
-        if (mPagingEnabled) {
+
+        // Swipe
+        if (mSwipeEnabled) {
             return super.onTouchEvent(event);
         }
-        return false;
-        */
+
+        // Drag
+        else {
+            switch (event.getAction()) {
+                case MotionEvent.ACTION_DOWN:
+                    Log.i("CustomViewPager", "onTouchEvent ACTION_DOWN");
+                    mDragStartX = event.getRawX();
+                    return super.onTouchEvent(event);
+
+                case MotionEvent.ACTION_MOVE:
+                    Log.i("CustomViewPager", "onTouchEvent ACTION_MOVE");
+
+                    // Get view
+                    EpisodeFragmentPagerAdapter adapter = (EpisodeFragmentPagerAdapter) getAdapter();
+                    EpisodeFragment fragment = adapter.getItem(getCurrentItem());
+                    View view = fragment.getView();
+                    CustomImageView imageView = (CustomImageView) view.findViewById(R.id.episodeCustomImageView);
+
+                    // Scroll
+                    float endX = event.getRawX();
+                    float distanceX = endX - mDragStartX;
+                    mDragStartX = endX;
+                    boolean boundary = imageView.horizontalScroll(distanceX);
+
+                    // Boundary has been reached: re-enable page swiping
+                    if (boundary) {
+                        return super.onTouchEvent(event);
+                    }
+                    return true;
+
+                default:
+                    return super.onTouchEvent(event);
+            }
+        }
     }
-
-
-    public void setPaging(boolean b) {
-        mPagingEnabled = b;
-    }
-
 
     // Gesture
     private class MyGestureDetectorListener implements GestureDetector.OnGestureListener , GestureDetector.OnDoubleTapListener {
@@ -103,7 +132,65 @@ public class CustomViewPager extends ViewPager {
 
         @Override
         public boolean onDoubleTap(MotionEvent motionEvent) {
-            Toast.makeText(getContext(), "Intercepted double-tap!?", Toast.LENGTH_LONG).show();
+            //Log.d("CustomViewPager", "MyGestureDetectorListener onDoubleTap");
+            LeRubanBleuApplication application = LeRubanBleuApplication.getInstance();
+            int zoomLevel = application.getZoomLevel();
+            int pageLimit;
+            int currentItem;
+            EpisodeFragmentPagerAdapter adapter;
+            switch (zoomLevel) {
+                case 0:
+                    // Save new zoom level
+                    application.setZoomLevel(1);
+
+                    // Get viewpager properties
+                    pageLimit = getOffscreenPageLimit();
+                    currentItem = getCurrentItem();
+                    adapter = (EpisodeFragmentPagerAdapter) getAdapter();
+
+                    // Zoom previous pages
+                    for (int i=currentItem-pageLimit; i<currentItem; i++) {
+                        EpisodeFragment fragment = adapter.getItem(i);
+                        View view = fragment.getView();
+                        CustomImageView imageView = (CustomImageView) view.findViewById(R.id.episodeCustomImageView);
+                        imageView.zoom(CustomImageView.ZOOM_LEVEL_1);
+                    }
+
+                    // Zoom current and next pages
+                    for (int i=currentItem; i<currentItem+pageLimit+1; i++) {
+                        EpisodeFragment fragment = adapter.getItem(i);
+                        View view = fragment.getView();
+                        CustomImageView imageView = (CustomImageView) view.findViewById(R.id.episodeCustomImageView);
+                        imageView.zoom(CustomImageView.ZOOM_LEVEL_1);
+                    }
+
+                    // Disable swipe
+                    mSwipeEnabled = false;
+
+                    break;
+
+                case 1:
+                    // Save new zoom level
+                    application.setZoomLevel(0);
+
+                    // Get viewpager properties
+                    pageLimit = getOffscreenPageLimit();
+                    currentItem = getCurrentItem();
+                    adapter = (EpisodeFragmentPagerAdapter) getAdapter();
+
+                    // Unzoom all pages
+                    for (int i=currentItem-pageLimit; i<currentItem+pageLimit+1; i++) {
+                        EpisodeFragment fragment = adapter.getItem(i);
+                        View view = fragment.getView();
+                        CustomImageView imageView = (CustomImageView) view.findViewById(R.id.episodeCustomImageView);
+                        imageView.zoom(CustomImageView.ZOOM_LEVEL_0);
+                    }
+
+                    // Enable swipe
+                    mSwipeEnabled = true;
+
+                    break;
+            }
             return true;
         }
 

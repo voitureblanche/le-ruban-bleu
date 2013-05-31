@@ -18,6 +18,14 @@ import fr.free.gelmir.lerubanbleu.LeRubanBleuApplication;
 
 public class CustomImageView extends ImageView {
 
+    // Zoom levels
+    public static int ZOOM_LEVEL_0 = 0;
+    public static int ZOOM_LEVEL_1 = 1;
+
+    // Alignments
+    public static int ALIGN_LEFT = 0;
+    public static int ALIGN_RIGHT = 1;
+
     // Application
     LeRubanBleuApplication mApplication;
 
@@ -191,7 +199,7 @@ public class CustomImageView extends ImageView {
                     // Zoom
                     mApplication.setZoomLevel(1);
                     mDrag = true;
-                    zoom(motionEvent, mScaleMax);
+                    zoom(ZOOM_LEVEL_1);
                     break;
 
                 case 1:
@@ -201,7 +209,7 @@ public class CustomImageView extends ImageView {
                     // Unzoom
                     mApplication.setZoomLevel(0);
                     mDrag = false;
-                    zoom(motionEvent, mScaleMin);
+                    zoom(ZOOM_LEVEL_0);
                     break;
             }
             return true;
@@ -243,7 +251,7 @@ public class CustomImageView extends ImageView {
 
 
     // cf. http://stackoverflow.com/questions/7418955/how-to-animate-zoom-out-with-imageview-that-uses-matrix-scaling
-    private void zoom(MotionEvent event, float scale)
+    public void zoom(int zoomLevel)
     {
         // Matrix
         final Matrix matrix = new Matrix();
@@ -253,14 +261,15 @@ public class CustomImageView extends ImageView {
 
         // Scaling variables
         final float startScale = matrixValues[Matrix.MSCALE_X];
-        final float endScale = scale;
+        final float endScale;
         final float startX;
         final float startY;
         final float endX;
         final float endY;
 
         // Zoom
-        if (startScale < endScale) {
+        if (zoomLevel == ZOOM_LEVEL_1) {
+            endScale = mScaleMax;
             startX = matrixValues[Matrix.MTRANS_X];
             startY = matrixValues[Matrix.MTRANS_Y];
             // Always zoom to the origin
@@ -270,6 +279,7 @@ public class CustomImageView extends ImageView {
 
         // Unzoom
         else {
+            endScale = mScaleMin;
             startX = matrixValues[Matrix.MTRANS_X];
             startY = matrixValues[Matrix.MTRANS_Y];
             endX = mScaleToFitPointX;
@@ -309,8 +319,7 @@ public class CustomImageView extends ImageView {
         });
     }
 
-    //
-    private boolean horizontalScroll(float distanceX)
+    public boolean horizontalScroll(float distanceX)
     {
         boolean boundary = false;
 
