@@ -61,24 +61,6 @@ public class CustomViewPager extends ViewPager {
     }
 
     @Override
-    public boolean onInterceptTouchEvent(MotionEvent event) {
-        Log.d("CustomViewPager", "onInterceptTouchEvent " + Integer.toString(event.getAction()));
-        return super.onInterceptTouchEvent(event);
-
-        /*
-        if (mSwipeEnabled) {
-            return super.onInterceptTouchEvent(ev);
-        }
-
-        // Do not intercept touch event, will propagate to the children, will be handled in the ViewPager last
-        return false;
-
-        // Intercept touch return true, will not propagate to the children, will be handled in onTouchedEvent()
-        // return true;
-        */
-    }
-
-    @Override
     public boolean onTouchEvent(MotionEvent event) {
         Log.d("CustomViewPager", "onTouchEvent " + Integer.toString(event.getAction()));
 
@@ -110,7 +92,7 @@ public class CustomViewPager extends ViewPager {
                     mDragStartX = endX;
                     boolean boundary = imageView.horizontalScroll(distanceX);
 
-                    // Boundary has been reached: re-enable page swiping
+                    // Boundary has been reached: forward motion event to the superclass
                     if (boundary) {
                         return super.onTouchEvent(event);
                     }

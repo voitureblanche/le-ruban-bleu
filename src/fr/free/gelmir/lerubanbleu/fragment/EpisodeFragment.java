@@ -25,7 +25,7 @@ import fr.free.gelmir.lerubanbleu.util.CustomImageView;
  * Time: 22:46
  * To change this template use File | Settings | File Templates.
  */
-public class EpisodeFragment extends Fragment implements GestureDetector.OnGestureListener , GestureDetector.OnDoubleTapListener {
+public class EpisodeFragment extends Fragment {
 
     // Static
     private static final String EPISODE_NUMBER = "fr.free.gelmir.fragment.episodeFragment.episodeNumber";
@@ -71,22 +71,6 @@ public class EpisodeFragment extends Fragment implements GestureDetector.OnGestu
         TextView textView = (TextView) view.findViewById(R.id.episodeNbTextView);
         textView.setText(Integer.toString(episodeNb + 1));
 
-        // Set touch listener
-        /*
-        mGestureDetector = new GestureDetector(getActivity(), this);
-        mGestureDetector.setOnDoubleTapListener(this);
-        view.setOnTouchListener(new View.OnTouchListener() {
-            public boolean onTouch(View v, MotionEvent event) {
-                Log.d("EpisodeFragment", "onTouch !");
-                //Toast.makeText(getActivity(), "Ouch !?", Toast.LENGTH_LONG).show();
-                boolean result = mGestureDetector.onTouchEvent(event);
-                if (result) {
-                    // Change zoom level
-                }
-                return result;
-            }
-        });
-        */
         return view;
     }
 
@@ -255,51 +239,4 @@ public class EpisodeFragment extends Fragment implements GestureDetector.OnGestu
         }
     };
 
-
-    // Gesture
-
-
-    @Override
-    public boolean onSingleTapConfirmed(MotionEvent motionEvent) {
-        return false;
-    }
-
-    @Override
-    public boolean onDoubleTap(MotionEvent motionEvent) {
-        Toast.makeText(getActivity(), "Double-tap !?", Toast.LENGTH_LONG).show();
-        return true;
-    }
-
-    @Override
-    public boolean onDoubleTapEvent(MotionEvent motionEvent) {
-        return false;
-    }
-
-    @Override
-    public boolean onDown(MotionEvent motionEvent) {
-        return false;
-    }
-
-    @Override
-    public void onShowPress(MotionEvent motionEvent) {
-    }
-
-    @Override
-    public boolean onSingleTapUp(MotionEvent motionEvent) {
-        return false;
-    }
-
-    @Override
-    public boolean onScroll(MotionEvent motionEvent, MotionEvent motionEvent2, float v, float v2) {
-        return false;
-    }
-
-    @Override
-    public void onLongPress(MotionEvent motionEvent) {
-    }
-
-    @Override
-    public boolean onFling(MotionEvent motionEvent, MotionEvent motionEvent2, float v, float v2) {
-        return false;  //To change body of implemented methods use File | Settings | File Templates.
-    }
 }
