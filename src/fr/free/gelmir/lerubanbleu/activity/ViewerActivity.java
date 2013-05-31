@@ -36,7 +36,7 @@ public class ViewerActivity extends FragmentActivity
         Log.d("ViewerActivity", "total number of episodes " + Integer.toString(totalNbEpisodes));
 
         // FragmentPagerAdapter
-        EpisodeFragmentPagerAdapter fragmentPagerAdapter = new EpisodeFragmentPagerAdapter(getSupportFragmentManager(), lastEpisode, totalNbEpisodes);
+        EpisodeFragmentPagerAdapter episodeFragmentPagerAdapter = new EpisodeFragmentPagerAdapter(getSupportFragmentManager(), lastEpisode, totalNbEpisodes);
 
         // OnPageChangeListener
         MyOnPageChangeListener pageChangeListener = new MyOnPageChangeListener();
@@ -44,10 +44,11 @@ public class ViewerActivity extends FragmentActivity
         // Viewpager
         CustomViewPager viewPager = (CustomViewPager) findViewById(R.id.viewpager);
         viewPager.setOffscreenPageLimit(2);
-        viewPager.setAdapter(fragmentPagerAdapter);
+        viewPager.setAdapter(episodeFragmentPagerAdapter);
         viewPager.setCurrentItem(lastEpisode);
 
         // Bind the indicator to the viewpager
+        // TODO bind later to avoid indicator blinking at position 0
         UnderlinePageIndicator indicator = (UnderlinePageIndicator)findViewById(R.id.indicator);
         indicator.setViewPager(viewPager);
         indicator.setFadeDelay(1000);

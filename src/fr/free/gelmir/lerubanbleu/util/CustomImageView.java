@@ -106,7 +106,7 @@ public class CustomImageView extends ImageView {
     }
 
     // cf. http://stackoverflow.com/questions/7418955/how-to-animate-zoom-out-with-imageview-that-uses-matrix-scaling
-    public void zoom(int zoomLevel)
+    public void zoom(int zoomLevel, int alignment)
     {
         // Matrix
         final Matrix matrix = new Matrix();
@@ -127,9 +127,16 @@ public class CustomImageView extends ImageView {
             endScale = mScaleMax;
             startX = matrixValues[Matrix.MTRANS_X];
             startY = matrixValues[Matrix.MTRANS_Y];
-            // Always zoom to the origin
-            endX = 0;
-            endY = 0;
+
+            if (alignment == ALIGN_LEFT) {
+                // Always zoom to the origin
+                endX = 0;
+                endY = 0;
+            }
+            else {
+                endX = - ((mBitmapWidth * mScaleMax) - mViewWidth);;
+                endY = 0;
+            }
         }
 
         // Unzoom
@@ -174,7 +181,7 @@ public class CustomImageView extends ImageView {
         });
     }
 
-    // Horizontal scroll
+    // Horizontal scroll, only available in ZOOM_LEVEL_1
     public boolean horizontalScroll(float distanceX)
     {
         boolean boundary = false;
@@ -187,10 +194,9 @@ public class CustomImageView extends ImageView {
 
         // Get current scaling variables
         float startX = matrixValues[Matrix.MTRANS_X];
-        float scale = matrixValues[Matrix.MSCALE_X];
 
         // Compute boundaries
-        float minX = - ((mBitmapWidth * scale) - mViewWidth);
+        float minX = - ((mBitmapWidth * mScaleMax) - mViewWidth);
         float maxX = 0;
 
         // Compute translation

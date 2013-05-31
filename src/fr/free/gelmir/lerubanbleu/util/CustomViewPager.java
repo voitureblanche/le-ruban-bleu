@@ -41,7 +41,7 @@ public class CustomViewPager extends ViewPager {
     // Constructor
     private void init(Context context) {
 
-        // Disable paging when image is zoomed
+        // Disable swipe when image is zoomed
         LeRubanBleuApplication application = LeRubanBleuApplication.getInstance();
         if (application.getZoomLevel() == 1) {
             mSwipeEnabled = false;
@@ -58,6 +58,23 @@ public class CustomViewPager extends ViewPager {
                 return result;
             }
         });
+
+        // Page change listener
+        //setOnPageChangeListener(new MyOnPageChangeListener());
+    }
+
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();    //To change body of overridden methods use File | Settings | File Templates.
+    }
+
+    @Override
+    public void setCurrentItem(int item) {
+        Log.d("CustomViewPager", "setCurrentItem");
+        super.setCurrentItem(item);
+
+        // Apply zoom level
+        //setZoomLevel();
     }
 
     @Override
@@ -115,64 +132,9 @@ public class CustomViewPager extends ViewPager {
         @Override
         public boolean onDoubleTap(MotionEvent motionEvent) {
             //Log.d("CustomViewPager", "MyGestureDetectorListener onDoubleTap");
-            LeRubanBleuApplication application = LeRubanBleuApplication.getInstance();
-            int zoomLevel = application.getZoomLevel();
-            int pageLimit;
-            int currentItem;
-            EpisodeFragmentPagerAdapter adapter;
-            switch (zoomLevel) {
-                case 0:
-                    // Save new zoom level
-                    application.setZoomLevel(1);
 
-                    // Get viewpager properties
-                    pageLimit = getOffscreenPageLimit();
-                    currentItem = getCurrentItem();
-                    adapter = (EpisodeFragmentPagerAdapter) getAdapter();
-
-                    // Zoom previous pages
-                    for (int i=currentItem-pageLimit; i<currentItem; i++) {
-                        EpisodeFragment fragment = adapter.getItem(i);
-                        View view = fragment.getView();
-                        CustomImageView imageView = (CustomImageView) view.findViewById(R.id.episodeCustomImageView);
-                        imageView.zoom(CustomImageView.ZOOM_LEVEL_1);
-                    }
-
-                    // Zoom current and next pages
-                    for (int i=currentItem; i<currentItem+pageLimit+1; i++) {
-                        EpisodeFragment fragment = adapter.getItem(i);
-                        View view = fragment.getView();
-                        CustomImageView imageView = (CustomImageView) view.findViewById(R.id.episodeCustomImageView);
-                        imageView.zoom(CustomImageView.ZOOM_LEVEL_1);
-                    }
-
-                    // Disable swipe
-                    mSwipeEnabled = false;
-
-                    break;
-
-                case 1:
-                    // Save new zoom level
-                    application.setZoomLevel(0);
-
-                    // Get viewpager properties
-                    pageLimit = getOffscreenPageLimit();
-                    currentItem = getCurrentItem();
-                    adapter = (EpisodeFragmentPagerAdapter) getAdapter();
-
-                    // Unzoom all pages
-                    for (int i=currentItem-pageLimit; i<currentItem+pageLimit+1; i++) {
-                        EpisodeFragment fragment = adapter.getItem(i);
-                        View view = fragment.getView();
-                        CustomImageView imageView = (CustomImageView) view.findViewById(R.id.episodeCustomImageView);
-                        imageView.zoom(CustomImageView.ZOOM_LEVEL_0);
-                    }
-
-                    // Enable swipe
-                    mSwipeEnabled = true;
-
-                    break;
-            }
+            // Set zoom level
+            setZoomLevel();
             return true;
         }
 
@@ -207,6 +169,96 @@ public class CustomViewPager extends ViewPager {
         @Override
         public boolean onFling(MotionEvent motionEvent, MotionEvent motionEvent2, float v, float v2) {
             return false;
+        }
+    }
+
+
+    private void setZoomLevel()
+    {
+        // Get properties
+        LeRubanBleuApplication application = LeRubanBleuApplication.getInstance();
+        int zoomLevel = application.getZoomLevel();
+        int pageLimit;
+        int currentItem;
+        EpisodeFragmentPagerAdapter adapter;
+        int i, j;
+
+        switch (zoomLevel) {
+            case 0:
+                // Save new zoom level
+                application.setZoomLevel(1);
+
+                // Get viewpager properties
+                pageLimit = getOffscreenPageLimit();
+                currentItem = getCurrentItem();
+                adapter = (EpisodeFragmentPagerAdapter) getAdapter();
+
+                // Zoom previous pages
+                i = (currentItem - pageLimit) < 0 ? 0 : (currentItem - pageLimit);
+                for (; i<currentItem; i++) {
+                    EpisodeFragment fragment = adapter.getItem(i);
+                    View view = fragment.getView();
+                    CustomImageView imageView = (CustomImageView) view.findViewById(R.id.episodeCustomImageView);
+                    imageView.zoom(CustomImageView.ZOOM_LEVEL_1, CustomImageView.ALIGN_RIGHT);
+                }
+
+                // Zoom current and next pages
+                i = currentItem;
+                j = (currentItem + pageLimit + 1) > adapter.getCount() ? (adapter.getCount() - 1) : (currentItem + pageLimit + 1);
+                for (; i < j; i++) {
+                    EpisodeFragment fragment = adapter.getItem(i);
+                    View view = fragment.getView();
+                    CustomImageView imageView = (CustomImageView) view.findViewById(R.id.episodeCustomImageView);
+                    imageView.zoom(CustomImageView.ZOOM_LEVEL_1, CustomImageView.ALIGN_LEFT);
+                }
+
+                // Disable swipe
+                mSwipeEnabled = false;
+
+                break;
+
+            case 1:
+                // Save new zoom level
+                application.setZoomLevel(0);
+
+                // Get viewpager properties
+                pageLimit = getOffscreenPageLimit();
+                currentItem = getCurrentItem();
+                adapter = (EpisodeFragmentPagerAdapter) getAdapter();
+
+                // Unzoom all pages
+                i = (currentItem - pageLimit) < 0 ? 0 : (currentItem - pageLimit);
+                j = (currentItem + pageLimit + 1) > adapter.getCount() ? (adapter.getCount() - 1) : (currentItem + pageLimit + 1);
+                for (; i < j; i++) {
+                    EpisodeFragment fragment = adapter.getItem(i);
+                    View view = fragment.getView();
+                    CustomImageView imageView = (CustomImageView) view.findViewById(R.id.episodeCustomImageView);
+                    imageView.zoom(CustomImageView.ZOOM_LEVEL_0, 0);
+                }
+
+                // Enable swipe
+                mSwipeEnabled = true;
+
+                break;
+        }
+
+
+
+    }
+
+    private class MyOnPageChangeListener implements OnPageChangeListener {
+        @Override
+        public void onPageScrolled(int i, float v, int i2) {
+        }
+
+        @Override
+        public void onPageSelected(int i) {
+            // Align other pages
+            Log.d("CustomViewPager", "MyOnPageChangeListener onPageSelected " + Integer.toString(i));
+        }
+
+        @Override
+        public void onPageScrollStateChanged(int i) {
         }
     }
 
