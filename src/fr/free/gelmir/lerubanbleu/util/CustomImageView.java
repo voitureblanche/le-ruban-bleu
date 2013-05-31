@@ -26,12 +26,6 @@ public class CustomImageView extends ImageView {
     public static int ALIGN_LEFT = 0;
     public static int ALIGN_RIGHT = 1;
 
-    // Application
-    LeRubanBleuApplication mApplication;
-
-    // Gesture
-    GestureDetector mGestureDetector;
-
     // Dimensions
     private int mViewWidth;
     private int mViewHeight;
@@ -45,51 +39,23 @@ public class CustomImageView extends ImageView {
     private float mScaleToFitPointY = 0;
     private boolean mFirstDraw = true;
 
-    // Drag
-    private boolean mDrag = false;
-    private float mDragStartX;
-
 
     public CustomImageView(Context context) {
         super(context);
-        init(context);
     }
 
     public CustomImageView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        init(context);
-    }
-
-    // Constructor
-    private void init(Context context)
-    {
-        //super.setClickable(true);
-
-        // Gesture management
-        /*
-        MyGestureDetectorListener gestureDetectorListener = new MyGestureDetectorListener();
-        mGestureDetector = new GestureDetector(getContext(), gestureDetectorListener);
-        mGestureDetector.setOnDoubleTapListener(gestureDetectorListener);
-        setOnTouchListener(new View.OnTouchListener() {
-            public boolean onTouch(View v, MotionEvent event) {
-                boolean result;
-                result = mGestureDetector.onTouchEvent(event);
-                return result;
-            }
-        });
-        */
     }
 
     @Override
     public void setImageURI(Uri uri) {
-
         // Get bitmap dimension
         Bitmap bitmap = BitmapFactory.decodeFile(uri.getPath());
         mBitmapWidth = bitmap.getWidth();
         mBitmapHeight = bitmap.getHeight();
 
         super.setImageURI(uri);
-
     }
 
     // cf. http://stackoverflow.com/questions/12266899/onmeasure-custom-view-explanation
@@ -117,8 +83,8 @@ public class CustomImageView extends ImageView {
         mScaleToFitPointY = matrixValues[Matrix.MTRANS_Y];
 
         // Apply zoom level
-        mApplication = LeRubanBleuApplication.getInstance();
-        int zoomLevel = mApplication.getZoomLevel();
+        LeRubanBleuApplication application = LeRubanBleuApplication.getInstance();
+        int zoomLevel = application.getZoomLevel();
         switch (zoomLevel)
         {
             case 0:
@@ -138,117 +104,6 @@ public class CustomImageView extends ImageView {
         // Mandatory call
         setMeasuredDimension(mViewWidth, mViewHeight);
     }
-
-    @Override
-    public boolean onTouchEvent(MotionEvent event) {
-        Log.d("CustomImageView", "onTouchEvent " + Integer.toString(event.getAction()));
-        return super.onTouchEvent(event);
-
-        /*
-        if (mDrag)
-        {
-            switch (event.getAction()) {
-                case MotionEvent.ACTION_DOWN:
-                    Log.i("CustomImageView", "onTouchEvent ACTION_DOWN");
-                    mDragStartX = event.getRawX();
-                    break;
-
-                case MotionEvent.ACTION_MOVE:
-                    Log.i("CustomImageView", "onTouchEvent ACTION_MOVE");
-
-                    // Scroll
-                    float endX = event.getRawX();
-                    float distanceX = endX - mDragStartX;
-                    mDragStartX = endX;
-                    boolean boundary = horizontalScroll(distanceX);
-
-                    // Boundary has been reached: re-enable page swiping
-                    if (boundary) {
-                        //CustomViewPager viewPager = (CustomViewPager) getParent();
-                        //viewPager.setPaging(true);
-                    }
-
-                    break;
-            }
-            // Consume the event
-            return true;
-        }
-        return super.onTouchEvent(event);
-        */
-    }
-
-    // Gesture listener
-    private class MyGestureDetectorListener implements GestureDetector.OnGestureListener , GestureDetector.OnDoubleTapListener {
-
-        @Override
-        public boolean onSingleTapConfirmed(MotionEvent motionEvent) {
-            return false;
-        }
-
-        @Override
-        public boolean onDoubleTap(MotionEvent motionEvent)
-        {
-            // Change zoom level
-            int zoomLevel = mApplication.getZoomLevel();
-            //CustomViewPager viewPager = (CustomViewPager) getParent();
-            switch (zoomLevel) {
-                case 0:
-                    // Disable swiping
-                    //viewPager.setPaging(false);
-
-                    // Zoom
-                    mApplication.setZoomLevel(1);
-                    mDrag = true;
-                    zoom(ZOOM_LEVEL_1);
-                    break;
-
-                case 1:
-                    // Enable swiping
-                    //viewPager.setPaging(true);
-
-                    // Unzoom
-                    mApplication.setZoomLevel(0);
-                    mDrag = false;
-                    zoom(ZOOM_LEVEL_0);
-                    break;
-            }
-            return true;
-        }
-
-        @Override
-        public boolean onDoubleTapEvent(MotionEvent motionEvent) {
-            return false;
-        }
-
-        @Override
-        public boolean onDown(MotionEvent motionEvent) {
-            return false;
-        }
-
-        @Override
-        public void onShowPress(MotionEvent motionEvent) {
-        }
-
-        @Override
-        public boolean onSingleTapUp(MotionEvent motionEvent) {
-            return false;
-        }
-
-        @Override
-        public boolean onScroll(MotionEvent motionEvent, MotionEvent motionEvent2, float distanceX, float distanceY) {
-            return false;
-        }
-
-        @Override
-        public void onLongPress(MotionEvent motionEvent) {
-        }
-
-        @Override
-        public boolean onFling(MotionEvent motionEvent, MotionEvent motionEvent2, float v, float v2) {
-            return false;
-        }
-    }
-
 
     // cf. http://stackoverflow.com/questions/7418955/how-to-animate-zoom-out-with-imageview-that-uses-matrix-scaling
     public void zoom(int zoomLevel)
@@ -319,6 +174,7 @@ public class CustomImageView extends ImageView {
         });
     }
 
+    // Horizontal scroll
     public boolean horizontalScroll(float distanceX)
     {
         boolean boundary = false;
