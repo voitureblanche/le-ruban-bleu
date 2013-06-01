@@ -14,6 +14,9 @@ import fr.free.gelmir.lerubanbleu.util.CustomViewPager;
 
 public class ViewerActivity extends FragmentActivity
 {
+    // Viewpager
+    CustomViewPager mViewPager;
+
     @Override
     public void onCreate(Bundle savedInstanceState)
     {
@@ -37,20 +40,20 @@ public class ViewerActivity extends FragmentActivity
         MyOnPageChangeListener pageChangeListener = new MyOnPageChangeListener();
 
         // Viewpager
-        CustomViewPager viewPager = (CustomViewPager) findViewById(R.id.viewpager);
-        viewPager.setOffscreenPageLimit(2);
-        viewPager.setAdapter(episodeFragmentPagerAdapter);
+        mViewPager = (CustomViewPager) findViewById(R.id.viewpager);
+        mViewPager.setOffscreenPageLimit(2);
+        mViewPager.setAdapter(episodeFragmentPagerAdapter);
 
         // Bind the indicator to the viewpager
         // Bind early to avoid indicator blinking at position 0
         UnderlinePageIndicator indicator = (UnderlinePageIndicator)findViewById(R.id.indicator);
-        indicator.setViewPager(viewPager);
+        indicator.setViewPager(mViewPager);
         indicator.setFadeDelay(1000);
         indicator.setFadeLength(1000);
         indicator.setOnPageChangeListener(pageChangeListener);
 
         // Set page
-        viewPager.setCurrentItem(lastEpisode);
+        mViewPager.setCurrentItem(lastEpisode);
     }
 
     @Override
@@ -78,22 +81,27 @@ public class ViewerActivity extends FragmentActivity
     {
         @Override
         public void onPageScrolled(int i, float v, int i2) {
+            Log.d("ViewerActivity", "onPageScrolled position " + Integer.toString(i) + " - offset " + Float.toString(v) + " - pixel offset " + Integer.toString(i2));
+
+            // Forward event to the ViewPager
+            mViewPager.onPageScrolled(i, v, i2);
         }
 
         @Override
         public void onPageSelected(int i) {
-            //Log.d("ViewerActivity", "MyOnPageChangeListener onPageSelected " + Integer.toString(i));
+            Log.d("ViewerActivity", "onPageSelected " + Integer.toString(i));
 
             // Save episode
             LeRubanBleuApplication application = LeRubanBleuApplication.getInstance();
             application.setUserLatestEpisode(i);
-
-            // TODO: forward event to the CustomViewPager
-
         }
 
         @Override
         public void onPageScrollStateChanged(int i) {
+            Log.d("ViewerActivity", "onPageScrollStateChanged state " + Integer.toString(i));
+
+            // Forward event to the ViewPager
+            mViewPager.onPageScrollStateChanged(i);
         }
     }
 

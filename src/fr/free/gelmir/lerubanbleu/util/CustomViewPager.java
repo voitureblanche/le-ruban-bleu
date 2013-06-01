@@ -3,6 +3,7 @@ package fr.free.gelmir.lerubanbleu.util;
 import android.content.Context;
 import android.support.v4.view.ViewPager;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
@@ -11,19 +12,17 @@ import fr.free.gelmir.lerubanbleu.R;
 import fr.free.gelmir.lerubanbleu.fragment.EpisodeFragment;
 import fr.free.gelmir.lerubanbleu.fragment.EpisodeFragmentPagerAdapter;
 
-/**
- * Created with IntelliJ IDEA.
- * User: gerard
- * Date: 21/05/13
- * Time: 00:10
- * To change this template use File | Settings | File Templates.
- */
+
 public class CustomViewPager extends ViewPager {
 
-    // Swipe, drag management
-    private boolean mSwipeEnabled = true;
+    // Viewpager states
+    private final int FULL_PAGING = 0;
+    private final int PARTIAL_PAGING = 1;
+    private final int IMAGE_DRAGGING = 2;
+    private int mViewPagerState = FULL_PAGING;
+
+    // Image drag
     private float mDragStartX;
-    private float mOnPageScrolledDistance;
 
     // Gesture
     GestureDetector mGestureDetector;
@@ -44,7 +43,7 @@ public class CustomViewPager extends ViewPager {
         // Disable swipe when image is zoomed
         LeRubanBleuApplication application = LeRubanBleuApplication.getInstance();
         if (application.getZoomLevel() == 1) {
-            mSwipeEnabled = false;
+            mViewPagerState = IMAGE_DRAGGING;
         }
 
         // Gesture
@@ -66,77 +65,80 @@ public class CustomViewPager extends ViewPager {
     public boolean onTouchEvent(MotionEvent event) {
         //Log.d("CustomViewPager", "onTouchEvent " + Integer.toString(event.getAction()));
 
-        // Swipe
-        if (mSwipeEnabled) {
-            return super.onTouchEvent(event);
-        }
+        switch (mViewPagerState) {
 
-        // Drag
-        else {
-            switch (event.getAction()) {
-                case MotionEvent.ACTION_DOWN:
-                    //Log.i("CustomViewPager", "onTouchEvent ACTION_DOWN");
-                    mDragStartX = event.getRawX();
-                    mOnPageScrolledDistance = 0;
-                    return super.onTouchEvent(event);
+            // Full paging
+            case FULL_PAGING:
+                return super.onTouchEvent(event);
 
-                case MotionEvent.ACTION_MOVE:
-                    //Log.i("CustomViewPager", "onTouchEvent ACTION_MOVE");
-
-                    // Get view
-                    EpisodeFragmentPagerAdapter adapter = (EpisodeFragmentPagerAdapter) getAdapter();
-                    EpisodeFragment fragment = adapter.getItem(getCurrentItem());
-                    View view = fragment.getView();
-                    CustomImageView imageView = (CustomImageView) view.findViewById(R.id.episodeCustomImageView);
-
-                    // Scroll
-                    float endX = event.getRawX();
-                    float distanceX = endX - mDragStartX;
-                    mDragStartX = endX;
-                    boolean boundary = imageView.horizontalScroll(distanceX);
-
-                    // Boundary has been reached:
-                    // - forward motion event to the superclass
-                    // - start mesuring the paage scrolled distance
-                    if (boundary) {
-                        mOnPageScrolledDistance = mOnPageScrolledDistance + endX - mDragStartX;
+            // Image scrolling
+            case IMAGE_DRAGGING:
+                switch (event.getAction()) {
+                    case MotionEvent.ACTION_DOWN:
+                        //Log.i("CustomViewPager", "onTouchEvent ACTION_DOWN");
+                        mDragStartX = event.getRawX();
+                        getCurrentItem();
                         return super.onTouchEvent(event);
-                    }
-                    return true;
+
+                    case MotionEvent.ACTION_MOVE:
+                        //Log.i("CustomViewPager", "onTouchEvent ACTION_MOVE");
+
+                        // Get view
+                        EpisodeFragmentPagerAdapter adapter = (EpisodeFragmentPagerAdapter) getAdapter();
+                        EpisodeFragment fragment = adapter.getItem(getCurrentItem());
+                        View view = fragment.getView();
+                        CustomImageView imageView = (CustomImageView) view.findViewById(R.id.episodeCustomImageView);
+
+                        // Scroll
+                        float endX = event.getRawX();
+                        float distanceX = endX - mDragStartX;
+                        mDragStartX = endX;
+                        boolean boundary = imageView.horizontalScroll(distanceX);
+
+                        // Boundary has been reached:
+                        // - forward motion event to the superclass
+                        // - change Viewpager state
+                        if (boundary) {
+                            Log.d("CustomViewPager", "onTouchEvent boundary reached!");
+                            mViewPagerState = PARTIAL_PAGING;
+                            return super.onTouchEvent(event);
+                        }
+                        return true;
 
 
-                case MotionEvent.ACTION_UP:
-                    // TODO: reset all variables
-                    mDragStartX = 0;
-                    return super.onTouchEvent(event);
+                    case MotionEvent.ACTION_UP:
+                        mDragStartX = 0;
+                        return super.onTouchEvent(event);
 
-                default:
-                    return true;
+                    default:
+                        return true;
+                }
+
+            case PARTIAL_PAGING:
+                return super.onTouchEvent(event);
+
+            default:
+                return super.onTouchEvent(event);
+        }
+    }
+
+
+    // Called by the activity
+    public void onPageScrolled(int i, float v, int i2) {
+        if (mViewPagerState == PARTIAL_PAGING) {
+
+        }
+    }
+
+    // Called by the activity
+    public void onPageScrollStateChanged(int i) {
+        if (mViewPagerState == PARTIAL_PAGING) {
+            if (i == SCROLL_STATE_SETTLING) {
+                // Revert to previous state
+                mViewPagerState = IMAGE_DRAGGING;
             }
         }
     }
-
-
-    // Reset gesture status
-    // This is called after a new page has been selected
-    // The listener not being implemented in that custom class because of the usage of ViewPagerIndicator
-    public void resetGestureStatus() {
-
-        // Get properties
-        LeRubanBleuApplication application = LeRubanBleuApplication.getInstance();
-        int zoomLevel = application.getZoomLevel();
-        switch (zoomLevel) {
-            case 0:
-                mSwipeEnabled = false;
-                break;
-
-            case 1:
-                mSwipeEnabled = true;
-                break;
-        }
-
-    }
-
 
     // Gesture
     private class MyGestureDetectorListener implements GestureDetector.OnGestureListener , GestureDetector.OnDoubleTapListener {
@@ -236,8 +238,8 @@ public class CustomViewPager extends ViewPager {
                     }
                 }
 
-                // Disable swipe
-                mSwipeEnabled = false;
+                // Change state
+                mViewPagerState = IMAGE_DRAGGING;
 
                 break;
 
@@ -264,8 +266,8 @@ public class CustomViewPager extends ViewPager {
                     }
                 }
 
-                // Enable swipe
-                mSwipeEnabled = true;
+                // Change state
+                mViewPagerState = FULL_PAGING;
 
                 break;
         }
