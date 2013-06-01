@@ -7,9 +7,6 @@ import android.graphics.Matrix;
 import android.graphics.RectF;
 import android.net.Uri;
 import android.util.AttributeSet;
-import android.util.Log;
-import android.view.GestureDetector;
-import android.view.MotionEvent;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.Interpolator;
 import android.widget.ImageView;
@@ -32,12 +29,16 @@ public class CustomImageView extends ImageView {
     private int mBitmapWidth;
     private int mBitmapHeight;
 
+    // Initial zoom properties
+    private int mInitialZoomLevel;
+    private int mInitialAlignment;
+
     // Zoom
     private float mScaleMin = 0;
     private float mScaleMax = 0;
     private float mScaleToFitPointX = 0;
     private float mScaleToFitPointY = 0;
-    private boolean mFirstDraw = true;
+
 
 
     public CustomImageView(Context context) {
@@ -50,6 +51,8 @@ public class CustomImageView extends ImageView {
 
     @Override
     public void setImageURI(Uri uri) {
+        //Log.d("CustomImageView", "setImageURI");
+
         // Get bitmap dimension
         Bitmap bitmap = BitmapFactory.decodeFile(uri.getPath());
         mBitmapWidth = bitmap.getWidth();
@@ -61,6 +64,7 @@ public class CustomImageView extends ImageView {
     // cf. http://stackoverflow.com/questions/12266899/onmeasure-custom-view-explanation
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        //Log.d("CustomImageView", "onMeasure");
 
         // Get view dimension
         mViewWidth = MeasureSpec.getSize(widthMeasureSpec);
@@ -78,15 +82,13 @@ public class CustomImageView extends ImageView {
         matrix.setRectToRect(bitmapRect, viewRect, Matrix.ScaleToFit.CENTER);
         matrix.getValues(matrixValues);
 
-        // Scale to fit point
+        // "Scale to fit" point
         mScaleToFitPointX = matrixValues[Matrix.MTRANS_X];
         mScaleToFitPointY = matrixValues[Matrix.MTRANS_Y];
 
         // Apply zoom level
         LeRubanBleuApplication application = LeRubanBleuApplication.getInstance();
-        int zoomLevel = application.getZoomLevel();
-        switch (zoomLevel)
-        {
+        switch (mInitialZoomLevel) {
             case 0:
                 setScaleType(ScaleType.MATRIX);
                 setImageMatrix(matrix);
@@ -96,7 +98,13 @@ public class CustomImageView extends ImageView {
                 setScaleType(ScaleType.MATRIX);
                 matrix.reset();
                 matrix.postScale(mScaleMax, mScaleMax);
-                matrix.postTranslate(0, 0);
+                if (mInitialAlignment == ALIGN_LEFT) {
+                    // Always zoom to the origin
+                    matrix.postTranslate(0, 0);
+                }
+                else {
+                    matrix.postTranslate(- ((mBitmapWidth * mScaleMax) - mViewWidth), 0);
+                }
                 setImageMatrix(matrix);
                 break;
         }
@@ -105,8 +113,16 @@ public class CustomImageView extends ImageView {
         setMeasuredDimension(mViewWidth, mViewHeight);
     }
 
+
+
+    public void initZoom(int zoomLevel, int alignement) {
+        mInitialZoomLevel = zoomLevel;
+        mInitialAlignment = alignement;
+    }
+
+
     // cf. http://stackoverflow.com/questions/7418955/how-to-animate-zoom-out-with-imageview-that-uses-matrix-scaling
-    public void zoom(int zoomLevel, int alignment)
+    public void zoom(int zoomLevel, int alignment, boolean animate)
     {
         // Matrix
         final Matrix matrix = new Matrix();
@@ -122,7 +138,7 @@ public class CustomImageView extends ImageView {
         final float endX;
         final float endY;
 
-        // Zoom
+        // Zoom values
         if (zoomLevel == ZOOM_LEVEL_1) {
             endScale = mScaleMax;
             startX = matrixValues[Matrix.MTRANS_X];
@@ -134,12 +150,12 @@ public class CustomImageView extends ImageView {
                 endY = 0;
             }
             else {
-                endX = - ((mBitmapWidth * mScaleMax) - mViewWidth);;
+                endX = - ((mBitmapWidth * mScaleMax) - mViewWidth);
                 endY = 0;
             }
         }
 
-        // Unzoom
+        // Unzoom values
         else {
             endScale = mScaleMin;
             startX = matrixValues[Matrix.MTRANS_X];
@@ -148,37 +164,49 @@ public class CustomImageView extends ImageView {
             endY = mScaleToFitPointY;
         }
 
-        // Interpolation
-        final Interpolator interpolator = new AccelerateDecelerateInterpolator();
-        final long startTime = System.currentTimeMillis();
-        final long duration = 300;
+        // Animated zoom
+        if (animate) {
 
-        // Thread
-        post(new Runnable() {
-            @Override
-            public void run() {
+            // Interpolation
+            final Interpolator interpolator = new AccelerateDecelerateInterpolator();
+            final long startTime = System.currentTimeMillis();
+            final long duration = 300;
 
-                // Increment time
-                float t = (float) (System.currentTimeMillis() - startTime) / duration;
-                t = t > 1.0f ? 1.0f : t;
+            // Thread
+            post(new Runnable() {
+                @Override
+                public void run() {
 
-                // Compute scale variables
-                float interpolatedRatio = interpolator.getInterpolation(t);
-                float tempScale = startScale + interpolatedRatio * (endScale - startScale);
-                float tempX = startX + interpolatedRatio * (endX - startX);
-                float tempY = startY + interpolatedRatio * (endY - startY);
+                    // Increment time
+                    float t = (float) (System.currentTimeMillis() - startTime) / duration;
+                    t = t > 1.0f ? 1.0f : t;
 
-                // Apply matrix
-                matrix.reset();
-                matrix.postScale(tempScale, tempScale);
-                matrix.postTranslate(tempX, tempY);
-                setImageMatrix(matrix);
+                    // Compute scale variables
+                    float interpolatedRatio = interpolator.getInterpolation(t);
+                    float tempScale = startScale + interpolatedRatio * (endScale - startScale);
+                    float tempX = startX + interpolatedRatio * (endX - startX);
+                    float tempY = startY + interpolatedRatio * (endY - startY);
 
-                if (t < 1f) {
-                    post(this);
+                    // Apply matrix
+                    matrix.reset();
+                    matrix.postScale(tempScale, tempScale);
+                    matrix.postTranslate(tempX, tempY);
+                    setImageMatrix(matrix);
+
+                    if (t < 1f) {
+                        post(this);
+                    }
                 }
-            }
-        });
+            });
+        }
+
+        // Direct zoom
+        else {
+            matrix.reset();
+            matrix.postScale(endScale, endScale);
+            matrix.postTranslate(endX, endY);
+            setImageMatrix(matrix);
+        }
     }
 
     // Horizontal scroll, only available in ZOOM_LEVEL_1

@@ -6,17 +6,19 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
-import android.view.*;
-import android.widget.ImageView;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
+import fr.free.gelmir.lerubanbleu.LeRubanBleuApplication;
 import fr.free.gelmir.lerubanbleu.R;
 import fr.free.gelmir.lerubanbleu.provider.EpisodeProvider;
 import fr.free.gelmir.lerubanbleu.provider.EpisodeTable;
 import fr.free.gelmir.lerubanbleu.service.Episode;
 import fr.free.gelmir.lerubanbleu.service.LibraryServiceHelper;
 import fr.free.gelmir.lerubanbleu.util.CustomImageView;
+import fr.free.gelmir.lerubanbleu.util.CustomViewPager;
 
 /**
  * Created with IntelliJ IDEA.
@@ -31,8 +33,6 @@ public class EpisodeFragment extends Fragment {
     private static final String EPISODE_NUMBER = "fr.free.gelmir.fragment.episodeFragment.episodeNumber";
     private static final String IMAGE_URI_STRING = "fr.free.gelmir.fragment.episodeFragment.imageUriString";
     private static final String REGISTERED_RECEIVER = "fr.free.gelmir.fragment.episodeFragment.registeredReceiver";
-
-    private GestureDetector mGestureDetector;
 
 
     public static final EpisodeFragment newInstance(int episodeNb)
@@ -81,7 +81,7 @@ public class EpisodeFragment extends Fragment {
         Bundle bundle = this.getArguments();
         int episodeNb = bundle.getInt(EPISODE_NUMBER);
         boolean registeredReceiver = bundle.getBoolean(REGISTERED_RECEIVER);
-        Log.d("EpisodeFragment", "fragment " + Integer.toString(episodeNb) + " paused");
+        //Log.d("EpisodeFragment", "fragment " + Integer.toString(episodeNb) + " paused");
 
         // Unregister the receiver
         if (registeredReceiver) {
@@ -99,7 +99,7 @@ public class EpisodeFragment extends Fragment {
         Bundle bundle = this.getArguments();
         int episodeNb = bundle.getInt(EPISODE_NUMBER);
         String bundleImageUriString = bundle.getString(IMAGE_URI_STRING);
-        Log.d("EpisodeFragment", "fragment " + Integer.toString(episodeNb) + " resumed");
+        //Log.d("EpisodeFragment", "fragment " + Integer.toString(episodeNb) + " resumed");
 
         // Test the image URI
         if (bundleImageUriString.equals("")) {
@@ -119,7 +119,7 @@ public class EpisodeFragment extends Fragment {
                 {
                     // The episode has already been downloaded successfully
                     case EpisodeTable.STATUS_SUCCESSFUL:
-                        Log.d("EpisodeFragment", "episode successfully found in the database!");
+                        //Log.d("EpisodeFragment", "episode successfully found in the database!");
 
                         String imageUriString = cursor.getString(cursor.getColumnIndex(EpisodeTable.COLUMN_IMAGE_URI));
 
@@ -133,13 +133,13 @@ public class EpisodeFragment extends Fragment {
 
                     // The episode could not be downloaded
                     case EpisodeTable.STATUS_FAILED:
-                        Log.d("EpisodeFragment", "episode with FAILED status found in the database!");
+                        //Log.d("EpisodeFragment", "episode with FAILED status found in the database!");
                         getEpisode(episodeNb);
                         break;
 
                     // The episode is currently being downloaded
                     case EpisodeTable.STATUS_RUNNING:
-                        Log.d("EpisodeFragment", "episode with RUNNING status found in the database!");
+                        //Log.d("EpisodeFragment", "episode with RUNNING status found in the database!");
                         // TODO: listen to notification
 
                         break;
@@ -195,17 +195,34 @@ public class EpisodeFragment extends Fragment {
 
     private void displayEpisode(Uri imageUri)
     {
-        Log.d("displayEpisode", "displaying episode " + imageUri.toString());
+        //Log.d("displayEpisode", "displaying episode " + imageUri.toString());
 
         // Hide progress bar
         ProgressBar progressBar = (ProgressBar) getView().findViewById(R.id.episodeProgressBar);
         progressBar.setVisibility(View.GONE);
 
-        // Show episode
-        // TODO consider using setImageBitmap() instead
-        // ImageView episodeView = (ImageView) getView().findViewById(R.id.episodeImageView);
+        // Configure ImageView
+        // Consider using setImageBitmap() instead?
         CustomImageView episodeView = (CustomImageView) getView().findViewById(R.id.episodeCustomImageView);
         episodeView.setImageURI(imageUri);
+
+        // Configure zoom
+        LeRubanBleuApplication application = LeRubanBleuApplication.getInstance();
+        if (application.getZoomLevel() == 0) {
+            //Log.d("displayEpisode", "zoom level 0");
+            episodeView.initZoom(CustomImageView.ZOOM_LEVEL_0, 0);
+        }
+        else {
+            //Log.d("displayEpisode", "zoom level 1");
+            CustomViewPager viewPager = (CustomViewPager) getActivity().findViewById(R.id.viewpager);
+            Bundle bundle = this.getArguments();
+            int episodeNb = bundle.getInt(EPISODE_NUMBER);
+            int currentItem =  viewPager.getCurrentItem();
+            int alignment = episodeNb < currentItem ? CustomImageView.ALIGN_RIGHT : CustomImageView.ALIGN_LEFT;
+            episodeView.initZoom(CustomImageView.ZOOM_LEVEL_1, alignment);
+        }
+
+        // Show ImageView
         episodeView.setVisibility(View.VISIBLE);
     }
 
@@ -216,14 +233,14 @@ public class EpisodeFragment extends Fragment {
         {
             if (intent.getAction().equals(LibraryServiceHelper.GET_EPISODE_COMPLETE))
             {
-                Log.d("EpisodeFragment", "GET_EPISODE_COMPLETE intent received");
+                //Log.d("EpisodeFragment", "GET_EPISODE_COMPLETE intent received");
                 int status = intent.getIntExtra(LibraryServiceHelper.EXTRA_STATUS, -1);
 
                 // Parse status
                 switch (status)
                 {
                     case LibraryServiceHelper.STATUS_OK:
-                        Log.d("EpisodeFragment", "STATUS_OK");
+                        //Log.d("EpisodeFragment", "STATUS_OK");
                         Episode episode = intent.getExtras().getParcelable(LibraryServiceHelper.EXTRA_EPISODE_POJO);
                         Uri episodeImageUri = episode.getImageUri();
                         displayEpisode(episodeImageUri);
@@ -231,7 +248,7 @@ public class EpisodeFragment extends Fragment {
                         break;
 
                     case LibraryServiceHelper.STATUS_KO:
-                        Log.d("EpisodeFragment", "STATUS_KO");
+                        //Log.d("EpisodeFragment", "STATUS_KO");
                         // TODO: toast message + update view with error icon
                         break;
                 }

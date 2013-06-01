@@ -2,8 +2,6 @@ package fr.free.gelmir.lerubanbleu.fragment;
 
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
-import android.util.Log;
-import android.view.View;
 
 import java.util.HashMap;
 
@@ -24,7 +22,7 @@ public class EpisodeFragmentPagerAdapter extends FragmentPagerAdapter
 
     @Override
     public EpisodeFragment getItem(int i) {
-        Log.d("EpisodeFragmentPagerAdapter", "getItem " + Integer.toString(i));
+        // Log.d("EpisodeFragmentPagerAdapter", "getItem " + Integer.toString(i));
         allocateFragments(i);
         return mHashMap.get(i);
     }
@@ -32,6 +30,10 @@ public class EpisodeFragmentPagerAdapter extends FragmentPagerAdapter
     @Override
     public int getCount() {
         return mTotalNbEpisodes;
+    }
+
+    public void setCount(int totalNbEpisodes) {
+        mTotalNbEpisodes = totalNbEpisodes;
     }
 
     // Allocate fragments
@@ -42,4 +44,6 @@ public class EpisodeFragmentPagerAdapter extends FragmentPagerAdapter
             mHashMap.put(episodeNb, EpisodeFragment.newInstance(episodeNb));
         }
     }
+
+
 }

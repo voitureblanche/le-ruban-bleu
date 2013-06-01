@@ -3,7 +3,6 @@ package fr.free.gelmir.lerubanbleu.util;
 import android.content.Context;
 import android.support.v4.view.ViewPager;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
@@ -24,6 +23,7 @@ public class CustomViewPager extends ViewPager {
     // Swipe, drag management
     private boolean mSwipeEnabled = true;
     private float mDragStartX;
+    private float mOnPageScrolledDistance;
 
     // Gesture
     GestureDetector mGestureDetector;
@@ -58,28 +58,13 @@ public class CustomViewPager extends ViewPager {
                 return result;
             }
         });
-
-        // Page change listener
-        //setOnPageChangeListener(new MyOnPageChangeListener());
     }
 
-    @Override
-    protected void onAttachedToWindow() {
-        super.onAttachedToWindow();    //To change body of overridden methods use File | Settings | File Templates.
-    }
 
-    @Override
-    public void setCurrentItem(int item) {
-        Log.d("CustomViewPager", "setCurrentItem");
-        super.setCurrentItem(item);
-
-        // Apply zoom level
-        //setZoomLevel();
-    }
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        Log.d("CustomViewPager", "onTouchEvent " + Integer.toString(event.getAction()));
+        //Log.d("CustomViewPager", "onTouchEvent " + Integer.toString(event.getAction()));
 
         // Swipe
         if (mSwipeEnabled) {
@@ -90,12 +75,13 @@ public class CustomViewPager extends ViewPager {
         else {
             switch (event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
-                    Log.i("CustomViewPager", "onTouchEvent ACTION_DOWN");
+                    //Log.i("CustomViewPager", "onTouchEvent ACTION_DOWN");
                     mDragStartX = event.getRawX();
+                    mOnPageScrolledDistance = 0;
                     return super.onTouchEvent(event);
 
                 case MotionEvent.ACTION_MOVE:
-                    Log.i("CustomViewPager", "onTouchEvent ACTION_MOVE");
+                    //Log.i("CustomViewPager", "onTouchEvent ACTION_MOVE");
 
                     // Get view
                     EpisodeFragmentPagerAdapter adapter = (EpisodeFragmentPagerAdapter) getAdapter();
@@ -109,17 +95,48 @@ public class CustomViewPager extends ViewPager {
                     mDragStartX = endX;
                     boolean boundary = imageView.horizontalScroll(distanceX);
 
-                    // Boundary has been reached: forward motion event to the superclass
+                    // Boundary has been reached:
+                    // - forward motion event to the superclass
+                    // - start mesuring the paage scrolled distance
                     if (boundary) {
+                        mOnPageScrolledDistance = mOnPageScrolledDistance + endX - mDragStartX;
                         return super.onTouchEvent(event);
                     }
                     return true;
 
-                default:
+
+                case MotionEvent.ACTION_UP:
+                    // TODO: reset all variables
+                    mDragStartX = 0;
                     return super.onTouchEvent(event);
+
+                default:
+                    return true;
             }
         }
     }
+
+
+    // Reset gesture status
+    // This is called after a new page has been selected
+    // The listener not being implemented in that custom class because of the usage of ViewPagerIndicator
+    public void resetGestureStatus() {
+
+        // Get properties
+        LeRubanBleuApplication application = LeRubanBleuApplication.getInstance();
+        int zoomLevel = application.getZoomLevel();
+        switch (zoomLevel) {
+            case 0:
+                mSwipeEnabled = false;
+                break;
+
+            case 1:
+                mSwipeEnabled = true;
+                break;
+        }
+
+    }
+
 
     // Gesture
     private class MyGestureDetectorListener implements GestureDetector.OnGestureListener , GestureDetector.OnDoubleTapListener {
@@ -132,7 +149,6 @@ public class CustomViewPager extends ViewPager {
         @Override
         public boolean onDoubleTap(MotionEvent motionEvent) {
             //Log.d("CustomViewPager", "MyGestureDetectorListener onDoubleTap");
-
             // Set zoom level
             setZoomLevel();
             return true;
@@ -197,9 +213,13 @@ public class CustomViewPager extends ViewPager {
                 i = (currentItem - pageLimit) < 0 ? 0 : (currentItem - pageLimit);
                 for (; i<currentItem; i++) {
                     EpisodeFragment fragment = adapter.getItem(i);
-                    View view = fragment.getView();
-                    CustomImageView imageView = (CustomImageView) view.findViewById(R.id.episodeCustomImageView);
-                    imageView.zoom(CustomImageView.ZOOM_LEVEL_1, CustomImageView.ALIGN_RIGHT);
+                    if (fragment != null) {
+                        View view = fragment.getView();
+                        if (view != null) {
+                            CustomImageView imageView = (CustomImageView) view.findViewById(R.id.episodeCustomImageView);
+                            imageView.zoom(CustomImageView.ZOOM_LEVEL_1, CustomImageView.ALIGN_RIGHT, true);
+                        }
+                    }
                 }
 
                 // Zoom current and next pages
@@ -207,9 +227,13 @@ public class CustomViewPager extends ViewPager {
                 j = (currentItem + pageLimit + 1) > adapter.getCount() ? (adapter.getCount() - 1) : (currentItem + pageLimit + 1);
                 for (; i < j; i++) {
                     EpisodeFragment fragment = adapter.getItem(i);
-                    View view = fragment.getView();
-                    CustomImageView imageView = (CustomImageView) view.findViewById(R.id.episodeCustomImageView);
-                    imageView.zoom(CustomImageView.ZOOM_LEVEL_1, CustomImageView.ALIGN_LEFT);
+                    if (fragment != null) {
+                        View view = fragment.getView();
+                        if (view != null) {
+                            CustomImageView imageView = (CustomImageView) view.findViewById(R.id.episodeCustomImageView);
+                            imageView.zoom(CustomImageView.ZOOM_LEVEL_1, CustomImageView.ALIGN_LEFT, true);
+                        }
+                    }
                 }
 
                 // Disable swipe
@@ -231,34 +255,19 @@ public class CustomViewPager extends ViewPager {
                 j = (currentItem + pageLimit + 1) > adapter.getCount() ? (adapter.getCount() - 1) : (currentItem + pageLimit + 1);
                 for (; i < j; i++) {
                     EpisodeFragment fragment = adapter.getItem(i);
-                    View view = fragment.getView();
-                    CustomImageView imageView = (CustomImageView) view.findViewById(R.id.episodeCustomImageView);
-                    imageView.zoom(CustomImageView.ZOOM_LEVEL_0, 0);
+                    if (fragment != null) {
+                        View view = fragment.getView();
+                        if (view != null) {
+                            CustomImageView imageView = (CustomImageView) view.findViewById(R.id.episodeCustomImageView);
+                            imageView.zoom(CustomImageView.ZOOM_LEVEL_0, 0, true);
+                        }
+                    }
                 }
 
                 // Enable swipe
                 mSwipeEnabled = true;
 
                 break;
-        }
-
-
-
-    }
-
-    private class MyOnPageChangeListener implements OnPageChangeListener {
-        @Override
-        public void onPageScrolled(int i, float v, int i2) {
-        }
-
-        @Override
-        public void onPageSelected(int i) {
-            // Align other pages
-            Log.d("CustomViewPager", "MyOnPageChangeListener onPageSelected " + Integer.toString(i));
-        }
-
-        @Override
-        public void onPageScrollStateChanged(int i) {
         }
     }
 

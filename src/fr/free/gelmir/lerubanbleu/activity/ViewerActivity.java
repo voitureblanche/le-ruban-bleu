@@ -2,8 +2,6 @@ package fr.free.gelmir.lerubanbleu.activity;
 
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.Window;
@@ -11,11 +9,8 @@ import android.view.WindowManager;
 import com.viewpagerindicator.UnderlinePageIndicator;
 import fr.free.gelmir.lerubanbleu.LeRubanBleuApplication;
 import fr.free.gelmir.lerubanbleu.R;
-import fr.free.gelmir.lerubanbleu.fragment.EpisodeFragment;
 import fr.free.gelmir.lerubanbleu.fragment.EpisodeFragmentPagerAdapter;
 import fr.free.gelmir.lerubanbleu.util.CustomViewPager;
-
-import java.util.HashMap;
 
 public class ViewerActivity extends FragmentActivity
 {
@@ -45,15 +40,17 @@ public class ViewerActivity extends FragmentActivity
         CustomViewPager viewPager = (CustomViewPager) findViewById(R.id.viewpager);
         viewPager.setOffscreenPageLimit(2);
         viewPager.setAdapter(episodeFragmentPagerAdapter);
-        viewPager.setCurrentItem(lastEpisode);
 
         // Bind the indicator to the viewpager
-        // TODO bind later to avoid indicator blinking at position 0
+        // Bind early to avoid indicator blinking at position 0
         UnderlinePageIndicator indicator = (UnderlinePageIndicator)findViewById(R.id.indicator);
         indicator.setViewPager(viewPager);
         indicator.setFadeDelay(1000);
         indicator.setFadeLength(1000);
         indicator.setOnPageChangeListener(pageChangeListener);
+
+        // Set page
+        viewPager.setCurrentItem(lastEpisode);
     }
 
     @Override
@@ -85,11 +82,13 @@ public class ViewerActivity extends FragmentActivity
 
         @Override
         public void onPageSelected(int i) {
+            //Log.d("ViewerActivity", "MyOnPageChangeListener onPageSelected " + Integer.toString(i));
+
             // Save episode
             LeRubanBleuApplication application = LeRubanBleuApplication.getInstance();
             application.setUserLatestEpisode(i);
 
-            // Get episode?
+            // TODO: forward event to the CustomViewPager
 
         }
 
