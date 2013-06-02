@@ -210,7 +210,7 @@ public class CustomImageView extends ImageView {
     }
 
     // Horizontal scroll, only available in ZOOM_LEVEL_1
-    public boolean horizontalScroll(float distanceX)
+    public boolean scrollX(float distanceX)
     {
         boolean boundary = false;
 

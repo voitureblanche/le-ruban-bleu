@@ -18,11 +18,14 @@ public class CustomViewPager extends ViewPager {
     // Viewpager states
     private final int FULL_PAGING = 0;
     private final int PARTIAL_PAGING = 1;
-    private final int IMAGE_DRAGGING = 2;
+    private final int IMAGE_SCROLLING = 2;
     private int mViewPagerState = FULL_PAGING;
 
-    // Image drag
-    private float mDragStartX;
+    // Partial paging variables
+    private boolean mFirstOnPageScrolledCaptured = false;
+
+    // Image scrolling variables
+    private float mImageScrollingX;
 
     // Gesture
     GestureDetector mGestureDetector;
@@ -43,7 +46,7 @@ public class CustomViewPager extends ViewPager {
         // Disable swipe when image is zoomed
         LeRubanBleuApplication application = LeRubanBleuApplication.getInstance();
         if (application.getZoomLevel() == 1) {
-            mViewPagerState = IMAGE_DRAGGING;
+            mViewPagerState = IMAGE_SCROLLING;
         }
 
         // Gesture
@@ -72,11 +75,11 @@ public class CustomViewPager extends ViewPager {
                 return super.onTouchEvent(event);
 
             // Image scrolling
-            case IMAGE_DRAGGING:
+            case IMAGE_SCROLLING:
                 switch (event.getAction()) {
                     case MotionEvent.ACTION_DOWN:
                         //Log.i("CustomViewPager", "onTouchEvent ACTION_DOWN");
-                        mDragStartX = event.getRawX();
+                        mImageScrollingX = event.getRawX();
                         getCurrentItem();
                         return super.onTouchEvent(event);
 
@@ -91,9 +94,9 @@ public class CustomViewPager extends ViewPager {
 
                         // Scroll
                         float endX = event.getRawX();
-                        float distanceX = endX - mDragStartX;
-                        mDragStartX = endX;
-                        boolean boundary = imageView.horizontalScroll(distanceX);
+                        float distanceX = endX - mImageScrollingX;
+                        mImageScrollingX = endX;
+                        boolean boundary = imageView.scrollX(distanceX);
 
                         // Boundary has been reached:
                         // - forward motion event to the superclass
@@ -105,13 +108,8 @@ public class CustomViewPager extends ViewPager {
                         }
                         return true;
 
-
-                    case MotionEvent.ACTION_UP:
-                        mDragStartX = 0;
-                        return super.onTouchEvent(event);
-
                     default:
-                        return true;
+                        return super.onTouchEvent(event);
                 }
 
             case PARTIAL_PAGING:
@@ -122,23 +120,55 @@ public class CustomViewPager extends ViewPager {
         }
     }
 
-
-    // Called by the activity
-    public void onPageScrolled(int i, float v, int i2) {
-        if (mViewPagerState == PARTIAL_PAGING) {
-
-        }
-    }
-
     // Called by the activity
     public void onPageScrollStateChanged(int i) {
         if (mViewPagerState == PARTIAL_PAGING) {
-            if (i == SCROLL_STATE_SETTLING) {
-                // Revert to previous state
-                mViewPagerState = IMAGE_DRAGGING;
+            switch (i) {
+                case SCROLL_STATE_DRAGGING:
+                    // Capture first onPageScrolled
+                    mFirstOnPageScrolledCaptured = false;
+                    break;
+
+                case SCROLL_STATE_SETTLING:
+                    // Revert to image scrolling state
+                    mViewPagerState = IMAGE_SCROLLING;
+                    break;
             }
         }
     }
+
+    // Superclass overriden protected method
+    @Override
+    public void onPageScrolled(int i, float v, int i2) {
+        Log.i("CustomViewPager", "onPageScrolled position " + Integer.toString(i) + " - offset " + Float.toString(v) + " - pixel offset " + Integer.toString(i2));
+
+        if (mViewPagerState == PARTIAL_PAGING) {
+
+            // The offset position is at the origin
+            if (v == 0) {
+                // This is the first time the page is scrolled
+                if (mFirstOnPageScrolledCaptured == false) {
+                    Log.i("CustomViewPager", "onPageScrolled first event captured!");
+                    mFirstOnPageScrolledCaptured = true;
+                }
+            }
+
+            // Parse position
+            else {
+
+                // TODO detect scroll back
+                // The page is being scrolled back to its origin
+                // Reset state to image scrolling
+                Log.i("CustomViewPager", "onPageScrolled scroll back detected!");
+                mViewPagerState = IMAGE_SCROLLING;
+                mFirstOnPageScrolledCaptured = false;
+            }
+        }
+
+        super.onPageScrolled(i, v, i2);
+    }
+
+
 
     // Gesture
     private class MyGestureDetectorListener implements GestureDetector.OnGestureListener , GestureDetector.OnDoubleTapListener {
@@ -239,7 +269,7 @@ public class CustomViewPager extends ViewPager {
                 }
 
                 // Change state
-                mViewPagerState = IMAGE_DRAGGING;
+                mViewPagerState = IMAGE_SCROLLING;
 
                 break;
 

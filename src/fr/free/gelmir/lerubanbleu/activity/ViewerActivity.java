@@ -81,10 +81,6 @@ public class ViewerActivity extends FragmentActivity
     {
         @Override
         public void onPageScrolled(int i, float v, int i2) {
-            Log.d("ViewerActivity", "onPageScrolled position " + Integer.toString(i) + " - offset " + Float.toString(v) + " - pixel offset " + Integer.toString(i2));
-
-            // Forward event to the ViewPager
-            mViewPager.onPageScrolled(i, v, i2);
         }
 
         @Override
