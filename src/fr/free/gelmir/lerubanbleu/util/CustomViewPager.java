@@ -23,6 +23,8 @@ public class CustomViewPager extends ViewPager {
 
     // Partial paging variables
     private boolean mFirstOnPageScrolledCaptured = false;
+    private float mPartialPagingStartX;
+    private float mPartialPagingDistanceX;
 
     // Image scrolling variables
     private float mImageScrollingX;
@@ -103,6 +105,8 @@ public class CustomViewPager extends ViewPager {
                         // - change Viewpager state
                         if (boundary) {
                             Log.d("CustomViewPager", "onTouchEvent boundary reached!");
+                            mPartialPagingStartX = endX;
+                            mPartialPagingDistanceX = distanceX;
                             mViewPagerState = PARTIAL_PAGING;
                             return super.onTouchEvent(event);
                         }
@@ -113,6 +117,16 @@ public class CustomViewPager extends ViewPager {
                 }
 
             case PARTIAL_PAGING:
+                switch (event.getAction()) {
+                    case MotionEvent.ACTION_DOWN:
+                        break;
+                    case MotionEvent.ACTION_MOVE:
+                        float endX = event.getRawX();
+
+                        break;
+                    case MotionEvent.ACTION_UP:
+                        break;
+                }
                 return super.onTouchEvent(event);
 
             default:
